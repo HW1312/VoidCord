@@ -12,6 +12,7 @@ import { findByPropsLazy, findStoreLazy } from "@webpack";
 import { MediaEngineStore, SelectedChannelStore, UserStore } from "@webpack/common";
 
 import { titleBarSlot } from "../_ui";
+import { clearDetections, onSpeaking, onVoiceStates, useFakeFlags } from "./detect";
 import { renderTitleBarButton, SettingsPanel } from "./ui";
 
 const logger = new Logger("FakeMute");
@@ -41,6 +42,13 @@ export const settings = definePluginSettings({
         default: false,
         hidden: true,
         onChange: () => scheduleResend()
+    },
+    detectOthers: {
+        type: OptionType.BOOLEAN,
+        description: "Show mute/deafen icons of people who fake it in blue",
+        default: true,
+        hidden: true,
+        onChange: v => { if (!v) clearDetections(); }
     },
     showTitleBarButton: {
         type: OptionType.BOOLEAN,
@@ -113,6 +121,7 @@ function scheduleResend() {
 let healTimer: ReturnType<typeof setTimeout> | undefined;
 
 function onVoiceStateUpdates({ voiceStates }: { voiceStates: { userId: string; channelId?: string | null; oldChannelId?: string | null; }[]; }) {
+    if (running && settings.store.detectOthers) onVoiceStates(voiceStates);
     if (!running || !settings.store.fakeDeafen) return;
     const channelId = SelectedChannelStore.getVoiceChannelId();
     const myId = UserStore.getCurrentUser()?.id;
@@ -155,6 +164,24 @@ const plugin = definePlugin({
             }
         },
         {
+            // Voice user icons (channel list etc.): blue mute/deafen icon for users detected as faking it
+            find: 'location:"VoiceUserIcons"',
+            replacement: [
+                {
+                    match: /user:(\i),(?=[^}]{0,80}\}=\i,)(.{0,400}?location:"VoiceUserIcons"\}\),)/,
+                    replace: "user:$1,$2vcFakeFlags=$self.useFakeFlags($1?.id),"
+                },
+                {
+                    match: /(\{\[\i\.\i\]:\i)(?=\}\),color:"currentColor"\}\);\i\.push\(\(0,\i\.jsx\)\(\i\.\i,\{text:[^}]{0,200}?,children:\i\},"mute"\)\))/,
+                    replace: '$1,"vc-fakemute-detected":vcFakeFlags?.mute'
+                },
+                {
+                    match: /(\{\[\i\.\i\]:\i)(?=\}\),color:"currentColor"\}\);\i\.push\(\(0,\i\.jsx\)\(\i\.\i,\{text:[^}]{0,200}?,children:\i\},"deaf"\)\))/,
+                    replace: '$1,"vc-fakemute-detected":vcFakeFlags?.deaf'
+                }
+            ]
+        },
+        {
             // GatewaySocket.voiceStateUpdate: modify the state right before it is sent to Discord
             find: "voiceServerPing(){",
             replacement: {
@@ -166,9 +193,14 @@ const plugin = definePlugin({
 
     renderTitleBarButton: titleBarSlot("FakeMute", renderTitleBarButton),
     modifyVoiceState,
+    useFakeFlags: (userId?: string) => {
+        const flags = useFakeFlags(userId);
+        return settings.store.detectOthers ? flags : undefined;
+    },
 
     flux: {
-        VOICE_STATE_UPDATES: onVoiceStateUpdates
+        VOICE_STATE_UPDATES: onVoiceStateUpdates,
+        SPEAKING: (e: any) => { if (settings.store.detectOthers) onSpeaking(e); }
     },
 
     toolboxActions: {
@@ -184,6 +216,7 @@ const plugin = definePlugin({
     stop() {
         running = false;
         clearTimeout(healTimer);
+        clearDetections();
         // Restore the real state
         resendVoiceState();
     }

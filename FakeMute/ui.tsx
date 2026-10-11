@@ -81,6 +81,7 @@ const DEAF_HINTS: Record<Mode, string> = {
 
 function Controls() {
     const s = useVoiceState();
+    const { detectOthers } = settings.use(["detectOthers"]);
 
     return (
         <>
@@ -102,6 +103,19 @@ function Controls() {
                 <Row title={<ModePicker value={s.deafMode} onChange={setDeafMode} />} />
                 <StatusRow label="Others see" value={s.shownDeaf ? "Deafened" : "Listening"} bad={s.shownDeaf} />
                 <StatusRow label="In reality" value={s.realDeaf ? "You hear nobody" : "You hear everyone"} bad={s.realDeaf} />
+            </Section>
+
+            <Section
+                title="Others"
+                footer="Works for this plugin and any other fake mute plugin, but only in your own voice channel and only once they talk - someone who fake deafens and stays silent can't be detected."
+            >
+                <ToggleRow
+                    icon={HEADPHONES_PATH}
+                    color="blue"
+                    title="Show fake mute/deafen in blue"
+                    checked={detectOthers}
+                    onChange={v => settings.store.detectOthers = v}
+                />
             </Section>
 
             {!s.inVoice && s.fakeActive && (

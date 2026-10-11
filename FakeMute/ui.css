@@ -38,3 +38,9 @@
     opacity: 0.5;
     pointer-events: none;
 }
+
+/* Others detected faking mute/deafen (talking while shown as muted) */
+.vc-fakemute-detected,
+.vc-fakemute-detected:hover {
+    color: var(--vc-ui-blue) !important;
+}
