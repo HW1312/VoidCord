@@ -9,7 +9,7 @@ param([string]$ExePath, [switch]$Uninstall, [switch]$Updated)
 $ErrorActionPreference = "Stop"
 Add-Type -AssemblyName PresentationFramework, PresentationCore, WindowsBase
 
-$Repo = "HW1312/VencordCustom"
+$Repo = "HW1312/VoidCord"
 $Target = Join-Path $env:APPDATA "VencordCustom"
 $Here = $PSScriptRoot
 $Embedded = [bool]("VoidCordHost.Host" -as [type])

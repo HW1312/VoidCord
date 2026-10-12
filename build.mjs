@@ -26,7 +26,7 @@ const FILES = join(RELEASE, "files");
 const INSTALLER = join(RELEASE, "VoidCord-Installer.exe");
 const IGNORED = new Set(["Vencord", "release", "node_modules", "dist"]);
 // GitHub-Repo, aus dessen Releases der Vencord-Updater der Freunde lädt (muss öffentlich sein)
-const REPO = "HW1312/VencordCustom";
+const REPO = "HW1312/VoidCord";
 
 const args = new Set(process.argv.slice(2));
 if (args.has("--release")) args.add("--package");
@@ -139,8 +139,50 @@ const PER_CLIENT_SETTINGS = "// VoidCord: own settings per Discord client\n"
     + "if(!process.env.VENCORD_USER_DATA_DIR&&n.startsWith(\"discord\")&&n!==\"discord\")"
     + "process.env.VENCORD_USER_DATA_DIR=p.join(u,\"..\",\"Vencord-\"+n.slice(7))}catch{}\n";
 
+/**
+ * Branding: visible texts in Vencord's own UI say "VoidCord" instead of "Vencord" (settings section and page titles,
+ * toolbox tooltip, update notices, descriptions). Only the build sees the change – the sources are restored right
+ * after, so the Vencord checkout stays clean for git pull. Identifiers (Vencord.Api, VencordNative, setting keys)
+ * are untouched: only a standalone word "Vencord" with text-like neighbours is replaced.
+ */
+const BRAND_FILES = [
+    "plugins/_core/settings.tsx",
+    "plugins/vencordToolbox/index.tsx",
+    "api/ChatButtons.tsx",
+    "api/SettingsSync/offline.ts",
+    "main/csp/manager.ts",
+    "Vencord.ts",
+    ...readdirSync(join(VENCORD, "src", "components", "settings"), { recursive: true })
+        .filter(f => /\.tsx?$/.test(f))
+        .map(f => `components/settings/${f.replaceAll("\\", "/")}`)
+];
+// preceded by a quote, ">" or a space that follows a letter/quote/">" (so "typeof Vencord" in code stays),
+// not followed by an identifier character, "." or "/" (Vencord.Api, Vencord/src paths)
+const BRAND_RE = /(?<=["'`>]|[A-Za-z,:;!?"'`>] )Vencord(?![\w$./])/g;
+// lines that really mean the Vencord project (donations, contributors, Vesktop note) keep the name
+const BRAND_KEEP = /donat|contribut|Vesktop/i;
+const brand = src => src.split("\n").map(l => (BRAND_KEEP.test(l) ? l : l.replace(BRAND_RE, "VoidCord"))).join("\n");
+
+function withBranding(fn) {
+    const originals = new Map();
+    try {
+        for (const rel of BRAND_FILES) {
+            const file = join(VENCORD, "src", rel);
+            const src = readFileSync(file, "utf8");
+            const out = brand(src);
+            if (out !== src) {
+                originals.set(file, src);
+                writeFileSync(file, out);
+            }
+        }
+        fn();
+    } finally {
+        for (const [file, src] of originals) writeFileSync(file, src);
+    }
+}
+
 function build(env) {
-    run(`pnpm build${env ? " --standalone" : ""}`, VENCORD, env);
+    withBranding(() => run(`pnpm build${env ? " --standalone" : ""}`, VENCORD, env));
     const patcher = join(VENCORD, "dist", "patcher.js");
     // After "use strict" – in front of it, the bundle would no longer run in strict mode
     const code = readFileSync(patcher, "utf8").replace('"use strict";', `"use strict";${PER_CLIENT_SETTINGS}`);
@@ -203,6 +245,6 @@ if (args.has("--release")) {
     const notesFile = join(RELEASE, "notes.md");
     writeFileSync(notesFile, body || git("log -1 --format=%s"));
 
-    run(`gh release create ${hash} ${assets.join(" ")} --repo ${REPO} --target ${git("rev-parse HEAD")} --title "VencordCustom ${hash}" --notes-file "${notesFile}"`, ROOT);
+    run(`gh release create ${hash} ${assets.join(" ")} --repo ${REPO} --target ${git("rev-parse HEAD")} --title "VoidCord ${hash}" --notes-file "${notesFile}"`, ROOT);
     console.log(`\nRelease ${hash} veröffentlicht. Freunde bekommen es beim nächsten Discord-Start.`);
 }

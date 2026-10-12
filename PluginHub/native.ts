@@ -24,7 +24,7 @@ function getTheme(id: unknown) {
 }
 
 /** Same repo as REPO in build.mjs; Themes/<id>/<fileName> on the main branch */
-const RAW = "https://raw.githubusercontent.com/HW1312/VencordCustom/main/Themes";
+const RAW = "https://raw.githubusercontent.com/HW1312/VoidCord/main/Themes";
 const MAX_BYTES = 2 * 1024 * 1024;
 
 const headerValue = (css: string, key: string) =>

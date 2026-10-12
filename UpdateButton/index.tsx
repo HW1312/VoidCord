@@ -32,7 +32,7 @@ const Native = VencordNative.pluginHelpers.UpdateButton as PluginNative<typeof i
 const HeaderBarIcon = findComponentByCodeLazy(".HEADER_BAR_BADGE_BOTTOM,", 'position:"bottom"');
 
 /** Same repo as REPO in build.mjs */
-const REPO = "HW1312/VencordCustom";
+const REPO = "HW1312/VoidCord";
 
 /** First check after Vencord's own startup check is done, so both don't write the files at the same time */
 const FIRST_CHECK = 60_000;

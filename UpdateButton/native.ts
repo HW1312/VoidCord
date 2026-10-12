@@ -14,7 +14,7 @@ import { request } from "https";
 import { join } from "path";
 
 /** Same repo as REPO in build.mjs */
-const REPO_URL = "https://github.com/HW1312/VencordCustom";
+const REPO_URL = "https://github.com/HW1312/VoidCord";
 const URL_LATEST = `${REPO_URL}/releases/latest`;
 
 /** The release assets build.mjs uploads – the files Vencord runs from (this code is bundled into patcher.js, so __dirname is their folder) */
