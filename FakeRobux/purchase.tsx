@@ -1,15 +1,15 @@
 /*
  * FakeRobux – confirm dialog and receipt of a simulated donation / gift.
- * The "Simulated" marks are part of the design and can't be turned off: nothing is sent, nobody gets anything.
+ * Transactions update local plugin state only.
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
 import ErrorBoundary from "@components/ErrorBoundary";
 import { useEffect, useState } from "@webpack/common";
 
-import { Glyph, ICONS, Note, openWindow, Row, Section, Sheet, Spinner } from "../_ui";
+import { classes, openWindow, Row, Section, Sheet, Spinner } from "../_ui";
 import { CatalogItem, RobloxUser } from "./api";
-import { fmtDate, ItemThumb, Robux, RobuxIcon, SimulatedTag, THEME, UserAvatar, UserName } from "./components";
+import { fmtDate, ItemThumb, Robux, THEME, UserAvatar } from "./components";
 import { HistoryEntry, settings, spend } from "./index";
 
 export interface PurchaseRequest {
@@ -23,14 +23,28 @@ export interface PurchaseRequest {
 
 type Step = "confirm" | "processing" | "done";
 
+// Roblox's purchase prompt shows one big picture: the item, or the person who gets the Robux
 function Hero({ req }: { req: PurchaseRequest; }) {
     return (
         <div className="vc-fakerobux-hero">
             {req.item
-                ? <ItemThumb url={req.thumbUrl} size={96} item={req.item} />
-                : <span className="vc-fakerobux-hero-robux"><RobuxIcon size={48} /></span>}
-            <span className="vc-fakerobux-hero-arrow">→</span>
-            <UserAvatar userId={req.recipient.id} size={96} />
+                ? <ItemThumb url={req.thumbUrl} size={150} item={req.item} />
+                : <UserAvatar userId={req.recipient.id} size={150} />}
+        </div>
+    );
+}
+
+function ReceiptSummary({ entry }: { entry: HistoryEntry; }) {
+    return (
+        <div className="vc-fakerobux-receipt-head">
+            <svg viewBox="0 0 32 32" width={48} height={48} className="vc-fakerobux-receipt-check" aria-hidden>
+                <path fill="currentColor" d="M28 16C28 9.37258 22.6274 4 16 4C9.37258 4 4 9.37258 4 16C4 22.6274 9.37258 28 16 28C22.6274 28 28 22.6274 28 16ZM30 16C30 23.732 23.732 30 16 30C8.26801 30 2 23.732 2 16C2 8.26801 8.26801 2 16 2C23.732 2 30 8.26801 30 16ZM21.7071 12.2929C22.0976 12.6834 22.0976 13.3166 21.7071 13.7071L14.7071 20.7071C14.3166 21.0976 13.6834 21.0976 13.2929 20.7071L10.2929 17.7071C9.90237 17.3166 9.90237 16.6834 10.2929 16.2929C10.6834 15.9024 11.3166 15.9024 11.7071 16.2929L14 18.5858L20.2929 12.2929C20.6834 11.9024 21.3166 11.9024 21.7071 12.2929Z" />
+            </svg>
+            <span>
+                {entry.kind === "gift"
+                    ? <>Your gift to <b>{entry.displayName}</b> is complete.</>
+                    : <>You sent <Robux value={entry.amount} /> to <b>{entry.displayName}</b>.</>}
+            </span>
         </div>
     );
 }
@@ -38,19 +52,13 @@ function Hero({ req }: { req: PurchaseRequest; }) {
 function Receipt({ entry }: { entry: HistoryEntry; }) {
     return (
         <div className="vc-fakerobux-receipt">
-            <span className="vc-fakerobux-stamp" aria-hidden>SIMULATED</span>
-            <div className="vc-fakerobux-receipt-head">
-                <Glyph path={ICONS.check} color="green" size={36} />
-                <b>{entry.kind === "gift" ? "Gift simulated" : "Donation simulated"}</b>
-                <span>Nothing was sent - {entry.displayName} received nothing.</span>
-            </div>
+            <ReceiptSummary entry={entry} />
             <Section>
                 <Row title="To" trailing={`${entry.displayName} (@${entry.username})`} />
                 {entry.item && <Row title="Item" trailing={entry.item.name} />}
                 <Row title="Amount" trailing={<Robux value={entry.amount} />} />
                 {entry.message && <Row title="Message" trailing={entry.message} />}
                 <Row title="Date" trailing={`${fmtDate(entry.at)}, ${new Date(entry.at).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })}`} />
-                <Row title="Status" trailing={<SimulatedTag />} />
             </Section>
         </div>
     );
@@ -79,20 +87,27 @@ function Purchase({ req, close }: { req: PurchaseRequest; close(): void; }) {
                 setEntry(done);
                 setStep("done");
             } else setStep("confirm");
-        }, 1400);
+        }, 1000 + Math.floor(Math.random() * 2001));
         return () => clearTimeout(t);
     }, [step]);
 
     // Roblox's own purchase prompt: plain title, no app icon
     const header = {
-        title: step === "done" ? (gift ? "Gift Completed" : "Robux Sent") : (gift ? "Buy Item" : "Send Robux"),
-        subtitle: <SimulatedTag />
+        title: step === "done" ? (gift ? "Gift Completed" : "Robux Sent") : (gift ? "Buy Item" : "Send Robux")
     };
 
     if (step === "done" && entry) {
         return (
-            <Sheet header={header} onClose={close} actions={[{ label: "Done", onClick: close }]}>
-                <Receipt entry={entry} />
+            <Sheet
+                className="vc-fakerobux-completion"
+                header={{
+                    ...header,
+                    actions: <span className="vc-fakerobux-completion-balance"><Robux value={balance} size={16} /></span>
+                }}
+                onClose={close}
+                actions={[{ label: "OK", onClick: close }]}
+            >
+                <ReceiptSummary entry={entry} />
             </Sheet>
         );
     }
@@ -102,10 +117,15 @@ function Purchase({ req, close }: { req: PurchaseRequest; close(): void; }) {
             header={header}
             onClose={close}
             notice={enough ? undefined : "You don't have enough Robux. Raise your balance in the plugin settings."}
+            footer={
+                <span className="vc-fakerobux-after">
+                    Your balance after this transaction will be <Robux value={Math.max(0, balance - req.amount)} size={12} />
+                </span>
+            }
             actions={[
                 { label: "Cancel", onClick: close },
                 {
-                    label: step === "processing" ? <><Spinner /> Processing</> : gift ? "Buy Now (simulated)" : "Send (simulated)",
+                    label: step === "processing" ? <><Spinner /> Processing</> : gift ? "Buy Now" : "Send Now",
                     color: "green",
                     disabled: !enough || step === "processing",
                     onClick: () => setStep("processing")
@@ -115,19 +135,10 @@ function Purchase({ req, close }: { req: PurchaseRequest; close(): void; }) {
             <Hero req={req} />
             <p className="vc-fakerobux-question">
                 {gift
-                    ? <>Gift <b>{req.item!.name}</b> to <b>{req.recipient.displayName}</b> for <Robux value={req.amount} />?</>
-                    : <>Send <Robux value={req.amount} /> to <b>{req.recipient.displayName}</b>?</>}
+                    ? <>Would you like to gift <b>{req.item!.name}</b> to <b>{req.recipient.displayName}</b> for <Robux value={req.amount} />?</>
+                    : <>Would you like to send <Robux value={req.amount} /> to <b>{req.recipient.displayName}</b>?</>}
             </p>
-            <Section>
-                <Row
-                    leading={<UserAvatar userId={req.recipient.id} size={32} />}
-                    title={<UserName displayName={req.recipient.displayName} name={req.recipient.name} verified={req.recipient.verified} />}
-                />
-                {req.message && <Row title="Message" trailing={req.message} />}
-                <Row title="Your balance" trailing={<Robux value={balance} />} />
-                <Row title="After" trailing={<Robux value={Math.max(0, balance - req.amount)} />} dim={!enough} />
-            </Section>
-            <Note tone="warn">Simulation - no Robux are sent and {req.recipient.displayName} gets nothing. Only your fake balance goes down.</Note>
+            {req.message && <p className="vc-fakerobux-message">“{req.message}”</p>}
         </Sheet>
     );
 }
@@ -137,19 +148,19 @@ export function openPurchase(req: PurchaseRequest) {
         <ErrorBoundary noop>
             <Purchase req={req} close={close} />
         </ErrorBoundary>
-    ), { size: "small", className: THEME });
+    ), { size: "medium", className: classes(THEME, "vc-fakerobux-purchase") });
 }
 
 export function openReceipt(entry: HistoryEntry) {
     openWindow(close => (
         <ErrorBoundary noop>
             <Sheet
-                header={{ title: entry.kind === "gift" ? "Gift" : "Donation", subtitle: <SimulatedTag /> }}
+                header={{ title: entry.kind === "gift" ? "Gift Completed" : "Robux Sent" }}
                 onClose={close}
-                actions={[{ label: "Close", onClick: close }]}
+                actions={[{ label: "Close", color: "green", onClick: close }]}
             >
                 <Receipt entry={entry} />
             </Sheet>
         </ErrorBoundary>
-    ), { size: "small", className: THEME });
+    ), { size: "medium", className: classes(THEME, "vc-fakerobux-purchase") });
 }

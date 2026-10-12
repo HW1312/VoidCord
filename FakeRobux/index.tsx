@@ -1,7 +1,7 @@
 /*
  * FakeRobux – Vencord Userplugin
  * Your real Roblox profile with a Robux balance you choose, in a window from the title bar.
- * "Send" simulates donations and gifts to real Roblox users: every dialog and receipt is marked as simulated,
+ * "Send" simulates donations and gifts to real Roblox users:
  * nothing is sent anywhere and nobody gets anything. Only reads Roblox's public API, never logs in.
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
@@ -80,7 +80,12 @@ export function spend(entry: Omit<HistoryEntry, "id" | "at">) {
     if (entry.amount > settings.store.balance) return false;
     setBalance(settings.store.balance - entry.amount);
     const full: HistoryEntry = { ...entry, id: `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`, at: Date.now() };
-    settings.store.history = [full, ...settings.store.history].slice(0, MAX_HISTORY);
+    // Settings recursively proxies records; copy them before saving through Electron IPC.
+    const history = settings.store.history.map(entry => ({
+        ...entry,
+        item: entry.item && { ...entry.item }
+    }));
+    settings.store.history = [full, ...history].slice(0, MAX_HISTORY);
     return full;
 }
 

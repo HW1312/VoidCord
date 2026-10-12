@@ -130,8 +130,3 @@ export function Tabs<T extends string>({ value, options, onChange }: {
 export function RobloxLogo({ size = 30 }: { size?: number; }) {
     return <span className="vc-fakerobux-logo"><Icon path={ROBLOX_PATH} size={size} /></span>;
 }
-
-/** Fixed marker on everything that looks like a transaction */
-export function SimulatedTag() {
-    return <span className="vc-fakerobux-sim-tag">Simulated</span>;
-}

@@ -12,10 +12,10 @@ import { useState } from "@webpack/common";
 
 import { Button, classes, confirm, Empty, Field, Icon, Note, openWindow, Pill, Pills, Row, Section, Sheet, Spinner, Stats, TextField, ToggleRow } from "../_ui";
 import { getUser, lookupUser } from "./api";
-import { abbr, fmt, fmtDate, GIFT_PATH, HISTORY_PATH, Robux, ROBLOX_PATH, RobloxLogo, ROBUX_PATH, RobuxIcon, SimulatedTag, Tabs, THEME, useAsync, UserAvatar } from "./components";
+import { abbr, fmt, fmtDate, GIFT_PATH, HISTORY_PATH, ROBLOX_PATH, RobloxLogo, Robux, ROBUX_PATH, RobuxIcon, Tabs, THEME, useAsync, UserAvatar } from "./components";
 import { HistoryEntry, MAX_BALANCE, setBalance, settings } from "./index";
-import { openReceipt } from "./purchase";
 import { Profile } from "./profile";
+import { openReceipt } from "./purchase";
 import { SendView } from "./send";
 
 const HeaderBarIcon = findComponentByCodeLazy(".HEADER_BAR_BADGE_BOTTOM,", 'position:"bottom"');
@@ -122,7 +122,7 @@ function HistoryView() {
     const { history } = settings.use(["history"]);
 
     if (!history.length) {
-        return <Empty icon={HISTORY_PATH} title="No transactions yet" hint="Simulated donations and gifts show up here." />;
+        return <Empty icon={HISTORY_PATH} title="No transactions yet" hint="Donations and gifts show up here." />;
     }
 
     const total = history.reduce((s, e) => s + e.amount, 0);
@@ -131,7 +131,7 @@ function HistoryView() {
         <>
             <Stats items={[
                 { value: fmt(history.length), label: "Transactions" },
-                { value: <Robux value={total} size={16} />, label: "Spent (simulated)" }
+                { value: <Robux value={total} size={16} />, label: "Spent" }
             ]} />
             <Section
                 title="History"
@@ -153,7 +153,7 @@ function HistoryRow({ entry }: { entry: HistoryEntry; }) {
             leading={<UserAvatar userId={entry.userId} size={36} />}
             title={entry.kind === "gift" ? <>Gifted <b>{entry.item?.name}</b> to {entry.displayName}</> : <>Sent Robux to {entry.displayName}</>}
             subtitle={`@${entry.username} · ${fmtDate(entry.at)}`}
-            trailing={<span className="vc-fakerobux-history-trailing"><Robux value={entry.amount} size={12} /><SimulatedTag /></span>}
+            trailing={<Robux value={entry.amount} size={12} />}
             onClick={() => openReceipt(entry)}
             chevron
         />
@@ -225,7 +225,7 @@ export const SettingsPanel = ErrorBoundary.wrap(() => {
                 <Row title="Open Roblox window" leading={<span className="vc-fakerobux-robux-glyph"><Icon path={ROBUX_PATH} size={18} /></span>} onClick={openRobloxWindow} chevron />
                 <Row
                     title="Clear history"
-                    subtitle={`${history.length} simulated transactions`}
+                    subtitle={`${history.length} transactions`}
                     leading={<span className="vc-fakerobux-robux-glyph"><Icon path={GIFT_PATH} size={18} /></span>}
                     dim={!history.length}
                     onClick={history.length ? async () => {
