@@ -1,0 +1,37 @@
+.vc-badgeunlock-icon {
+    display: block;
+    object-fit: contain;
+}
+
+/* Same box size as a settings glyph, so badge rows line up with the others */
+.vc-badgeunlock-leading {
+    display: grid;
+    place-items: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 7px;
+    background: var(--vc-ui-field);
+}
+
+.vc-badgeunlock-actions {
+    display: inline-flex;
+    gap: 4px;
+}
+
+/* Looks like the badge strip on a Discord profile */
+.vc-badgeunlock-preview {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    padding: 12px 14px;
+    border-bottom: 0.5px solid var(--vc-ui-sep);
+}
+
+.vc-badgeunlock-preview-badge {
+    display: grid;
+    place-items: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+    background: var(--vc-ui-field);
+}
