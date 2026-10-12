@@ -1,0 +1,864 @@
+/**
+ * @name Schweiz
+ * @author 5406
+ * @version 1.1.0
+ * @description Switzerland for Discord: an Alpine panorama with a red mountain train and falling snow behind the chat, SBB station-sign header, Swiss passport user panel, hiking-sign tooltips, Swiss army knife menus – and plenty of hidden extras.
+ */
+
+/* ==========================================================================
+   SCHWEIZ
+   --------------------------------------------------------------------------
+   Part of the country theme series. Design language: Swiss Style
+   (Helvetica, bold flush-left type, square corners, red as the accent) plus
+   the things everybody knows from Switzerland.
+
+   What you see
+   - Alpine panorama behind the chat: Eiger, Mönch and Jungfrau, the
+     Matterhorn, a lake, a chalet with a Swiss flag, a cow with a golden bell
+     and a viaduct. In the dark modes it's night (stars, moon, lit windows),
+     in Light it's a sunny day.
+   - A red mountain train crosses the viaduct every 45 seconds
+   - Snow falls gently behind the messages
+   - Channel header looks like an SBB station sign (blue plate, white frame)
+   - User panel is the red Swiss passport with embossed crosses
+   - Tooltips are yellow hiking signposts with the white-red-white mountain
+     trail tip
+   - Context menus are Swiss army knives: red handle, steel-shiny selection
+   - Home button is the Swiss flag
+   Hidden extras
+   - SBB station clock before the window title; the red second hand does its
+     famous stop at twelve
+   - Hover the title bar: "Grüezi mitenand!"
+   - Typing: a bouncing cheese wedge, cheese-yellow dots
+   - Scrollbars are chocolate bars
+   - Spoilers are locked in a bank vault (Bankgeheimnis)
+   - Date dividers look like a station departure board
+   - Mentions glow like Alpenglühen
+   - Edelweiss at the bottom of the member list
+   - Selected text in flag colors
+
+   The SVG art between the /*@NAME*\/ markers is generated (gen-swiss.mjs).
+
+   Selectors match Discord's hashed classes by prefix, for both naming
+   schemes ("name_a1b2c3" and "name__a1b2c"):
+       :is([class^="name_"], [class*=" name_"])
+
+   1. Palette        5. Channel list and user panel (passport)
+   2. Appearance     6. Chat, header (SBB sign) and messages
+   3. Discord tokens 7. Composer, tooltips, menus, controls
+   4. App shell      8. Alpine panorama, train and snow
+                     9. Easter eggs
+   ========================================================================== */
+
+
+/* ==========================================================================
+   1. PALETTE (Dark: Alpine night)
+   ========================================================================== */
+
+:root {
+    --ch-red: #e3262d;
+    --ch-red-rgb: 227, 38, 45;
+    --ch-flag-red: #da291c;
+    --ch-sbb-blue: #2d327d;
+    --ch-hiking-yellow: #ffd100;
+    --ch-cheese: #f4c430;
+    --ch-chocolate: #5b3a24;
+    --ch-alpenglow: 255, 122, 89;
+
+    --ch-bg: #0c0f14;          /* window, server list */
+    --ch-side: #12161d;        /* channel list, member list */
+    --ch-chat: #171c24;        /* chat */
+    --ch-card: #202631;        /* inputs, cards */
+    --ch-float: #262d3a;       /* menus, popouts */
+    --ch-raised: #313949;
+
+    --ch-text: #f1f3f6;
+    --ch-text-body: #dfe3ea;
+    --ch-text-2: #9aa4b4;
+    --ch-text-3: #677284;
+    --ch-link: #ff7d74;
+    --ch-ink-rgb: 255, 255, 255;
+    --ch-line: rgba(255, 255, 255, 0.07);
+
+    --ch-font: "Helvetica Neue", Helvetica, Arial, "Segoe UI", sans-serif;
+    --ch-font-mono: Consolas, "SF Mono", Menlo, monospace;
+    --ch-radius: 4px;
+    --ch-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+
+    --ch-scene: /*@SCENE_DARK*/url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1600 220'><g fill='rgb(255,255,255)'><circle cx='80' cy='26' r='1.2' opacity='.45'/><circle cx='210' cy='14' r='1' opacity='.45'/><circle cx='330' cy='34' r='0.8' opacity='.45'/><circle cx='520' cy='18' r='1.3' opacity='.45'/><circle cx='640' cy='40' r='0.9' opacity='.45'/><circle cx='760' cy='12' r='1.1' opacity='.45'/><circle cx='1050' cy='22' r='1' opacity='.45'/><circle cx='1180' cy='44' r='0.8' opacity='.45'/><circle cx='1290' cy='16' r='1.2' opacity='.45'/><circle cx='1530' cy='30' r='1' opacity='.45'/></g><circle cx='1440' cy='40' r='16' fill='rgb(255,255,255)' opacity='.1'/><circle cx='1447' cy='35' r='14' fill='rgb(23,28,36)' opacity='.92'/><path d='M0 220V120l60-20 60 15 70-45 40 15 40-25 40 18 40-28 45 30 45 15 60-23 60 26 80 12 80-20 60 15 80-45 40-30 15-8 10 6 25 42 40 22 70 8 70-20 70 16 70-21 60 17 70-7 70 20 70-7 60 22V220z' fill='rgb(255,255,255)' opacity='0.05'/><path d='M178 78l12-8 14 6-7 5-6-4-6 6zM258 68l12-8 13 7-7 4-6-3-6 5zM338 58l12-8 14 9-8 3-6-4-6 6zM880 52l20-22 15-8 10 6 17 28-12-4-9 10-9-12-10 14-9-10z' fill='rgb(255,255,255)' opacity='0.22'/><path d='M0 220V160c120-20 200-10 300-15 120-7 220 15 340 7 120-8 220 8 340-2 120-10 240 5 360-2 120-6 200 2 260 12V220z' fill='rgb(255,255,255)' opacity='0.035'/><path d='M30 172l7-22 7 22zM44 173l7-22 7 22zM58 174l7-22 7 22zM250 172l7-22 7 22zM262 171l7-22 7 22zM276 170l7-22 7 22zM470 165l7-22 7 22zM486 165l7-22 7 22zM610 173l7-22 7 22zM624 174l7-22 7 22zM1010 164l7-22 7 22zM1024 164l7-22 7 22zM1460 167l7-22 7 22zM1474 166l7-22 7 22zM1488 166l7-22 7 22zM1560 164l7-22 7 22z' fill='rgb(255,255,255)' opacity='0.06'/><rect x='0' y='176' width='1600' height='7' fill='rgb(255,255,255)' opacity='0.035'/><rect x='0' y='175' width='1600' height='1.6' fill='rgb(255,255,255)' opacity='0.14'/><path d='M180 220v-18c120-6 420-6 540 0v18z' fill='rgba(120,160,255,.07)'/><path d='M300 208h60M420 212h90M560 207h50M250 214h40' stroke='rgb(255,255,255)' stroke-width='1.2' opacity='0.14'/><path d='M0 220v-26c40-2 120 2 180 8v18zM720 220v-20c80-10 180-14 280-12 50 1 70 2 80-2v34zM1420 220v-34c60 2 120 6 180 8v26z' fill='rgb(255,255,255)' opacity='0.045'/><path d='M1080 176h340v44h-340zM1104 220V204a23 23 0 0 1 46 0V220zM1164 220V204a23 23 0 0 1 46 0V220zM1224 220V204a23 23 0 0 1 46 0V220zM1284 220V204a23 23 0 0 1 46 0V220zM1344 220V204a23 23 0 0 1 46 0V220z' fill='rgb(255,255,255)' fill-rule='evenodd' opacity='0.08'/><path d='M786 194v-20h40v20z' fill='rgb(255,255,255)' opacity='0.1'/><path d='M780 176l26-18 26 18z' fill='rgb(255,255,255)' opacity='0.14'/><g fill='rgb(255,190,90)'><rect x='792' y='180' width='6' height='6'/><rect x='803' y='180' width='6' height='6'/><rect x='814' y='180' width='6' height='6'/></g><rect x='846' y='150' width='1.6' height='44' fill='rgb(255,255,255)' opacity='0.2'/><rect x='847.6' y='150' width='14' height='14' fill='rgb(218,41,28)'/><path d='M853 153h3v3h3v3h-3v3h-3v-3h-3v-3h3z' fill='rgb(255,255,255)'/><g fill='rgb(255,255,255)' opacity='0.14'><ellipse cx='920' cy='186' rx='13' ry='7'/><path d='M906 184c-6-2-9 1-9 4s3 5 7 4zM910 191h3v9h-3zM926 191h3v9h-3zM914 191h3v8h-3zM922 191h3v8h-3zM933 183c4 1 5 5 4 9'/></g><circle cx='904' cy='194' r='1.8' fill='rgb(230,180,40)'/></svg>")/*@END*/;
+    --ch-train: /*@TRAIN_DARK*/url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 220 30'><rect x='2' y='6' width='48' height='18' rx='3' fill='rgb(200,16,46)'/><rect x='2' y='19' width='48' height='1.5' fill='rgb(255,255,255)' opacity='.7'/><rect x='6' y='9' width='7' height='6' rx='1' fill='rgb(255,214,120)'/><rect x='17' y='9' width='7' height='6' rx='1' fill='rgb(255,214,120)'/><rect x='28' y='9' width='7' height='6' rx='1' fill='rgb(255,214,120)'/><rect x='39' y='9' width='7' height='6' rx='1' fill='rgb(255,214,120)'/><circle cx='11' cy='26' r='3' fill='rgb(40,40,40)'/><circle cx='41' cy='26' r='3' fill='rgb(40,40,40)'/><rect x='54' y='6' width='48' height='18' rx='3' fill='rgb(200,16,46)'/><rect x='54' y='19' width='48' height='1.5' fill='rgb(255,255,255)' opacity='.7'/><rect x='58' y='9' width='7' height='6' rx='1' fill='rgb(255,214,120)'/><rect x='69' y='9' width='7' height='6' rx='1' fill='rgb(255,214,120)'/><rect x='80' y='9' width='7' height='6' rx='1' fill='rgb(255,214,120)'/><rect x='91' y='9' width='7' height='6' rx='1' fill='rgb(255,214,120)'/><circle cx='63' cy='26' r='3' fill='rgb(40,40,40)'/><circle cx='93' cy='26' r='3' fill='rgb(40,40,40)'/><rect x='106' y='6' width='48' height='18' rx='3' fill='rgb(200,16,46)'/><rect x='106' y='19' width='48' height='1.5' fill='rgb(255,255,255)' opacity='.7'/><rect x='110' y='9' width='7' height='6' rx='1' fill='rgb(255,214,120)'/><rect x='121' y='9' width='7' height='6' rx='1' fill='rgb(255,214,120)'/><rect x='132' y='9' width='7' height='6' rx='1' fill='rgb(255,214,120)'/><rect x='143' y='9' width='7' height='6' rx='1' fill='rgb(255,214,120)'/><circle cx='115' cy='26' r='3' fill='rgb(40,40,40)'/><circle cx='145' cy='26' r='3' fill='rgb(40,40,40)'/><path d='M158 24V8q0-2 2-2h44q8 0 12 8l2 10z' fill='rgb(200,16,46)'/><rect x='158' y='19' width='60' height='1.5' fill='rgb(255,255,255)' opacity='.7'/><rect x='164' y='9' width='8' height='6' rx='1' fill='rgb(255,214,120)'/><rect x='176' y='9' width='8' height='6' rx='1' fill='rgb(255,214,120)'/><path d='M204 9h6l4 6h-10z' fill='rgb(255,214,120)'/><path d='M176 6l8-5h10M184 1l-6 5' stroke='rgb(60,60,60)' stroke-width='1.2' fill='none'/><circle cx='166' cy='26' r='3' fill='rgb(40,40,40)'/><circle cx='206' cy='26' r='3' fill='rgb(40,40,40)'/><circle cx='216' cy='20' r='1.6' fill='rgb(255,240,180)'/></svg>")/*@END*/;
+    --ch-snow: /*@SNOW_DARK*/url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 240'><g fill='rgb(255,255,255)'><circle cx='117.7' cy='134.6' r='1.0' opacity='0.22'/><circle cx='106.4' cy='121.5' r='0.9' opacity='0.41'/><circle cx='141.5' cy='98.6' r='1.3' opacity='0.38'/><circle cx='157.8' cy='18.4' r='1.6' opacity='0.22'/><circle cx='161.3' cy='37.9' r='1.7' opacity='0.30'/><circle cx='42.3' cy='12.0' r='2.3' opacity='0.44'/><circle cx='29.0' cy='106.6' r='2.3' opacity='0.21'/><circle cx='100.6' cy='132.1' r='1.9' opacity='0.23'/><circle cx='40.9' cy='236.5' r='1.5' opacity='0.22'/><circle cx='131.3' cy='79.3' r='1.0' opacity='0.38'/><circle cx='84.4' cy='84.0' r='0.9' opacity='0.43'/><circle cx='57.3' cy='212.2' r='1.6' opacity='0.22'/><circle cx='144.7' cy='96.4' r='2.0' opacity='0.35'/><circle cx='32.6' cy='53.7' r='1.5' opacity='0.18'/><circle cx='11.4' cy='98.9' r='1.9' opacity='0.34'/><circle cx='229.2' cy='78.0' r='1.5' opacity='0.30'/><circle cx='105.3' cy='201.2' r='1.5' opacity='0.28'/><circle cx='63.4' cy='56.8' r='2.0' opacity='0.19'/><circle cx='64.9' cy='184.0' r='2.2' opacity='0.44'/><circle cx='222.4' cy='206.5' r='2.0' opacity='0.34'/></g></svg>")/*@END*/;
+    --ch-art-edelweiss: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><g fill='rgb(255,255,255)' opacity='.09'><ellipse cx='50' cy='27' rx='8' ry='20'/><ellipse cx='50' cy='27' rx='8' ry='20' transform='rotate(45 50 50)'/><ellipse cx='50' cy='27' rx='8' ry='20' transform='rotate(90 50 50)'/><ellipse cx='50' cy='27' rx='8' ry='20' transform='rotate(135 50 50)'/><ellipse cx='50' cy='27' rx='8' ry='20' transform='rotate(180 50 50)'/><ellipse cx='50' cy='27' rx='8' ry='20' transform='rotate(225 50 50)'/><ellipse cx='50' cy='27' rx='8' ry='20' transform='rotate(270 50 50)'/><ellipse cx='50' cy='27' rx='8' ry='20' transform='rotate(315 50 50)'/></g><g fill='rgb(244,196,48)' opacity='.18'><circle cx='50' cy='50' r='7'/><circle cx='43' cy='45' r='3.5'/><circle cx='57' cy='45' r='3.5'/><circle cx='50' cy='58' r='3.5'/></g></svg>");
+    --ch-passport-crosses: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 28 28'><path d='M12 7h4v5h5v4h-5v5h-4v-5H7v-4h5z' fill='rgb(255,255,255)' opacity='.07'/></svg>");
+}
+
+
+/* ==========================================================================
+   2. APPEARANCE MODES
+   Light = theme-light, Ash = theme-dark, Dark = theme-darker,
+   Onyx = theme-midnight. Dark is the palette from section 1.
+   ========================================================================== */
+
+/* Ash: dusk in the mountains */
+html.theme-dark:not(#ch) {
+    --ch-bg: #161a21;
+    --ch-side: #1c212a;
+    --ch-chat: #222833;
+    --ch-card: #2b3240;
+    --ch-float: #313949;
+    --ch-raised: #3b4456;
+}
+
+/* Onyx: black night, only the stars */
+html.theme-midnight:not(#ch) {
+    --ch-bg: #000000;
+    --ch-side: #06070a;
+    --ch-chat: #0a0c10;
+    --ch-card: #14171d;
+    --ch-float: #1b1f27;
+    --ch-raised: #262b35;
+}
+
+/* Light: a sunny day, fresh snow, black type, flag red */
+html.theme-light:not(#ch) {
+    --ch-red: #da291c;
+    --ch-red-rgb: 218, 41, 28;
+    --ch-bg: #e8e8e4;
+    --ch-side: #f4f4f1;
+    --ch-chat: #fbfcfd;
+    --ch-card: #f1f1ee;
+    --ch-float: #ffffff;
+    --ch-raised: #e4e4e0;
+    --ch-text: #111111;
+    --ch-text-body: #1a1a1a;
+    --ch-text-2: #5c5c5c;
+    --ch-text-3: #8a8a8a;
+    --ch-link: #c41e14;
+    --ch-ink-rgb: 0, 0, 0;
+    --ch-line: rgba(0, 0, 0, 0.09);
+
+    --ch-scene: /*@SCENE_LIGHT*/url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1600 220'><circle cx='1440' cy='42' r='20' fill='rgb(255,190,60)' opacity='.25'/><path d='M0 220V120l60-20 60 15 70-45 40 15 40-25 40 18 40-28 45 30 45 15 60-23 60 26 80 12 80-20 60 15 80-45 40-30 15-8 10 6 25 42 40 22 70 8 70-20 70 16 70-21 60 17 70-7 70 20 70-7 60 22V220z' fill='rgb(0,0,0)' opacity='0.05'/><path d='M178 78l12-8 14 6-7 5-6-4-6 6zM258 68l12-8 13 7-7 4-6-3-6 5zM338 58l12-8 14 9-8 3-6-4-6 6zM880 52l20-22 15-8 10 6 17 28-12-4-9 10-9-12-10 14-9-10z' fill='rgb(255,255,255)' opacity='1'/><path d='M0 220V160c120-20 200-10 300-15 120-7 220 15 340 7 120-8 220 8 340-2 120-10 240 5 360-2 120-6 200 2 260 12V220z' fill='rgb(0,0,0)' opacity='0.035'/><path d='M30 172l7-22 7 22zM44 173l7-22 7 22zM58 174l7-22 7 22zM250 172l7-22 7 22zM262 171l7-22 7 22zM276 170l7-22 7 22zM470 165l7-22 7 22zM486 165l7-22 7 22zM610 173l7-22 7 22zM624 174l7-22 7 22zM1010 164l7-22 7 22zM1024 164l7-22 7 22zM1460 167l7-22 7 22zM1474 166l7-22 7 22zM1488 166l7-22 7 22zM1560 164l7-22 7 22z' fill='rgb(0,0,0)' opacity='0.07'/><rect x='0' y='176' width='1600' height='7' fill='rgb(0,0,0)' opacity='0.035'/><rect x='0' y='175' width='1600' height='1.6' fill='rgb(0,0,0)' opacity='0.14'/><path d='M180 220v-18c120-6 420-6 540 0v18z' fill='rgba(40,110,220,.1)'/><path d='M300 208h60M420 212h90M560 207h50M250 214h40' stroke='rgb(0,0,0)' stroke-width='1.2' opacity='0.14'/><path d='M0 220v-26c40-2 120 2 180 8v18zM720 220v-20c80-10 180-14 280-12 50 1 70 2 80-2v34zM1420 220v-34c60 2 120 6 180 8v26z' fill='rgb(0,0,0)' opacity='0.045'/><path d='M1080 176h340v44h-340zM1104 220V204a23 23 0 0 1 46 0V220zM1164 220V204a23 23 0 0 1 46 0V220zM1224 220V204a23 23 0 0 1 46 0V220zM1284 220V204a23 23 0 0 1 46 0V220zM1344 220V204a23 23 0 0 1 46 0V220z' fill='rgb(0,0,0)' fill-rule='evenodd' opacity='0.08'/><path d='M786 194v-20h40v20z' fill='rgb(0,0,0)' opacity='0.12'/><path d='M780 176l26-18 26 18z' fill='rgb(0,0,0)' opacity='0.16'/><g fill='rgb(255,255,255)'><rect x='792' y='180' width='6' height='6'/><rect x='803' y='180' width='6' height='6'/><rect x='814' y='180' width='6' height='6'/></g><rect x='846' y='150' width='1.6' height='44' fill='rgb(0,0,0)' opacity='0.3'/><rect x='847.6' y='150' width='14' height='14' fill='rgb(218,41,28)'/><path d='M853 153h3v3h3v3h-3v3h-3v-3h-3v-3h3z' fill='rgb(255,255,255)'/><g fill='rgb(0,0,0)' opacity='0.16'><ellipse cx='920' cy='186' rx='13' ry='7'/><path d='M906 184c-6-2-9 1-9 4s3 5 7 4zM910 191h3v9h-3zM926 191h3v9h-3zM914 191h3v8h-3zM922 191h3v8h-3zM933 183c4 1 5 5 4 9'/></g><circle cx='904' cy='194' r='1.8' fill='rgb(230,180,40)'/></svg>")/*@END*/;
+    --ch-train: /*@TRAIN_LIGHT*/url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 220 30'><rect x='2' y='6' width='48' height='18' rx='3' fill='rgb(200,16,46)'/><rect x='2' y='19' width='48' height='1.5' fill='rgb(255,255,255)' opacity='.7'/><rect x='6' y='9' width='7' height='6' rx='1' fill='rgb(200,225,245)'/><rect x='17' y='9' width='7' height='6' rx='1' fill='rgb(200,225,245)'/><rect x='28' y='9' width='7' height='6' rx='1' fill='rgb(200,225,245)'/><rect x='39' y='9' width='7' height='6' rx='1' fill='rgb(200,225,245)'/><circle cx='11' cy='26' r='3' fill='rgb(40,40,40)'/><circle cx='41' cy='26' r='3' fill='rgb(40,40,40)'/><rect x='54' y='6' width='48' height='18' rx='3' fill='rgb(200,16,46)'/><rect x='54' y='19' width='48' height='1.5' fill='rgb(255,255,255)' opacity='.7'/><rect x='58' y='9' width='7' height='6' rx='1' fill='rgb(200,225,245)'/><rect x='69' y='9' width='7' height='6' rx='1' fill='rgb(200,225,245)'/><rect x='80' y='9' width='7' height='6' rx='1' fill='rgb(200,225,245)'/><rect x='91' y='9' width='7' height='6' rx='1' fill='rgb(200,225,245)'/><circle cx='63' cy='26' r='3' fill='rgb(40,40,40)'/><circle cx='93' cy='26' r='3' fill='rgb(40,40,40)'/><rect x='106' y='6' width='48' height='18' rx='3' fill='rgb(200,16,46)'/><rect x='106' y='19' width='48' height='1.5' fill='rgb(255,255,255)' opacity='.7'/><rect x='110' y='9' width='7' height='6' rx='1' fill='rgb(200,225,245)'/><rect x='121' y='9' width='7' height='6' rx='1' fill='rgb(200,225,245)'/><rect x='132' y='9' width='7' height='6' rx='1' fill='rgb(200,225,245)'/><rect x='143' y='9' width='7' height='6' rx='1' fill='rgb(200,225,245)'/><circle cx='115' cy='26' r='3' fill='rgb(40,40,40)'/><circle cx='145' cy='26' r='3' fill='rgb(40,40,40)'/><path d='M158 24V8q0-2 2-2h44q8 0 12 8l2 10z' fill='rgb(200,16,46)'/><rect x='158' y='19' width='60' height='1.5' fill='rgb(255,255,255)' opacity='.7'/><rect x='164' y='9' width='8' height='6' rx='1' fill='rgb(200,225,245)'/><rect x='176' y='9' width='8' height='6' rx='1' fill='rgb(200,225,245)'/><path d='M204 9h6l4 6h-10z' fill='rgb(200,225,245)'/><path d='M176 6l8-5h10M184 1l-6 5' stroke='rgb(60,60,60)' stroke-width='1.2' fill='none'/><circle cx='166' cy='26' r='3' fill='rgb(40,40,40)'/><circle cx='206' cy='26' r='3' fill='rgb(40,40,40)'/><circle cx='216' cy='20' r='1.6' fill='rgb(255,240,180)'/></svg>")/*@END*/;
+    --ch-snow: /*@SNOW_LIGHT*/url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 240'><g fill='rgb(120,145,180)'><circle cx='117.7' cy='134.6' r='1.0' opacity='0.22'/><circle cx='106.4' cy='121.5' r='0.9' opacity='0.41'/><circle cx='141.5' cy='98.6' r='1.3' opacity='0.38'/><circle cx='157.8' cy='18.4' r='1.6' opacity='0.22'/><circle cx='161.3' cy='37.9' r='1.7' opacity='0.30'/><circle cx='42.3' cy='12.0' r='2.3' opacity='0.44'/><circle cx='29.0' cy='106.6' r='2.3' opacity='0.21'/><circle cx='100.6' cy='132.1' r='1.9' opacity='0.23'/><circle cx='40.9' cy='236.5' r='1.5' opacity='0.22'/><circle cx='131.3' cy='79.3' r='1.0' opacity='0.38'/><circle cx='84.4' cy='84.0' r='0.9' opacity='0.43'/><circle cx='57.3' cy='212.2' r='1.6' opacity='0.22'/><circle cx='144.7' cy='96.4' r='2.0' opacity='0.35'/><circle cx='32.6' cy='53.7' r='1.5' opacity='0.18'/><circle cx='11.4' cy='98.9' r='1.9' opacity='0.34'/><circle cx='229.2' cy='78.0' r='1.5' opacity='0.30'/><circle cx='105.3' cy='201.2' r='1.5' opacity='0.28'/><circle cx='63.4' cy='56.8' r='2.0' opacity='0.19'/><circle cx='64.9' cy='184.0' r='2.2' opacity='0.44'/><circle cx='222.4' cy='206.5' r='2.0' opacity='0.34'/></g></svg>")/*@END*/;
+    --ch-art-edelweiss: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><g fill='rgb(0,0,0)' opacity='.06'><ellipse cx='50' cy='27' rx='8' ry='20'/><ellipse cx='50' cy='27' rx='8' ry='20' transform='rotate(45 50 50)'/><ellipse cx='50' cy='27' rx='8' ry='20' transform='rotate(90 50 50)'/><ellipse cx='50' cy='27' rx='8' ry='20' transform='rotate(135 50 50)'/><ellipse cx='50' cy='27' rx='8' ry='20' transform='rotate(180 50 50)'/><ellipse cx='50' cy='27' rx='8' ry='20' transform='rotate(225 50 50)'/><ellipse cx='50' cy='27' rx='8' ry='20' transform='rotate(270 50 50)'/><ellipse cx='50' cy='27' rx='8' ry='20' transform='rotate(315 50 50)'/></g><g fill='rgb(214,160,20)' opacity='.3'><circle cx='50' cy='50' r='7'/><circle cx='43' cy='45' r='3.5'/><circle cx='57' cy='45' r='3.5'/><circle cx='50' cy='58' r='3.5'/></g></svg>");
+
+    --background-scrim: rgba(0, 0, 0, 0.35);
+    --shadow-low: 0 1px 3px rgba(0, 0, 0, 0.08);
+    --shadow-medium: 0 4px 16px rgba(0, 0, 0, 0.1);
+    --shadow-high: 0 12px 32px rgba(0, 0, 0, 0.14);
+}
+
+
+/* ==========================================================================
+   3. DISCORD TOKENS
+   ":not(#ch)" adds id-level specificity, so these beat Discord's own
+   definitions regardless of stylesheet order.
+   ========================================================================== */
+
+:root:not(#ch),
+:is(.theme-dark, .theme-darker, .theme-midnight, .theme-light):not(#ch) {
+    --font-primary: var(--ch-font);
+    --font-display: var(--ch-font);
+    --font-headline: var(--ch-font);
+    --font-code: var(--ch-font-mono);
+
+    --radius-xs: 2px;
+    --radius-sm: var(--ch-radius);
+    --radius-md: var(--ch-radius);
+    --radius-lg: 6px;
+    --radius-xl: 8px;
+
+    /* Accent: Swiss red instead of blurple */
+    --brand-500: var(--ch-red);
+    --brand-460: color-mix(in srgb, var(--ch-red) 90%, #fff);
+    --brand-360: color-mix(in srgb, var(--ch-red) 70%, #fff);
+    --brand-560: color-mix(in srgb, var(--ch-red) 88%, #000);
+    --brand-600: color-mix(in srgb, var(--ch-red) 78%, #000);
+    --background-brand: var(--ch-red);
+    --text-brand: var(--ch-link);
+    --control-brand-foreground: var(--ch-link);
+    --control-brand-foreground-new: var(--ch-link);
+    --text-link: var(--ch-link);
+    --border-focus: var(--ch-red);
+    --control-primary-background-default: var(--ch-red);
+    --control-primary-background-hover: color-mix(in srgb, var(--ch-red) 88%, #fff);
+    --control-primary-background-active: color-mix(in srgb, var(--ch-red) 85%, #000);
+    --badge-background-brand: var(--ch-red);
+    --checkbox-background-selected-default: var(--ch-red);
+    --checkbox-background-selected-hover: color-mix(in srgb, var(--ch-red) 88%, #fff);
+    --checkbox-border-selected-default: var(--ch-red);
+    --checkbox-border-selected-hover: color-mix(in srgb, var(--ch-red) 88%, #fff);
+    --radio-background-selected-default: var(--ch-red);
+    --radio-background-selected-hover: color-mix(in srgb, var(--ch-red) 88%, #fff);
+    --radio-border-selected-default: var(--ch-red);
+    --radio-border-selected-hover: color-mix(in srgb, var(--ch-red) 88%, #fff);
+    --radio-foreground-active: var(--ch-red);
+    --switch-background-selected-default: var(--ch-red);
+    --switch-thumb-icon-active: var(--ch-red);
+
+    /* Text */
+    --text-strong: var(--ch-text);
+    --text-default: var(--ch-text-body);
+    --text-normal: var(--ch-text-body);
+    --text-subtle: var(--ch-text-2);
+    --text-muted: var(--ch-text-2);
+    --header-primary: var(--ch-text);
+    --header-secondary: var(--ch-text-2);
+    --interactive-text-default: var(--ch-text-2);
+    --interactive-text-hover: var(--ch-text);
+    --interactive-text-active: var(--ch-text);
+    --interactive-normal: var(--ch-text-2);
+    --interactive-hover: var(--ch-text);
+    --interactive-active: var(--ch-text);
+    --channels-default: var(--ch-text-2);
+    --channel-icon: var(--ch-text-3);
+    --icon-default: var(--ch-text-2);
+    --icon-muted: var(--ch-text-3);
+    --icon-strong: var(--ch-text);
+
+    /* Surfaces */
+    --background-base-lowest: var(--ch-bg);
+    --background-base-lower: var(--ch-chat);
+    --background-base-low: var(--ch-side);
+    --background-primary: var(--ch-chat);
+    --background-secondary: var(--ch-side);
+    --background-secondary-alt: var(--ch-card);
+    --background-tertiary: var(--ch-bg);
+    --app-frame-background: var(--ch-bg);
+    --app-frame-border: var(--ch-line);
+    --chat-background: var(--ch-chat);
+    --chat-background-default: var(--ch-chat);
+    --home-background: var(--ch-chat);
+    --panel-bg: var(--ch-side);
+    --channel-background-default: var(--ch-chat);
+    --background-gradient-lowest: initial;
+    --background-gradient-lower: initial;
+    --background-gradient-low: initial;
+    --background-gradient-high: initial;
+    --background-gradient-higher: initial;
+    --background-gradient-highest: initial;
+    --background-gradient-chat: initial;
+
+    --background-surface-high: var(--ch-card);
+    --background-surface-higher: var(--ch-float);
+    --background-surface-highest: var(--ch-raised);
+    --background-floating: var(--ch-float);
+    --bg-surface-raised: var(--ch-card);
+    --modal-background: var(--ch-chat);
+    --modal-footer-background: var(--ch-side);
+    --card-background-default: var(--ch-card);
+    --card-secondary-bg: var(--ch-float);
+    --embed-background: var(--ch-card);
+    --embed-background-alternate: var(--ch-float);
+    --background-code: rgba(var(--ch-ink-rgb), 0.05);
+    --channeltextarea-background: var(--ch-card);
+
+    /* Interaction fills */
+    --background-mod-muted: rgba(var(--ch-ink-rgb), 0.03);
+    --background-mod-subtle: rgba(var(--ch-ink-rgb), 0.05);
+    --background-mod-normal: rgba(var(--ch-ink-rgb), 0.08);
+    --background-mod-strong: rgba(var(--ch-ink-rgb), 0.12);
+    --background-modifier-hover: rgba(var(--ch-ink-rgb), 0.05);
+    --background-modifier-active: rgba(var(--ch-ink-rgb), 0.08);
+    --background-modifier-selected: rgba(var(--ch-ink-rgb), 0.08);
+    --background-modifier-accent: var(--ch-line);
+    --interactive-background-hover: rgba(var(--ch-ink-rgb), 0.05);
+    --interactive-background-active: rgba(var(--ch-ink-rgb), 0.08);
+    --interactive-background-selected: rgba(var(--ch-ink-rgb), 0.1);
+
+    /* Messages: mentions glow like the Alps at sunset */
+    --message-background-hover: rgba(var(--ch-ink-rgb), 0.03);
+    --message-highlight-background-default: rgba(var(--ch-red-rgb), 0.08);
+    --message-highlight-background-hover: rgba(var(--ch-red-rgb), 0.12);
+    --message-mentioned-background-default: rgba(var(--ch-alpenglow), 0.08);
+    --message-mentioned-background-hover: rgba(var(--ch-alpenglow), 0.12);
+    --mention-background: rgba(var(--ch-red-rgb), 0.18);
+    --mention-foreground: var(--ch-link);
+
+    --reaction-background-default: rgba(var(--ch-ink-rgb), 0.05);
+    --reaction-background-hover: rgba(var(--ch-ink-rgb), 0.08);
+    --reaction-background-reacted-default: rgba(var(--ch-red-rgb), 0.14);
+    --reaction-background-reacted-hover: rgba(var(--ch-red-rgb), 0.2);
+    --reaction-border-default: transparent;
+    --reaction-border-reacted-default: rgba(var(--ch-red-rgb), 0.55);
+    --reaction-border-reacted-hover: var(--ch-red);
+
+    /* Inputs and borders */
+    --input-background-default: var(--ch-card);
+    --input-border-default: var(--ch-line);
+    --input-border-hover: rgba(var(--ch-ink-rgb), 0.18);
+    --input-border-active: var(--ch-red);
+    --input-placeholder-text-default: var(--ch-text-3);
+    --input-text-default: var(--ch-text);
+    --border-subtle: var(--ch-line);
+    --border-muted: var(--ch-line);
+    --border-normal: rgba(var(--ch-ink-rgb), 0.12);
+    --border-strong: rgba(var(--ch-ink-rgb), 0.2);
+    --chat-border: var(--ch-line);
+
+    --progressbar-indicator-background: var(--ch-red);
+    --progressbar-track-background: rgba(var(--ch-ink-rgb), 0.08);
+    --slider-track-background: rgba(var(--ch-ink-rgb), 0.12);
+    --spoiler-hidden-background: #7d868f;
+    --spoiler-hidden-background-hover: #8c959e;
+    --spoiler-revealed-background: rgba(var(--ch-ink-rgb), 0.05);
+
+    /* Scrollbars: chocolate (section 7 draws the bar pieces) */
+    --scrollbar-thin-thumb: var(--ch-chocolate);
+    --scrollbar-thin-track: transparent;
+    --scrollbar-auto-thumb: var(--ch-chocolate);
+    --scrollbar-auto-track: transparent;
+    --scrollbar-auto-scrollbar-color-thumb: var(--ch-chocolate);
+    --scrollbar-auto-scrollbar-color-track: transparent;
+}
+
+
+/* ==========================================================================
+   4. APP SHELL
+   ========================================================================== */
+
+html,
+body,
+#app-mount {
+    background: var(--ch-bg);
+}
+
+#app-mount {
+    color: var(--ch-text);
+    font-family: var(--ch-font);
+    -webkit-font-smoothing: antialiased;
+}
+
+/* A red rule along the top of the window, like a Swiss poster margin */
+#app-mount::before {
+    content: "";
+    position: fixed;
+    inset: 0 0 auto;
+    z-index: 10000;
+    height: 2px;
+    background: var(--ch-red);
+    pointer-events: none;
+}
+
+/* Window title: bold, flush, tight */
+:is([class^="bar_"], [class*=" bar_"]):has(> :is([class^="trailing_"], [class*=" trailing_"])) > :is([class^="title_"], [class*=" title_"]) * {
+    font-family: var(--ch-font);
+    font-weight: 700;
+    letter-spacing: -0.01em;
+}
+
+/* Server list */
+[data-list-id="guildsnav"] [data-list-item-id^="guildsnav___"] {
+    transition: filter 0.15s var(--ch-ease);
+}
+
+[data-list-id="guildsnav"] [data-list-item-id^="guildsnav___"]:hover {
+    filter: brightness(1.1);
+}
+
+/* Selection / unread pill: a red bar */
+[data-list-id="guildsnav"] :is([class^="pill_"], [class*=" pill_"]) span {
+    background-color: var(--ch-red);
+    border-radius: 0 2px 2px 0;
+}
+
+:is([class^="guildSeparator_"], [class*=" guildSeparator_"]) {
+    background: var(--ch-line);
+}
+
+/* Unread badges: flag red with white numerals */
+:is([class^="numberBadge_"], [class*=" numberBadge_"]) {
+    background-color: var(--ch-flag-red) !important;
+    color: #fff;
+    font-family: var(--ch-font);
+    font-weight: 700;
+}
+
+
+/* ==========================================================================
+   5. CHANNEL LIST AND USER PANEL
+   ========================================================================== */
+
+:is([class^="sidebarList_"], [class*=" sidebarList_"]) > nav {
+    background: transparent;
+}
+
+:is([class^="sidebarList_"], [class*=" sidebarList_"]) header h2,
+:is([class^="sidebarList_"], [class*=" sidebarList_"]) header [class*="name_"] {
+    font-weight: 700;
+    letter-spacing: -0.015em;
+}
+
+[data-list-item-id^="channels___"] {
+    border-radius: var(--ch-radius);
+    transition: background-color 0.12s var(--ch-ease), color 0.12s var(--ch-ease);
+}
+
+/* Selected channel: a red bar on the left edge */
+:is([class^="modeSelected_"], [class*=" modeSelected_"]) [data-list-item-id^="channels___"],
+:is([class^="modeSelected_"], [class*=" modeSelected_"]) :is([class^="link_"], [class*=" link_"]) {
+    background: rgba(var(--ch-ink-rgb), 0.07);
+    box-shadow: inset 3px 0 0 var(--ch-red);
+}
+
+:is([class^="modeSelected_"], [class*=" modeSelected_"]) :is([class^="name_"], [class*=" name_"]) {
+    color: var(--ch-text);
+    font-weight: 600;
+}
+
+:is([class^="containerDefault_"], [class*=" containerDefault_"]) :is([class^="unread_"], [class*=" unread_"]):not(:is([class^="bar_"], [class*=" bar_"])) {
+    background-color: var(--ch-red);
+}
+
+/* User panel: the red Swiss passport with embossed crosses */
+:is([class^="panels_"], [class*=" panels_"]) {
+    background:
+        var(--ch-passport-crosses) 0 0 / 28px 28px,
+        linear-gradient(160deg, #cf1820, #94101a);
+    border: 1px solid rgba(0, 0, 0, 0.25);
+    border-radius: 8px;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15), 0 6px 18px rgba(0, 0, 0, 0.3);
+
+    --text-strong: #fff;
+    --text-default: #fff;
+    --text-normal: #fff;
+    --text-muted: rgba(255, 255, 255, 0.75);
+    --text-subtle: rgba(255, 255, 255, 0.75);
+    --header-primary: #fff;
+    --header-secondary: rgba(255, 255, 255, 0.75);
+    --interactive-normal: rgba(255, 255, 255, 0.85);
+    --interactive-hover: #fff;
+    --interactive-active: #fff;
+    --interactive-text-default: rgba(255, 255, 255, 0.85);
+    --interactive-text-hover: #fff;
+    --icon-default: rgba(255, 255, 255, 0.85);
+    --icon-strong: #fff;
+    --channels-default: rgba(255, 255, 255, 0.75);
+    --background-modifier-hover: rgba(255, 255, 255, 0.12);
+    --background-modifier-active: rgba(255, 255, 255, 0.18);
+    --interactive-background-hover: rgba(255, 255, 255, 0.12);
+    --interactive-background-active: rgba(255, 255, 255, 0.18);
+    --background-mod-subtle: rgba(255, 255, 255, 0.1);
+    --background-mod-normal: rgba(255, 255, 255, 0.14);
+    --background-mod-strong: rgba(255, 255, 255, 0.2);
+}
+
+/* Voice buttons sit on the passport as light chips */
+:is([class^="panels_"], [class*=" panels_"]) button[class*="buttonColor_"] {
+    background-color: rgba(255, 255, 255, 0.14);
+    color: #fff;
+}
+
+:is([class^="panels_"], [class*=" panels_"]) button[class*="buttonColor_"]:hover {
+    background-color: rgba(255, 255, 255, 0.24);
+}
+
+/* "Voice Connected" stays readable on red */
+:is([class^="panels_"], [class*=" panels_"]) [class*="rtcConnectionStatusConnected"] {
+    color: #c9ffd6;
+}
+
+
+/* ==========================================================================
+   6. CHAT, HEADER AND MESSAGES
+   ========================================================================== */
+
+/* Channel header: an SBB station sign – blue plate, thin white frame */
+:is([class^="chat_"], [class*=" chat_"]) > section,
+:is([class^="page_"], [class*=" page_"]) > section {
+    background: var(--ch-sbb-blue);
+    border-bottom: none;
+    box-shadow: inset 0 0 0 3px var(--ch-sbb-blue), inset 0 0 0 4px rgba(255, 255, 255, 0.55);
+
+    --header-primary: #fff;
+    --header-secondary: rgba(255, 255, 255, 0.75);
+    --text-strong: #fff;
+    --text-default: #fff;
+    --text-normal: #fff;
+    --text-muted: rgba(255, 255, 255, 0.72);
+    --text-subtle: rgba(255, 255, 255, 0.72);
+    --channel-icon: rgba(255, 255, 255, 0.75);
+    --interactive-normal: rgba(255, 255, 255, 0.85);
+    --interactive-hover: #fff;
+    --interactive-active: #fff;
+    --interactive-text-default: rgba(255, 255, 255, 0.85);
+    --interactive-text-hover: #fff;
+    --icon-default: rgba(255, 255, 255, 0.85);
+    --icon-muted: rgba(255, 255, 255, 0.6);
+    --icon-strong: #fff;
+    --input-placeholder-text-default: rgba(255, 255, 255, 0.65);
+    --input-text-default: #fff;
+    --background-modifier-hover: rgba(255, 255, 255, 0.12);
+    --interactive-background-hover: rgba(255, 255, 255, 0.12);
+}
+
+:is([class^="chat_"], [class*=" chat_"]) > section h1,
+:is([class^="chat_"], [class*=" chat_"]) > section h1 *,
+:is([class^="page_"], [class*=" page_"]) > section h1 {
+    font-weight: 700;
+    letter-spacing: -0.01em;
+}
+
+/* Header search field: a recessed white-on-blue field */
+:is([class^="chat_"], [class*=" chat_"], [class^="page_"], [class*=" page_"]) > section :is([class^="searchBar_"], [class*=" searchBar_"]) {
+    background: rgba(255, 255, 255, 0.14);
+    border-radius: var(--ch-radius);
+}
+
+[id^="message-username-"] {
+    font-weight: 700;
+    letter-spacing: -0.01em;
+}
+
+li[id^="chat-messages-"] time {
+    color: var(--ch-text-3);
+    font-variant-numeric: tabular-nums;
+}
+
+[id^="message-content-"] {
+    line-height: 1.45;
+}
+
+:is([class^="blockquoteDivider_"], [class*=" blockquoteDivider_"]) {
+    background-color: var(--ch-red);
+    border-radius: 0;
+}
+
+article:is([class^="embedFull_"], [class*=" embedFull_"]) {
+    border-radius: var(--ch-radius);
+}
+
+/* Member list: rows stay transparent so the edelweiss shows through */
+:is([class^="membersWrap_"], [class*=" membersWrap_"]) {
+    border-inline-start: 1px solid var(--ch-line);
+}
+
+:is([class^="members_"], [class*=" members_"]),
+:is([class^="members_"], [class*=" members_"]) :is([class^="member_"], [class*=" member_"]) {
+    background: transparent;
+}
+
+:is([class^="membersGroup_"], [class*=" membersGroup_"]) {
+    font-weight: 700;
+    letter-spacing: 0.08em;
+}
+
+
+/* ==========================================================================
+   7. COMPOSER, TOOLTIPS, MENUS, CONTROLS
+   ========================================================================== */
+
+/* Message box: square card, red rule on focus */
+:is([class^="form_"], [class*=" form_"]):has(:is([class^="channelTextArea_"], [class*=" channelTextArea_"])) :is([class^="channelTextArea_"], [class*=" channelTextArea_"]):not(:has(:is([class^="channelTextArea_"], [class*=" channelTextArea_"]))) {
+    background-color: var(--ch-card);
+    border: 1px solid var(--ch-line);
+    border-radius: var(--ch-radius);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18);
+    transition: box-shadow 0.15s var(--ch-ease), border-color 0.15s var(--ch-ease);
+}
+
+:is([class^="form_"], [class*=" form_"]):has(:is([class^="channelTextArea_"], [class*=" channelTextArea_"])) :is([class^="channelTextArea_"], [class*=" channelTextArea_"]):not(:has(:is([class^="channelTextArea_"], [class*=" channelTextArea_"]))):focus-within {
+    border-color: rgba(var(--ch-red-rgb), 0.5);
+    box-shadow: inset 3px 0 0 var(--ch-red), 0 4px 14px rgba(0, 0, 0, 0.18);
+}
+
+/* The area around the composer stays see-through, so the panorama runs down to the window edge */
+:is([class^="form_"], [class*=" form_"]):has(:is([class^="channelTextArea_"], [class*=" channelTextArea_"])),
+:is([class^="form_"], [class*=" form_"]):has(:is([class^="channelTextArea_"], [class*=" channelTextArea_"]))::before {
+    background: transparent;
+}
+
+/* Tooltips: Swiss hiking signposts – yellow plate, black type, and the
+   white-red-white tip of a mountain trail sign */
+:is([class^="tooltipPrimary_"], [class*=" tooltipPrimary_"]) {
+    background:
+        linear-gradient(180deg, #fff 0 33%, #e30613 33% 67%, #fff 67%) right / 22px 100% no-repeat,
+        var(--ch-hiking-yellow) !important;
+    color: #111 !important;
+    border-radius: 0;
+    padding-inline-end: 34px;
+    clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 50%, calc(100% - 12px) 100%, 0 100%);
+    font-weight: 700;
+
+    --text-strong: #111;
+    --text-default: #111;
+    --text-normal: #111;
+    --text-muted: #333;
+    --header-primary: #111;
+    --interactive-normal: #111;
+}
+
+:is([class^="tooltipPrimary_"], [class*=" tooltipPrimary_"]) * {
+    color: inherit;
+}
+
+:is([class^="tooltipPrimary_"], [class*=" tooltipPrimary_"]) :is([class^="tooltipPointer_"], [class*=" tooltipPointer_"], [class^="tooltipPointerBg_"], [class*=" tooltipPointerBg_"]) {
+    display: none;
+}
+
+/* Context menus: a Swiss army knife – red handle on top with the cross
+   shield, steel-shiny selection */
+:is([class^="menu_"], [class*=" menu_"])[role="menu"] {
+    padding-top: 22px;
+    background:
+        url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 22'><path d='M2 2h16v9c0 5-4 8-8 10-4-2-8-5-8-10z' fill='rgb(235,235,235)'/><path d='M4 4h12v7c0 4-3 6-6 8-3-2-6-4-6-8z' fill='rgb(200,16,46)'/><path d='M8.6 6.5h2.8v2.8h2.8v2.8h-2.8v2.8H8.6v-2.8H5.8V9.3h2.8z' fill='rgb(255,255,255)'/></svg>") center 4px / 13px 14px no-repeat,
+        linear-gradient(180deg, rgba(255, 255, 255, 0.22), transparent 45%) top / 100% 22px no-repeat,
+        linear-gradient(180deg, #d81e28, #a3121b) top / 100% 22px no-repeat,
+        var(--ch-float);
+    border: 1px solid var(--ch-line);
+    border-radius: 8px;
+}
+
+[role="menu"] :is([class^="focused_"], [class*=" focused_"]):is([role="menuitem"], [role="menuitemcheckbox"], [role="menuitemradio"]) {
+    background: linear-gradient(180deg, #f2f4f6, #c3c9cf 55%, #dde1e5);
+    color: #111;
+}
+
+[role="menu"] :is([class^="focused_"], [class*=" focused_"]):is([role="menuitem"], [role="menuitemcheckbox"], [role="menuitemradio"]) * {
+    color: inherit;
+}
+
+[role="menu"] :is([class^="focused_"], [class*=" focused_"]):is([class*="colorDanger_"]) {
+    color: #c8102e;
+}
+
+/* Popouts */
+:is([class^="popout_"], [class*=" popout_"])[role="dialog"],
+:is([class^="autocomplete_"], [class*=" autocomplete_"]) {
+    border: 1px solid var(--ch-line);
+    border-radius: 6px;
+}
+
+/* Sliders */
+:is([class^="slider_"], [class*=" slider_"]) :is([class^="barFill_"], [class*=" barFill_"]) {
+    background-color: var(--ch-red);
+}
+
+/* Scrollbars: chocolate bars, scored into pieces */
+:is([class^="thin_"], [class*=" thin_"], [class^="auto_"], [class*=" auto_"])::-webkit-scrollbar-thumb {
+    background-color: var(--ch-chocolate);
+    background-image:
+        linear-gradient(90deg, rgba(255, 255, 255, 0.12), transparent 40%, rgba(0, 0, 0, 0.2)),
+        repeating-linear-gradient(180deg, transparent 0 13px, rgba(0, 0, 0, 0.35) 13px 15px, rgba(255, 255, 255, 0.08) 15px 16px);
+    border-radius: 2px;
+}
+
+:is([class^="thin_"], [class*=" thin_"], [class^="auto_"], [class*=" auto_"])::-webkit-scrollbar-thumb:hover {
+    background-color: #6e4630;
+}
+
+:is([class^="auto_"], [class*=" auto_"])::-webkit-scrollbar-track {
+    background: transparent;
+    border-color: transparent;
+}
+
+
+/* ==========================================================================
+   8. ALPINE PANORAMA, TRAIN AND SNOW
+   Layers, back to front: chat color (chat_) → falling snow (chat_::before)
+   → panorama (chatContent_::before) → train (chatContent_::after) →
+   messages. The pseudo-elements use z-index -1 inside isolated stacking
+   contexts, so they always stay behind the content. Everything that moves
+   is a transform, so it runs on the GPU.
+   ========================================================================== */
+
+:is([class^="chat_"], [class*=" chat_"]) {
+    position: relative;
+    isolation: isolate;
+    overflow: clip;
+    background: var(--ch-chat);
+}
+
+:is([class^="chat_"], [class*=" chat_"])::before {
+    content: "";
+    position: absolute;
+    inset: -240px 0 0;
+    z-index: -1;
+    background: var(--ch-snow) 0 0 / 240px 240px repeat;
+    pointer-events: none;
+    animation: ch-snowfall 22s linear infinite;
+}
+
+@keyframes ch-snowfall {
+    from { translate: 0 0; }
+    to { translate: 0 240px; }
+}
+
+:is([class^="chatContent_"], [class*=" chatContent_"]) {
+    position: relative;
+    isolation: isolate;
+    overflow: clip;
+    background: transparent;
+}
+
+:is([class^="chatContent_"], [class*=" chatContent_"])::before {
+    content: "";
+    position: absolute;
+    inset: auto 0 0;
+    z-index: -1;
+    height: 220px;
+    background: var(--ch-scene) left bottom / auto 220px repeat-x;
+    pointer-events: none;
+}
+
+/* The train: a full-width strip with the train at its right edge. Sliding the
+   strip from -100% (train just off the left) to +220px (just off the right)
+   moves the train across any chat width. Crossing takes ~12 s of every 45 s. */
+:is([class^="chatContent_"], [class*=" chatContent_"])::after {
+    content: "";
+    position: absolute;
+    inset: auto 0 44px;
+    z-index: -1;
+    height: 30px;
+    background: var(--ch-train) right bottom / 220px 30px no-repeat;
+    pointer-events: none;
+    translate: -100% 0;
+    animation: ch-train 45s linear infinite;
+}
+
+@keyframes ch-train {
+    0% { translate: -100% 0; }
+    27% { translate: 220px 0; }
+    100% { translate: 220px 0; }
+}
+
+
+/* ==========================================================================
+   9. EASTER EGGS
+   ========================================================================== */
+
+/* 9a. SBB station clock before the window title. The second hand sweeps in
+   58.5 seconds and waits at twelve for the minute to tick on. */
+:is([class^="bar_"], [class*=" bar_"]):has(> :is([class^="trailing_"], [class*=" trailing_"])) > :is([class^="title_"], [class*=" title_"]) {
+    position: relative;
+    padding-inline-start: 22px;
+}
+
+:is([class^="bar_"], [class*=" bar_"]):has(> :is([class^="trailing_"], [class*=" trailing_"])) > :is([class^="title_"], [class*=" title_"])::before,
+:is([class^="bar_"], [class*=" bar_"]):has(> :is([class^="trailing_"], [class*=" trailing_"])) > :is([class^="title_"], [class*=" title_"])::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 16px;
+    height: 16px;
+    margin-top: -8px;
+    pointer-events: none;
+}
+
+:is([class^="bar_"], [class*=" bar_"]):has(> :is([class^="trailing_"], [class*=" trailing_"])) > :is([class^="title_"], [class*=" title_"])::before {
+    background: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='48' fill='rgb(255,255,255)' stroke='rgb(40,40,40)' stroke-width='4'/><g fill='rgb(20,20,20)'><rect x='46.5' y='7' width='7' height='17'/><rect x='46.5' y='7' width='7' height='17' transform='rotate(30 50 50)'/><rect x='46.5' y='7' width='7' height='17' transform='rotate(60 50 50)'/><rect x='46.5' y='7' width='7' height='17' transform='rotate(90 50 50)'/><rect x='46.5' y='7' width='7' height='17' transform='rotate(120 50 50)'/><rect x='46.5' y='7' width='7' height='17' transform='rotate(150 50 50)'/><rect x='46.5' y='7' width='7' height='17' transform='rotate(180 50 50)'/><rect x='46.5' y='7' width='7' height='17' transform='rotate(210 50 50)'/><rect x='46.5' y='7' width='7' height='17' transform='rotate(240 50 50)'/><rect x='46.5' y='7' width='7' height='17' transform='rotate(270 50 50)'/><rect x='46.5' y='7' width='7' height='17' transform='rotate(300 50 50)'/><rect x='46.5' y='7' width='7' height='17' transform='rotate(330 50 50)'/><rect x='45.5' y='24' width='9' height='34' transform='rotate(-60 50 50)'/><rect x='46.5' y='10' width='7' height='48' transform='rotate(60 50 50)'/></g></svg>") center / contain no-repeat;
+}
+
+:is([class^="bar_"], [class*=" bar_"]):has(> :is([class^="trailing_"], [class*=" trailing_"])) > :is([class^="title_"], [class*=" title_"])::after {
+    background: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><g fill='rgb(235,0,0)'><rect x='48.5' y='22' width='3' height='44'/><circle cx='50' cy='22' r='8.5'/></g></svg>") center / contain no-repeat;
+    animation: ch-sbb-second 60s linear infinite;
+}
+
+@keyframes ch-sbb-second {
+    0% { rotate: 0deg; }
+    97.5% { rotate: 360deg; }
+    100% { rotate: 360deg; }
+}
+
+/* 9b. Hover the title bar: a Swiss welcome */
+:is([class^="bar_"], [class*=" bar_"]):has(> :is([class^="trailing_"], [class*=" trailing_"])) > :is([class^="title_"], [class*=" title_"]) > :last-child::after {
+    content: "  ·  Grüezi mitenand!";
+    color: var(--ch-red);
+    opacity: 0;
+    transition: opacity 0.3s var(--ch-ease);
+}
+
+:is([class^="bar_"], [class*=" bar_"]):has(> :is([class^="trailing_"], [class*=" trailing_"])):hover > :is([class^="title_"], [class*=" title_"]) > :last-child::after {
+    opacity: 1;
+}
+
+/* 9c. Home button: the Swiss flag */
+[data-list-id="guildsnav"] [data-list-item-id="guildsnav___home"] {
+    background: var(--ch-flag-red) url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><path d='M13 6h6v7h7v6h-7v7h-6v-7H6v-6h7z' fill='rgb(255,255,255)'/></svg>") center / 70% no-repeat !important;
+}
+
+[data-list-id="guildsnav"] [data-list-item-id="guildsnav___home"] > * {
+    opacity: 0;
+}
+
+/* 9d. Typing: a cheese wedge, and the dots are cheese-yellow */
+:is([class^="typing_"], [class*=" typing_"]) svg circle {
+    fill: var(--ch-cheese);
+}
+
+:is([class^="typing_"], [class*=" typing_"]) > :first-child::before {
+    content: "";
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    margin-inline-end: 4px;
+    vertical-align: -3px;
+    background: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M2 17L22 7v12H2z' fill='rgb(244,196,48)'/><path d='M2 17L22 7l-3-1L2 15z' fill='rgb(255,221,110)'/><g fill='rgb(206,150,20)'><circle cx='7' cy='17.5' r='1.4'/><circle cx='14' cy='15' r='2'/><circle cx='19' cy='11.5' r='1.1'/><circle cx='18' cy='17' r='1.2'/></g></svg>") center / contain no-repeat;
+    animation: ch-cheese 1.2s ease-in-out infinite;
+}
+
+@keyframes ch-cheese {
+    50% { translate: 0 -2px; }
+}
+
+/* 9e. Spoilers: locked in a Swiss bank vault – brushed steel until revealed */
+:is([class^="spoilerContent_"], [class*=" spoilerContent_"]):is([class*="hidden_"]) {
+    background:
+        repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.07) 0 1px, transparent 1px 3px),
+        linear-gradient(180deg, #a3abb3, #6f7880) !important;
+    border-radius: 2px;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), inset 0 -1px 0 rgba(0, 0, 0, 0.3);
+}
+
+/* 9f. Date dividers: a station departure board */
+:is([class^="divider_"], [class*=" divider_"])[role="separator"] > span {
+    padding: 2px 8px;
+    border-radius: 2px;
+    background:
+        linear-gradient(180deg, transparent calc(50% - 0.5px), rgba(255, 255, 255, 0.14) calc(50% - 0.5px) calc(50% + 0.5px), transparent calc(50% + 0.5px)),
+        #15171c;
+    color: #f4f4f4;
+    font-family: var(--ch-font-mono);
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+/* 9g. Mentions: alpenglow on the snow */
+li[id^="chat-messages-"] > [class*="mentioned_"] {
+    background-image: linear-gradient(90deg, rgba(var(--ch-alpenglow), 0.16), rgba(255, 90, 140, 0.05) 45%, transparent 80%);
+}
+
+li[id^="chat-messages-"] > [class*="mentioned_"]::before {
+    background: linear-gradient(180deg, #ff9a5c, #e3262d) !important;
+}
+
+/* 9h. Edelweiss at the bottom of the member list */
+:is([class^="membersWrap_"], [class*=" membersWrap_"]) {
+    background-color: var(--ch-side);
+    background-image: var(--ch-art-edelweiss);
+    background-position: center bottom 18px;
+    background-repeat: no-repeat;
+    background-size: 120px;
+}
+
+/* 9i. Selected text in flag colors */
+::selection {
+    background: var(--ch-flag-red);
+    color: #fff;
+}
+
+
+/* ==========================================================================
+   REDUCED MOTION: the train parks off-screen, snow and second hand stop
+   ========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+    :is([class^="chat_"], [class*=" chat_"])::before,
+    :is([class^="chatContent_"], [class*=" chatContent_"])::after,
+    :is([class^="bar_"], [class*=" bar_"]) > :is([class^="title_"], [class*=" title_"])::after,
+    :is([class^="typing_"], [class*=" typing_"]) > :first-child::before {
+        animation: none;
+    }
+}
