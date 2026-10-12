@@ -12,6 +12,7 @@ import { Menu } from "@webpack/common";
 import { openBackupModal } from "./BackupModal";
 import { openGiveawayModal } from "./GiveawayModal";
 import { openHealthModal } from "./HealthModal";
+import { inviterProps } from "./inviter";
 import { openNameCopyModal } from "./NameCopyModal";
 import { cancelAll, queueConfig } from "./queue";
 import { SettingsPanel } from "./ui";
@@ -80,10 +81,23 @@ const messageContextPatch: NavContextMenuPatchCallback = (children, { message }:
 
 export default definePlugin({
     name: "ServerTools",
-    description: "Server tools: backup & restore, Channel Health with heatmap, fair, verifiable giveaways and copying channel names",
+    description: "Server tools: backup & restore, Channel Health with heatmap, fair, verifiable giveaways, copying channel names and clickable inviters in the invite list",
     authors: [{ name: "5406", id: 1062070744558870548n }],
     tags: ["Servers", "Utility"],
     settings,
+
+    patches: [
+        {
+            // Invite list in server settings: make the inviter cell open the profile / a context menu
+            find: "inviteSourceTrailingContent:",
+            replacement: {
+                match: /(inviter:(\i),.{0,300}?\(0,\i\.jsxs\)\(\i\.\i,\{)(grow:4,)/,
+                replace: "$1...$self.inviterProps($2),$3"
+            }
+        }
+    ],
+
+    inviterProps,
 
     contextMenus: {
         "guild-context": guildContextPatch,
