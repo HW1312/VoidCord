@@ -315,7 +315,7 @@ function BackupWindow({ guildId, initialTab, close }: { guildId: string | null; 
     const [tab, setTab] = useState<Tab>(initialTab);
     return (
         <Sheet
-            header={{ title: "ServerBackup", subtitle: "Back up a server and restore it into a server of your own", icon: ICONS.archive, iconColor: ICON_COLOR }}
+            header={{ app: "ServerTools", title: "ServerBackup", subtitle: "Back up a server and restore it into a server of your own", icon: ICONS.archive, iconColor: ICON_COLOR }}
             onClose={close}
             top={
                 <div className={cl("tabs")}>

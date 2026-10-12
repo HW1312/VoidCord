@@ -17,6 +17,8 @@ import { ModalRoot, ModalSize } from "@utils/modal";
 import { createRoot, openModal, Tooltip, useEffect, useRef, useState } from "@webpack/common";
 import type { CSSProperties, ReactNode } from "react";
 
+import { APP_ICONS } from "./appIcons.generated";
+
 export const cl = classNameFactory("vc-ui-");
 export { classes };
 
@@ -477,7 +479,27 @@ export function Avatar({ src, size = 32, fallback = ICONS.user, square }: { src?
 
 // ---------------------------------------------------------------- Windows
 
+const normalize = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, "");
+const ARTWORK = new Map(Object.entries(APP_ICONS).map(([name, src]) => [normalize(name), src]));
+
+/** App icon artwork of a plugin by name ("Friend Dock" finds FriendDock), or undefined */
+export const appArtwork = (name: unknown) => (typeof name === "string" ? ARTWORK.get(normalize(name)) : undefined);
+
+/** A plugin's app icon artwork with Apple corners, same size rules as AppIcon. `pulse` shows a ring while the plugin is busy */
+export function AppArtwork({ src, size = 42, pulse }: { src: string; size?: number; pulse?: boolean; }) {
+    const img = <img src={src} className={cl("app-art")} style={{ width: size, height: size, borderRadius: size * 0.225 }} alt="" draggable={false} />;
+    return pulse ? <span className={cl("app-art-pulse")} style={{ borderRadius: size * 0.225 }}>{img}</span> : img;
+}
+
+/** Header picture of a plugin: its artwork (with a busy ring if `pulse`), else the plugin's own fallback logo */
+export function PluginArtwork({ app, pulse, size, fallback }: { app: string; pulse?: boolean; size?: number; fallback?: ReactNode; }) {
+    const src = appArtwork(app);
+    return src ? <AppArtwork src={src} size={size} pulse={pulse} /> : <>{fallback}</>;
+}
+
 export interface WindowHeader {
+    /** Plugin whose app icon artwork to show; by default the title is tried as plugin name */
+    app?: string;
     title: ReactNode;
     subtitle?: ReactNode;
     /** Green subtitle, e.g. while something runs */
@@ -524,7 +546,10 @@ export function Sheet({ header, onClose, top, children, footer, notice, actions,
         >
             {header && (
                 <header className={cl("header")}>
-                    {header.iconNode ?? (header.icon && <AppIcon path={header.icon} color={header.iconColor} />)}
+                    {header.iconNode ?? (() => {
+                        const art = appArtwork(header.app ?? header.title);
+                        return art ? <AppArtwork src={art} /> : header.icon && <AppIcon path={header.icon} color={header.iconColor} />;
+                    })()}
                     <div className={cl("header-text")}>
                         <h2 className={cl("title")}>{header.title}</h2>
                         {header.subtitle && <span className={classes(cl("subtitle"), header.live && cl("subtitle-live"))}>{header.subtitle}</span>}

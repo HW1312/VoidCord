@@ -595,7 +595,7 @@ function ReminderDialog({ close, message }: { close(): void; message?: any; }) {
         <Sheet
             onClose={close}
             header={{
-                title: "Remind me…",
+                app: "Radar", title: "Remind me…",
                 subtitle: Number.isFinite(due) && due > Date.now() ? `${formatWhen(due)} (${formatRelative(due)})` : "Choose a time in the future",
                 icon: RI.clock,
                 iconColor: "green"
@@ -661,7 +661,7 @@ function BookmarkDialog({ close, message, existing }: { close(): void; message?:
     return (
         <Sheet
             onClose={close}
-            header={{ title: existing ? "Edit bookmark" : "Save to Radar bookmarks", icon: RI.bookmark, iconColor: "green" }}
+            header={{ app: "Radar", title: existing ? "Edit bookmark" : "Save to Radar bookmarks", icon: RI.bookmark, iconColor: "green" }}
             actions={[
                 ...(existing ? [{ label: "Remove", onClick: () => { deleteBookmark(existing.id); close(); }, variant: "destructive" as const }] : []),
                 { label: "Cancel", onClick: close, variant: "gray" },
@@ -735,7 +735,7 @@ function MediaViewer({ close, bookmarkId, start }: { close(): void; bookmarkId: 
 
     if (!b || !m) {
         return (
-            <Sheet onClose={close} header={{ title: "Bookmark removed", icon: RI.image, iconColor: "green" }}>
+            <Sheet onClose={close} header={{ app: "Radar", title: "Bookmark removed", icon: RI.image, iconColor: "green" }}>
                 <Empty icon={RI.image} title="Not available anymore" />
             </Sheet>
         );
@@ -745,7 +745,7 @@ function MediaViewer({ close, bookmarkId, start }: { close(): void; bookmarkId: 
         <Sheet
             onClose={close}
             header={{
-                title: m.name,
+                app: "Radar", title: m.name,
                 subtitle: `${b.message.authorName}${media.length > 1 ? ` · ${index + 1} of ${media.length}` : ""} · ${m.local ? "saved on this PC" : "from Discord, may disappear"}`,
                 icon: m.kind === "video" ? ICONS.play : m.kind === "image" ? RI.image : RI.file,
                 iconColor: "green"

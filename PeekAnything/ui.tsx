@@ -499,7 +499,7 @@ export const SettingsPanel = ErrorBoundary.wrap(() => {
         <Sheet
             embedded
             header={{
-                title: "PeekAnything",
+                app: "PeekAnything", title: "PeekAnything",
                 subtitle: "Click into a preview to pin it, Esc or a click outside closes it. Peeking never marks anything as read.",
                 icon: EYE_PATH,
                 iconColor: ICON_COLOR

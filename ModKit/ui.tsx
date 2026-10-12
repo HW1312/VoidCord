@@ -195,7 +195,7 @@ function NotesModal({ onClose, guildId, userId, target }: { onClose(): void; gui
         <Sheet
             onClose={onClose}
             header={{
-                title: `ModNotes - ${userName(guildId, userId)}`,
+                app: "ModKit", title: `ModNotes - ${userName(guildId, userId)}`,
                 subtitle: `${guild?.name ?? "Server"} · ID ${userId}`,
                 icon: GAVEL_PATH,
                 iconColor: APP_COLOR
@@ -436,7 +436,7 @@ function MacroModal({ onClose, macro, target }: { onClose(): void; macro: Macro;
         <Sheet
             onClose={onClose}
             header={{
-                title: `${macro.emoji} Run ${macro.name}?`,
+                app: "ModKit", title: `${macro.emoji} Run ${macro.name}?`,
                 subtitle: `Target: ${userName(target.guildId, target.userId)} (${target.userId})`,
                 icon: GAVEL_PATH,
                 iconColor: APP_COLOR
@@ -500,7 +500,7 @@ function QuickPick({ onClose, target }: { onClose(): void; target: Target; }) {
     return (
         <Sheet
             onClose={onClose}
-            header={{ title: "ModKit", subtitle: `Target: ${userName(target.guildId, target.userId)}`, icon: GAVEL_PATH, iconColor: APP_COLOR }}
+            header={{ app: "ModKit", title: "ModKit", subtitle: `Target: ${userName(target.guildId, target.userId)}`, icon: GAVEL_PATH, iconColor: APP_COLOR }}
             actions={[{ label: "Close", variant: "gray", onClick: onClose }]}
         >
             {macros.length > 0
@@ -784,7 +784,7 @@ export const SettingsPanel = ErrorBoundary.wrap(() => {
         <Sheet
             embedded
             header={{
-                title: "ModKit",
+                app: "ModKit", title: "ModKit",
                 subtitle: "ModNotes in your own mod channel, macros for routine actions, scam quick action.",
                 icon: GAVEL_PATH,
                 iconColor: APP_COLOR

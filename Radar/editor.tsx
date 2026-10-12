@@ -523,7 +523,7 @@ function RuleEditor({ close, initial }: { close(): void; initial?: Rule; }) {
             onClose={close}
             height={rule ? "min(760px, 88vh)" : undefined}
             header={{
-                title: initial ? "Edit rule" : "New rule",
+                app: "Radar", title: initial ? "Edit rule" : "New rule",
                 subtitle: rule ? "Everything runs locally on your side - Radar never sends messages." : "Choose a preset or a trigger.",
                 icon: RI.rules,
                 iconColor: "green"

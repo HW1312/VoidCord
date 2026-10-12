@@ -92,7 +92,7 @@ function TextWindow({ src, close }: { src: string; close(): void; }) {
 
     return (
         <Sheet
-            header={{ title: "Text from image", subtitle, icon: TEXT_ICON, iconColor: ICON_COLOR }}
+            header={{ app: "ImageText", title: "Text from image", subtitle, icon: TEXT_ICON, iconColor: ICON_COLOR }}
             onClose={close}
             actions={[
                 { label: "Close", onClick: close },

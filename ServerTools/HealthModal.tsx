@@ -250,7 +250,7 @@ function HealthPanel({ initialGuildId }: { initialGuildId: string | null; }) {
 
 export function openHealthModal(guildId: string | null) {
     openWindow(close => (
-        <Sheet header={{ title: "Channel Health", subtitle: "Which channels are alive - and which are not?", icon: ICONS.pulse, iconColor: ICON_COLOR }} onClose={close}>
+        <Sheet header={{ app: "ServerTools", title: "Channel Health", subtitle: "Which channels are alive - and which are not?", icon: ICONS.pulse, iconColor: ICON_COLOR }} onClose={close}>
             <HealthPanel initialGuildId={guildId} />
         </Sheet>
     ), { size: "large" });

@@ -462,7 +462,7 @@ export async function editImage(file: File, name = file.name): Promise<File | nu
 
             return (
                 <Sheet
-                    header={{ title: "Edit image", subtitle: name, icon: ERASER_ICON, iconColor: OPSEC_COLOR }}
+                    header={{ app: "OpSec", title: "Edit image", subtitle: name, icon: ERASER_ICON, iconColor: OPSEC_COLOR }}
                     onClose={() => { finish(null); close(); }}
                     actions={[
                         { label: "Send original", onClick: () => { finish(null); close(); } },

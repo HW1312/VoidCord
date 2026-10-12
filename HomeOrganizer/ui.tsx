@@ -29,7 +29,7 @@ function Organizer({ initialTab, onClose }: { initialTab: Tab; onClose(): void; 
             height="min(820px, 86vh)"
             onClose={onClose}
             header={{
-                title: "HomeOrganizer",
+                app: "HomeOrganizer", title: "HomeOrganizer",
                 subtitle: "Clean up DMs and review friend requests - nothing happens without your click.",
                 icon: ICONS.home,
                 iconColor: APP_COLOR
@@ -69,7 +69,7 @@ function Panel() {
         <Sheet
             embedded
             header={{
-                title: "HomeOrganizer",
+                app: "HomeOrganizer", title: "HomeOrganizer",
                 subtitle: "Also available via the home icon in the title bar, by right-clicking a DM or user, or from the Vencord toolbox.",
                 icon: ICONS.home,
                 iconColor: APP_COLOR

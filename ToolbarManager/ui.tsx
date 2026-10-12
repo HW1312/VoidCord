@@ -576,7 +576,7 @@ function ManagerContent() {
 }
 
 export const SettingsPanel = ErrorBoundary.wrap(() => (
-    <Sheet embedded header={{ ...HEADER, subtitle: "Sort, hide or tuck away toolbar buttons" }}>
+    <Sheet embedded header={{ app: "ToolbarManager", ...HEADER, subtitle: "Sort, hide or tuck away toolbar buttons" }}>
         <ManagerContent />
     </Sheet>
 ), { noop: true });

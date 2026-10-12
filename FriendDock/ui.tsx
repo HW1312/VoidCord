@@ -19,7 +19,7 @@ import {
 } from "@webpack/common";
 import type { CSSProperties, ReactElement, ReactNode } from "react";
 
-import { Avatar, Button, Empty, Icon, IconButton, ICONS, Popover, RoundButton, Row, SearchField, Section, Sheet, ToggleRow } from "../_ui";
+import { Avatar, Button, PluginArtwork, Empty, Icon, IconButton, ICONS, Popover, RoundButton, Row, SearchField, Section, Sheet, ToggleRow } from "../_ui";
 import {
     addFavorite, getDisplayName, getJoinBlocker, getMyVoiceChannelId, getVoiceInfo, joinVoice, moveFavorite,
     removeFavorite, settings, stopFollowing, toggleFollow
@@ -418,7 +418,7 @@ function Options() {
 }
 
 export const SettingsPanel = ErrorBoundary.wrap(() => (
-    <Sheet embedded header={{ title: "Friend Dock", subtitle: "Your favorite friends with live status and voice", iconNode: <DockLogo /> }}>
+    <Sheet embedded header={{ title: "Friend Dock", subtitle: "Your favorite friends with live status and voice", iconNode: <PluginArtwork app="FriendDock" fallback={<DockLogo />} /> }}>
         <FavoriteManager />
         <Options />
     </Sheet>
@@ -435,7 +435,7 @@ function PopoutPanel({ onClose }: { onClose(): void; }) {
                 header={{
                     title: "Friend Dock",
                     subtitle: summary,
-                    iconNode: <DockLogo following={!!following} />,
+                    iconNode: <PluginArtwork app="FriendDock" pulse={!!following} fallback={<DockLogo following={!!following} />} />,
                     actions: <RoundButton icon={ICONS.gear} label="Settings" onClick={() => { onClose(); openPluginModal(plugins.FriendDock); }} />
                 }}
             >

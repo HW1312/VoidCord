@@ -280,7 +280,7 @@ function ForwardPicker({ count, onPick, onClose }: { count: number; onPick(chann
         <Sheet
             onClose={onClose}
             header={{
-                title: `Forward ${count} message${count === 1 ? "" : "s"}`,
+                app: "MessageSelect", title: `Forward ${count} message${count === 1 ? "" : "s"}`,
                 subtitle: "Native forwards are sent one message at a time.",
                 icon: FORWARD_PATH,
                 iconColor: "indigo"
@@ -423,7 +423,7 @@ function ScreenshotModal({ close }: { close(): void; }) {
         <Sheet
             onClose={close}
             header={{
-                title: "Message Screenshot",
+                app: "MessageSelect", title: "Message Screenshot",
                 subtitle: `${messages.length} message${messages.length === 1 ? "" : "s"}`,
                 icon: CAMERA_PATH,
                 iconColor: "indigo"

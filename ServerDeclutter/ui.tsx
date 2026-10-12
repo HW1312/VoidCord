@@ -64,7 +64,7 @@ function Panel() {
         <Sheet
             embedded
             header={{
-                title: "ServerDeclutter",
+                app: "ServerDeclutter", title: "ServerDeclutter",
                 subtitle: "Overview of all servers and decluttering with a click – also via right-click on a server icon → \"Declutter servers …\".",
                 icon: ICONS.broom,
                 iconColor: ICON_COLOR,

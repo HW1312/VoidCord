@@ -13,7 +13,7 @@ import { OptionType, Plugin } from "@utils/types";
 import { findComponentByCodeLazy } from "@webpack";
 import { useMemo, useState } from "@webpack/common";
 
-import { Badge, Button, Empty, Icon, IconButton, ICONS, Note, openWindow, Row, SearchField, Section, Segmented, Sheet, Toggle, ToggleRow } from "../_ui";
+import { AppArtwork, appArtwork, Badge, Button, Empty, Icon, IconButton, ICONS, Note, openWindow, Row, SearchField, Section, Segmented, Sheet, Toggle, ToggleRow } from "../_ui";
 import logo from "file://logo.png?base64";
 import { getOwnPlugins, isEnabled, isNew, markTried, needsRestart, setEnabled, settings } from "./index";
 import { hubThemes, ThemesTab } from "./themes";
@@ -26,11 +26,18 @@ const GRID_PATH = "M4 4h6v6H4V4Zm10 0h6v6h-6V4ZM4 14h6v6H4v-6Zm10 0h6v6h-6v-6Z";
 
 // ---------------------------------------------------------------- List
 
+/** The plugin's app icon artwork (website/icons-src), or nothing for plugins that don't have one yet */
+function PluginIcon({ plugin, size }: { plugin: Plugin; size: number; }) {
+    const src = appArtwork(plugin.name);
+    return src ? <AppArtwork src={src} size={size} /> : null;
+}
+
 function PluginRow({ plugin }: { plugin: Plugin; }) {
     const enabled = isEnabled(plugin);
 
     return (
         <Row
+            leading={appArtwork(plugin.name) && <PluginIcon plugin={plugin} size={36} />}
             title={
                 <span className="vc-pluginhub-name">
                     {plugin.name}
@@ -125,7 +132,7 @@ function InfoContent({ plugin }: { plugin: Plugin; }) {
 export function openInfoModal(plugin: Plugin) {
     openWindow(close => (
         <Sheet
-            header={{ title: plugin.name, subtitle: "Plugin", icon: GRID_PATH, iconColor: "indigo" }}
+            header={{ app: plugin.name, title: plugin.name, subtitle: "Plugin", icon: GRID_PATH, iconColor: "indigo" }}
             onClose={close}
             actions={[
                 { label: "Close", onClick: close },

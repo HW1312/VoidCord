@@ -1025,7 +1025,7 @@ export function OpSecApp({ variant, close }: { variant: "popout" | "modal"; clos
             embedded={variant === "modal"}
             height={variant === "popout" ? "min(640px, 76vh)" : undefined}
             onClose={close}
-            header={{ title: "OpSec", subtitle: "Beneath the OS", icon: MASK_PATH, iconColor: OPSEC_COLOR }}
+            header={{ app: "OpSec", title: "OpSec", subtitle: "Beneath the OS", icon: MASK_PATH, iconColor: OPSEC_COLOR }}
             top={
                 <Segmented
                     value={tab}

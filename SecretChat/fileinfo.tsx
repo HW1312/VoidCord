@@ -165,7 +165,7 @@ function FileInfoWindow({ info, close, fetchBytes, pickFile }: {
 
     return (
         <Sheet
-            header={{ title: "Encrypted file", subtitle: m.n, icon: LOCK_PATH, iconColor: "green" }}
+            header={{ app: "Unter das OS", title: "Encrypted file", subtitle: m.n, icon: LOCK_PATH, iconColor: "green" }}
             onClose={close}
         >
             <Section

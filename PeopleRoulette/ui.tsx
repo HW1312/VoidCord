@@ -397,7 +397,7 @@ function Roulette({ onClose }: { onClose(): void; }) {
 
 export function openRouletteModal() {
     openWindow(close => (
-        <Sheet onClose={close} header={{ title: "People Roulette", subtitle: "Meet someone new from your servers", icon: DICE_PATH, iconColor: "pink" }}>
+        <Sheet onClose={close} header={{ app: "People Roulette", title: "People Roulette", subtitle: "Meet someone new from your servers", icon: DICE_PATH, iconColor: "pink" }}>
             <ErrorBoundary noop>
                 <Roulette onClose={close} />
             </ErrorBoundary>
@@ -422,7 +422,7 @@ export const SettingsPanel = ErrorBoundary.wrap(() => {
         <Sheet
             embedded
             header={{
-                title: "People Roulette",
+                app: "People Roulette", title: "People Roulette",
                 subtitle: "Meet someone new from your servers",
                 icon: DICE_PATH,
                 iconColor: "pink",

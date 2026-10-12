@@ -16,7 +16,7 @@ import { findComponentByCodeLazy } from "@webpack";
 import { Popout, showToast, Tooltip, useEffect, useRef, useState } from "@webpack/common";
 import type { CSSProperties } from "react";
 
-import { Button, Empty, IconButton, ICONS, openWindow, Popover, RoundButton, Section, Sheet, ToggleRow, useListener } from "../_ui";
+import { Button, Empty, PluginArtwork, IconButton, ICONS, openWindow, Popover, RoundButton, Section, Sheet, ToggleRow, useListener } from "../_ui";
 import { grab, needsRestart as mediaGrabNeedsRestart } from "../MediaGrab/grab";
 import { settings } from "./index";
 import { PlatformIcon, PLATFORMS } from "./platforms";
@@ -347,7 +347,7 @@ function RadarSheet({ onClose, embedded }: { onClose?(): void; embedded?: boolea
                 title: "SongRadar",
                 subtitle: subtitle(),
                 live: busy(),
-                iconNode: <RadarLogo active={state.hearing || state.phase === "searching"} />,
+                iconNode: <PluginArtwork app="SongRadar" pulse={state.hearing || state.phase === "searching"} fallback={<RadarLogo active={state.hearing || state.phase === "searching"} />} />,
                 actions: <><VolumeControl /><RoundButton icon={ICONS.gear} label="Settings" onClick={openSettings} className={cl("bare")} /></>
             }}
         >
@@ -414,7 +414,7 @@ export function renderTitleBarButton() {
 export const SettingsPanel = ErrorBoundary.wrap(() => {
     const s = settings.use(["showTitleBarButton", "history"]);
     return (
-        <Sheet embedded header={{ title: "SongRadar", subtitle: "Recognize music like Shazam – no account needed", iconNode: <RadarLogo /> }}>
+        <Sheet embedded header={{ title: "SongRadar", subtitle: "Recognize music like Shazam – no account needed", iconNode: <PluginArtwork app="SongRadar" fallback={<RadarLogo />} /> }}>
             <Section title="Options" footer="Only a fingerprint of the sound is sent to Shazam, never the audio itself.">
                 <ToggleRow icon={WAVE_PATH} color="blue" title="Show icon in the title bar" checked={s.showTitleBarButton} onChange={v => settings.store.showTitleBarButton = v} />
             </Section>

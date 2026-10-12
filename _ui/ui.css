@@ -95,6 +95,42 @@
     color: #fff;
 }
 
+/* generated plugin app icon artwork (same corners as AppIcon, light hairline instead of the glyph gloss) */
+.vc-ui-app-art {
+    flex: none;
+    display: block;
+    object-fit: cover;
+    box-shadow: 0 2px 8px rgb(0 0 0 / 25%), inset 0 0 0 0.5px rgb(255 255 255 / 15%);
+    user-select: none;
+    transition: filter 0.3s;
+}
+
+/* busy ring around the artwork (following, listening, room open …) */
+.vc-ui-app-art-pulse {
+    position: relative;
+    flex: none;
+    display: flex;
+}
+
+.vc-ui-app-art-pulse::after {
+    content: "";
+    position: absolute;
+    inset: -3px;
+    border: 2px solid rgb(48 209 88 / 90%);
+    border-radius: inherit;
+    animation: vc-ui-art-pulse 1.6s ease-out infinite;
+    pointer-events: none;
+}
+
+@keyframes vc-ui-art-pulse {
+    0% { opacity: 0.9; transform: scale(1); }
+    100% { opacity: 0; transform: scale(1.25); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .vc-ui-app-art-pulse::after { animation: none; }
+}
+
 .vc-ui-app-icon {
     box-shadow: 0 2px 8px rgb(0 0 0 / 25%), inset 0 0.5px 0 rgb(255 255 255 / 40%);
     transition: filter 0.3s;
@@ -133,7 +169,8 @@
     padding: 0;
 }
 
-.vc-ui-sheet-paused .vc-ui-header .vc-ui-app-icon {
+.vc-ui-sheet-paused .vc-ui-header .vc-ui-app-icon,
+.vc-ui-sheet-paused .vc-ui-header .vc-ui-app-art {
     filter: grayscale(1) brightness(0.8);
 }
 
@@ -144,7 +181,8 @@
     gap: 10px;
 }
 
-.vc-ui-header .vc-ui-app-icon {
+.vc-ui-header .vc-ui-app-icon,
+.vc-ui-header .vc-ui-app-art {
     margin-right: 2px;
 }
 

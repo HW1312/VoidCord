@@ -407,7 +407,7 @@ function DeclutterPanel({ onCloseModal, initialGuildId }: { onCloseModal(): void
     return (
         <Sheet
             header={{
-                title: "Declutter servers",
+                app: "ServerDeclutter", title: "Declutter servers",
                 subtitle: "Overview of all servers – mute, archive or leave",
                 icon: ICONS.broom,
                 iconColor: ICON_COLOR,

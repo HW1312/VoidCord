@@ -36,7 +36,7 @@ function Panel() {
         <Sheet
             embedded
             header={{
-                title: "ServerTools",
+                app: "ServerTools", title: "ServerTools",
                 subtitle: "Tools for server owners & admins - also available by right-clicking a server icon, a channel or a message.",
                 icon: ICONS.tools,
                 iconColor: ICON_COLOR

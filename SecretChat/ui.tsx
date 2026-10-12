@@ -14,7 +14,7 @@ import { Channel, Message } from "@vencord/discord-types";
 import { showToast, Tooltip, UserStore, useState } from "@webpack/common";
 import type { ReactNode } from "react";
 
-import { Avatar as KitAvatar, Button, confirm, openAlert, Empty, Glyph, Icon, IconButton, ICONS, LinkRow, Note, openWindow, Pill, Pills, Row, Section, Segmented, Sheet, State, TextField } from "../_ui";
+import { Avatar as KitAvatar, Button, PluginArtwork, confirm, openAlert, Empty, Glyph, Icon, IconButton, ICONS, LinkRow, Note, openWindow, Pill, Pills, Row, Section, Segmented, Sheet, State, TextField } from "../_ui";
 import { RoomCard } from "./area";
 import { SecretLogo } from "./logo";
 import { keyFromPassword, randomBytes } from "./crypto";
@@ -383,7 +383,7 @@ function ChatWindow({ channel, close }: { channel: Channel; close(): void; }) {
                 title: "Unter das OS",
                 subtitle: active ? `Encrypted · ${active.name}` : "Not encrypted",
                 live: !!active,
-                iconNode: <SecretLogo locked={!!active} />,
+                iconNode: <PluginArtwork app="Unter das OS" pulse={!!active} fallback={<SecretLogo locked={!!active} />} />,
                 actions: active && <Button small variant="gray" onClick={() => setChannelKey(channel.id, null)}>Turn off</Button>
             }}
             onClose={close}

@@ -517,7 +517,7 @@ function Gallery({ channel, onClose }: { channel: Channel; onClose(): void; }) {
             height="min(860px, 88vh)"
             onClose={onClose}
             header={{
-                title: "Media Gallery",
+                app: "MediaGallery", title: "Media Gallery",
                 subtitle: channelTitle(channel),
                 icon: PATHS.gallery,
                 iconColor: "teal",
@@ -677,7 +677,7 @@ export const SettingsPanel = ErrorBoundary.wrap(() => {
         <Sheet
             embedded
             header={{
-                title: "Media Gallery",
+                app: "MediaGallery", title: "Media Gallery",
                 subtitle: <>
                     Open via the gallery button in the channel header or chat bar, or by right-clicking a channel, thread, DM or message → "Media Gallery".
                     History is loaded throttled (about 1 request per second) and cached for this session.

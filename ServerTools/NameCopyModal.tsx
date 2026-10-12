@@ -34,7 +34,7 @@ function NameCopyWindow({ name, title, close }: { name: string; title: string; c
 
     return (
         <Sheet
-            header={{ title, icon: ICONS.copy, iconColor: ICON_COLOR }}
+            header={{ app: "ServerTools", title, icon: ICONS.copy, iconColor: ICON_COLOR }}
             onClose={close}
             actions={[
                 { label: "Reset", onClick: () => setText(name), disabled: text === name },

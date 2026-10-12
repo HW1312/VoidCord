@@ -108,7 +108,7 @@ function GrabWindow({ close, channel, links }: { close(): void; channel?: Channe
 
     return (
         <Sheet
-            header={{ title: "MediaGrab", subtitle: "Video or MP3 from TikTok, YouTube, Instagram, X, Reddit and many more", icon: GRAB_PATH, iconColor: "pink" }}
+            header={{ app: "MediaGrab", title: "MediaGrab", subtitle: "Video or MP3 from TikTok, YouTube, Instagram, X, Reddit and many more", icon: GRAB_PATH, iconColor: "pink" }}
             onClose={close}
             actions={[
                 { label: "Cancel", onClick: close },
@@ -192,7 +192,7 @@ function LinkChoiceWindow({ close, url, onChoice, onDone }: { close(): void; url
 
     return (
         <Sheet
-            header={{ title: "Send as link or as file?", subtitle: shortUrl(url), icon: GRAB_PATH, iconColor: "pink" }}
+            header={{ app: "MediaGrab", title: "Send as link or as file?", subtitle: shortUrl(url), icon: GRAB_PATH, iconColor: "pink" }}
             onClose={close}
             footer={<span className="vc-mediagrab-hint">Esc keeps the link in the message box. You can turn this question off in the MediaGrab settings.</span>}
         >

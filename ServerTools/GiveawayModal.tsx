@@ -355,7 +355,7 @@ function GiveawayPanel({ message }: { message: any; }) {
 
 export function openGiveawayModal(message: any) {
     openWindow(close => (
-        <Sheet header={{ title: "Draw giveaway", subtitle: "Fair, verifiable and without a bot", icon: ICONS.gift, iconColor: ICON_COLOR }} onClose={close}>
+        <Sheet header={{ app: "ServerTools", title: "Draw giveaway", subtitle: "Fair, verifiable and without a bot", icon: ICONS.gift, iconColor: ICON_COLOR }} onClose={close}>
             <GiveawayPanel message={message} />
         </Sheet>
     ), { size: "medium" });
