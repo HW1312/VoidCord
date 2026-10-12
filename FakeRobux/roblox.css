@@ -1,0 +1,358 @@
+/*
+ * FakeRobux – Roblox look for every FakeRobux window (and the settings panel).
+ * Re-skins the shared _ui kit inside .vc-fakerobux-rbx: flat dark surfaces, 8px corners, bold Builder Sans-style type,
+ * Roblox blue for actions, green for buying – no glass, no blur.
+ */
+
+/* ---------------------------------------------------------------- Tokens */
+
+.vc-fakerobux-rbx {
+    --rbx-page: #111216;
+    --rbx-nav: #18191d;
+    --rbx-surface: #1d1e23;
+    --rbx-surface-2: #26272d;
+    --rbx-hover: #2e3036;
+    --rbx-border: #2c2d33;
+    --rbx-border-strong: #3c3e45;
+    --rbx-text: #f7f7f8;
+    --rbx-text-2: #d4d5d8;
+    --rbx-dim: #a0a2a8;
+    --rbx-blue: #335fff;
+    --rbx-green: #00b06f;
+
+    --vc-ui-glass: var(--rbx-page);
+    --vc-ui-glass-strong: var(--rbx-page);
+    --vc-ui-group: var(--rbx-surface);
+    --vc-ui-group-hover: var(--rbx-surface-2);
+    --vc-ui-group-active: var(--rbx-hover);
+    --vc-ui-sep: var(--rbx-border);
+    --vc-ui-edge: var(--rbx-border);
+    --vc-ui-title: var(--rbx-text);
+    --vc-ui-text: var(--rbx-text-2);
+    --vc-ui-dim: var(--rbx-dim);
+    --vc-ui-track: var(--rbx-hover);
+    --vc-ui-thumb: var(--rbx-surface-2);
+    --vc-ui-field: var(--rbx-surface);
+    --vc-ui-shadow: 0 16px 48px rgb(0 0 0 / 55%);
+    --vc-ui-blue: var(--rbx-blue);
+    --vc-ui-green: var(--rbx-green);
+    --vc-ui-red: #f24a4a;
+    --vc-ui-orange: #ffa23a;
+
+    --vc-ui-font: "Builder Sans", "Gotham SSm", "Gotham", "HCo Gotham SSm", "Segoe UI Variable Text", "Segoe UI", var(--font-primary), sans-serif;
+    --vc-ui-font-display: "Builder Sans", "Gotham SSm", "Gotham", "HCo Gotham SSm", "Segoe UI Variable Display", "Segoe UI", var(--font-display), sans-serif;
+}
+
+.theme-light .vc-fakerobux-rbx,
+.theme-light.vc-fakerobux-rbx {
+    --rbx-page: #f7f7f8;
+    --rbx-nav: #ffffff;
+    --rbx-surface: #ffffff;
+    --rbx-surface-2: #eeeff1;
+    --rbx-hover: #e3e4e7;
+    --rbx-border: #e1e2e5;
+    --rbx-border-strong: #c9cbd0;
+    --rbx-text: #121215;
+    --rbx-text-2: #393b3d;
+    --rbx-dim: #6b6d73;
+    --vc-ui-shadow: 0 16px 48px rgb(0 0 0 / 18%);
+}
+
+/* ---------------------------------------------------------------- Window */
+
+.vc-ui-window.vc-fakerobux-rbx {
+    border: 1px solid var(--rbx-border) !important;
+    border-radius: 12px !important;
+    background: var(--rbx-page) !important;
+    box-shadow: var(--vc-ui-shadow) !important;
+    backdrop-filter: none;
+}
+
+/* Main window: fixed height that always fits the screen; the sheet fills it, so the body's scroll reaches the very end */
+.vc-ui-window.vc-fakerobux-main {
+    display: flex;
+    flex-direction: column;
+    height: min(78vh, calc(100vh - 120px));
+}
+
+.vc-fakerobux-main .vc-ui-sheet {
+    flex: 1;
+    min-height: 0;
+    max-height: none;
+}
+
+.vc-fakerobux-rbx .vc-ui-sheet {
+    gap: 0;
+    padding-top: 0;
+    font-size: 14px;
+}
+
+/* Header = Roblox top bar */
+.vc-fakerobux-rbx .vc-ui-header {
+    margin: 0 -18px;
+    padding: 12px 14px 12px 18px;
+    border-bottom: 1px solid var(--rbx-border);
+    background: var(--rbx-nav);
+}
+
+.vc-fakerobux-rbx .vc-ui-sheet-embedded .vc-ui-header,
+.vc-fakerobux-rbx.vc-ui-sheet-embedded .vc-ui-header {
+    margin: 0 0 16px;
+    padding: 14px 16px;
+    border: 1px solid var(--rbx-border);
+    border-radius: 8px;
+}
+
+.vc-fakerobux-rbx .vc-ui-title {
+    font-weight: 800;
+    letter-spacing: 0;
+}
+
+.vc-fakerobux-rbx .vc-ui-header .vc-ui-round-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: none;
+}
+
+.vc-fakerobux-rbx .vc-ui-header .vc-ui-round-btn:hover {
+    background: var(--rbx-hover);
+}
+
+.vc-fakerobux-rbx .vc-ui-body {
+    padding-top: 16px;
+}
+
+.vc-fakerobux-rbx .vc-ui-sheet-embedded .vc-ui-body,
+.vc-fakerobux-rbx.vc-ui-sheet-embedded .vc-ui-body {
+    padding-top: 0;
+}
+
+.vc-fakerobux-rbx .vc-ui-body::-webkit-scrollbar {
+    width: 8px;
+}
+
+.vc-fakerobux-rbx .vc-ui-body::-webkit-scrollbar-thumb {
+    border-radius: 4px;
+    background: var(--rbx-hover);
+}
+
+.vc-fakerobux-rbx .vc-ui-footer {
+    border-top: 1px solid var(--rbx-border);
+    background: var(--rbx-nav);
+}
+
+/* ---------------------------------------------------------------- Buttons */
+
+.vc-fakerobux-rbx .vc-ui-btn {
+    height: 36px;
+    min-height: 36px;
+    padding: 0 18px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.vc-fakerobux-rbx .vc-ui-btn-small {
+    height: 30px;
+    min-height: 30px;
+    padding: 0 12px;
+    font-size: 13px;
+}
+
+.vc-fakerobux-rbx .vc-ui-btn-small.vc-ui-btn-icon-only {
+    width: 30px;
+    padding: 0;
+}
+
+.vc-fakerobux-rbx .vc-ui-btn:active:not(:disabled) {
+    transform: none;
+    filter: brightness(0.92);
+}
+
+.vc-fakerobux-rbx .vc-ui-btn-gray {
+    border: 1px solid var(--rbx-border-strong);
+    background: var(--rbx-surface-2);
+    color: var(--rbx-text);
+}
+
+.vc-fakerobux-rbx .vc-ui-btn-gray:hover:not(:disabled) {
+    background: var(--rbx-hover);
+}
+
+.vc-fakerobux-rbx .vc-ui-icon-btn {
+    border-radius: 6px;
+}
+
+.vc-fakerobux-rbx .vc-ui-icon-btn:active:not(:disabled) {
+    transform: none;
+}
+
+.vc-fakerobux-rbx .vc-ui-toggle-on {
+    background: var(--rbx-blue);
+}
+
+/* ---------------------------------------------------------------- Lists, sections */
+
+.vc-fakerobux-rbx .vc-ui-section + .vc-ui-section {
+    margin-top: 22px;
+}
+
+.vc-fakerobux-rbx .vc-ui-section-head {
+    margin: 0 0 8px;
+}
+
+.vc-fakerobux-rbx .vc-ui-section-title {
+    color: var(--rbx-text);
+    font-family: var(--vc-ui-font-display);
+    font-size: 17px;
+    font-weight: 800;
+    letter-spacing: 0;
+    text-transform: none;
+}
+
+.vc-fakerobux-rbx .vc-ui-section-footer {
+    margin: 6px 0 0;
+}
+
+.vc-fakerobux-rbx .vc-ui-group {
+    border: 1px solid var(--rbx-border);
+    border-radius: 8px;
+}
+
+.vc-fakerobux-rbx .vc-ui-group > * + :not(.vc-ui-row)::before,
+.vc-fakerobux-rbx .vc-ui-group > * + .vc-ui-row > .vc-ui-row-main::before {
+    height: 1px;
+}
+
+.vc-fakerobux-rbx .vc-ui-row-title {
+    font-weight: 600;
+}
+
+.vc-fakerobux-rbx .vc-ui-stat,
+.vc-fakerobux-rbx .vc-ui-note,
+.vc-fakerobux-rbx .vc-ui-empty-icon {
+    border-radius: 8px;
+}
+
+.vc-fakerobux-rbx .vc-ui-stat {
+    border: 1px solid var(--rbx-border);
+}
+
+.vc-fakerobux-rbx .vc-ui-stat-value {
+    font-weight: 800;
+    letter-spacing: 0;
+}
+
+.vc-fakerobux-rbx .vc-ui-empty b {
+    font-weight: 800;
+}
+
+/* ---------------------------------------------------------------- Fields, pills */
+
+.vc-fakerobux-rbx .vc-ui-field,
+.vc-fakerobux-rbx .vc-ui-search {
+    min-height: 38px;
+    border: 1px solid var(--rbx-border-strong);
+    border-radius: 8px;
+    background: var(--rbx-surface);
+}
+
+.vc-fakerobux-rbx .vc-ui-search input {
+    height: 36px;
+}
+
+.vc-fakerobux-rbx .vc-ui-field:focus,
+.vc-fakerobux-rbx .vc-ui-search:focus-within {
+    border-color: var(--rbx-blue);
+    box-shadow: none;
+}
+
+.vc-fakerobux-rbx .vc-ui-form-label {
+    margin-left: 0;
+    color: var(--rbx-text-2);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0;
+    text-transform: none;
+}
+
+.vc-fakerobux-rbx .vc-ui-pill {
+    height: 30px;
+    padding: 0 12px;
+    border: 1px solid var(--rbx-border-strong);
+    border-radius: 8px;
+    background: var(--rbx-surface);
+    color: var(--rbx-text);
+    font-weight: 600;
+}
+
+.vc-fakerobux-rbx .vc-ui-pill-click:hover {
+    background: var(--rbx-surface-2);
+}
+
+.vc-fakerobux-rbx .vc-ui-pill-click:active {
+    transform: none;
+}
+
+.vc-fakerobux-rbx .vc-ui-pill-on,
+.vc-fakerobux-rbx .vc-ui-pill-on:hover {
+    border-color: var(--rbx-blue);
+    background: var(--rbx-blue);
+    color: #fff;
+}
+
+/* ---------------------------------------------------------------- Tabs (like the tabs on a Roblox profile) */
+
+.vc-fakerobux-tabs {
+    display: flex;
+    flex: none;
+    border-bottom: 1px solid var(--rbx-border);
+}
+
+.vc-ui-header + .vc-fakerobux-tabs {
+    margin: 0 -18px;
+    padding: 0 10px;
+    background: var(--rbx-nav);
+}
+
+.vc-fakerobux-tab {
+    display: flex;
+    flex: 1;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    height: 44px;
+    padding: 0 10px;
+    border: none;
+    background: none;
+    box-shadow: inset 0 -3px 0 transparent;
+    color: var(--rbx-dim);
+    font: inherit;
+    font-family: var(--vc-ui-font-display);
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: color 0.15s, box-shadow 0.15s;
+}
+
+.vc-fakerobux-tab:hover {
+    color: var(--rbx-text);
+}
+
+.vc-fakerobux-tab-on {
+    box-shadow: inset 0 -3px 0 var(--rbx-text);
+    color: var(--rbx-text);
+}
+
+.vc-fakerobux-tab-count {
+    min-width: 18px;
+    padding: 0 6px;
+    box-sizing: border-box;
+    border-radius: 9px;
+    background: var(--rbx-surface-2);
+    color: var(--rbx-text-2);
+    font-size: 11px;
+    line-height: 18px;
+    font-variant-numeric: tabular-nums;
+}
