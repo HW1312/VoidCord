@@ -4,3 +4,6 @@ VencordCustom.zip
 node_modules/
 .playwright-mcp/
 performance/
+bench/results/
+website/
+bench/channels.local.json

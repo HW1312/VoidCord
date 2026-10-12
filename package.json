@@ -6,7 +6,8 @@
         "inject": "node build.mjs --inject",
         "package": "node build.mjs --package",
         "release": "node build.mjs --release",
-        "update": "node build.mjs --update"
+        "update": "node build.mjs --update",
+        "bench": "node bench/run.mjs"
     },
     "dependencies": {
         "@noble/post-quantum": "0.7.1"

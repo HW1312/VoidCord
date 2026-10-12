@@ -1,0 +1,32 @@
+{
+    "branch": "stable",
+    "port": 9229,
+    "runs": 5,
+    "warmup": 1,
+    "settleSec": 45,
+    "idleSec": 60,
+    "minimizedSec": 60,
+    "switches": 10,
+    "variants": [
+        {
+            "name": "stock",
+            "stock": true
+        },
+        {
+            "name": "vencord-eager",
+            "plugins": {
+                "BetterSettings": {
+                    "eagerLoad": true
+                }
+            }
+        },
+        {
+            "name": "vencord",
+            "plugins": {
+                "BetterSettings": {
+                    "eagerLoad": false
+                }
+            }
+        }
+    ]
+}
