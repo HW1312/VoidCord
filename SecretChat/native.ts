@@ -5,8 +5,10 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { IpcMainInvokeEvent } from "electron";
+import { BrowserWindow, dialog, IpcMainInvokeEvent } from "electron";
+import { writeFile } from "fs/promises";
 import { request } from "https";
+import { basename } from "path";
 
 const HOSTS = new Set(["cdn.discordapp.com", "media.discordapp.net", "files.catbox.moe"]);
 /** Encrypted files are at most the Nitro upload limit */
@@ -54,4 +56,15 @@ function get(url: string, redirects: number): Promise<Uint8Array> {
 
 export function download(_: IpcMainInvokeEvent, url: string) {
     return get(url, 3);
+}
+
+/** Save only to a path explicitly chosen by the user; false means the dialog was cancelled. */
+export async function save(event: IpcMainInvokeEvent, data: Uint8Array, name: string) {
+    if (!(data instanceof Uint8Array) || typeof name !== "string") throw new Error("Invalid file");
+    const parent = BrowserWindow.fromWebContents(event.sender);
+    if (!parent) throw new Error("Discord window is no longer available");
+    const result = await dialog.showSaveDialog(parent, { defaultPath: basename(name) || "file" });
+    if (result.canceled || !result.filePath) return false;
+    await writeFile(result.filePath, data);
+    return true;
 }

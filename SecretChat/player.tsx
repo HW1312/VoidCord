@@ -12,6 +12,8 @@ import { openModal } from "@utils/modal";
 import { Tooltip, useEffect, useRef, useState } from "@webpack/common";
 import type { CSSProperties, ReactNode } from "react";
 
+import { saveDecrypted } from "./save";
+
 const cl = classNameFactory("vc-secretchat-player-");
 
 // ---------------------------------------------------------------- Remembered volume
@@ -290,7 +292,7 @@ export function openVideoViewer(src: string, name: string, startAt = 0, autoPlay
             <VideoPlayer src={src} name={name} big autoPlay={autoPlay} startAt={startAt} />
             <div className="vc-secretchat-viewer-bar" onClick={e => e.stopPropagation()}>
                 <span className="vc-secretchat-viewer-name">{name}</span>
-                <a className="vc-secretchat-viewer-btn" href={src} download={name} title="Save the decrypted video">Save</a>
+                <button type="button" className="vc-secretchat-viewer-btn" title="Save the decrypted video" onClick={() => saveDecrypted(src, name)}>Save</button>
                 <button type="button" className="vc-secretchat-viewer-btn" onClick={props.onClose}>Close</button>
             </div>
         </div>

@@ -1468,6 +1468,8 @@ video.vc-secretchat-file-media {
 
 /* Big view of a decrypted image (Discord's media viewer can't load blob: URLs) */
 .vc-secretchat-viewer {
+    /* Discord modal layers disable hit testing; this custom viewer must opt back in. */
+    pointer-events: auto;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -1524,11 +1526,27 @@ video.vc-secretchat-file-media {
     font-weight: 600;
     text-decoration: none;
     cursor: pointer;
+    transition: background-color 0.15s, transform 0.12s;
 }
 
 .vc-secretchat-viewer-btn:hover {
     background: rgb(255 255 255 / 20%);
     text-decoration: none;
+}
+
+.vc-secretchat-viewer-btn:active {
+    transform: scale(0.94);
+}
+
+.vc-secretchat-viewer-btn:focus-visible {
+    outline: 2px solid var(--vc-ui-blue);
+    outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .vc-secretchat-viewer-btn {
+        transition: none;
+    }
 }
 
 /* ---------------------------------------------------------------- Video player (player.tsx) */
@@ -1812,6 +1830,59 @@ video.vc-secretchat-file-media {
     .vc-secretchat-player-bar {
         padding-inline: 4px;
     }
+}
+
+.vc-secretchat-download-stack {
+    position: fixed;
+    right: 16px;
+    bottom: 16px;
+    z-index: 10000;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 300px;
+    pointer-events: none;
+}
+
+.vc-secretchat-download-card {
+    padding: 11px 14px;
+    border: 0.5px solid var(--vc-ui-edge);
+    border-radius: 18px;
+    background: var(--vc-ui-glass-strong);
+    box-shadow: var(--vc-ui-shadow);
+    color: var(--vc-ui-text);
+    font: 13px var(--vc-ui-font);
+    backdrop-filter: blur(30px) saturate(1.8);
+}
+
+.vc-secretchat-download-name {
+    overflow: hidden;
+    color: var(--vc-ui-title);
+    font-weight: 500;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.vc-secretchat-download-status {
+    margin-top: 3px;
+    color: var(--vc-ui-dim);
+    font-size: 12px;
+    overflow-wrap: anywhere;
+}
+
+.vc-secretchat-download-card progress {
+    width: 100%;
+    height: 4px;
+    margin-top: 8px;
+    accent-color: var(--vc-ui-blue);
+}
+
+.vc-secretchat-download-card[data-state="done"] progress {
+    accent-color: var(--vc-ui-green);
+}
+
+.vc-secretchat-download-card[data-state="error"] .vc-secretchat-download-status {
+    color: var(--vc-ui-red);
 }
 
 /* Small players: only the essentials */

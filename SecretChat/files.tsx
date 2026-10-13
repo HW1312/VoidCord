@@ -25,6 +25,7 @@ import { uploadForLink } from "../GofileUpload";
 import { decryptFile, encryptFile, encryptMessage, randomBytes, toHex } from "./crypto";
 import { openFileInfo } from "./fileinfo";
 import { VideoPlayer } from "./player";
+import { createFileProgress, saveDecrypted } from "./save";
 import { settings } from "./settings";
 import { channelKey, getKeyBytes, isLoaded } from "./store";
 
@@ -82,8 +83,8 @@ function openImageViewer(url: string, name: string) {
             <img src={url} alt={name} onClick={e => e.stopPropagation()} />
             <div className={cl("viewer-bar")} onClick={e => e.stopPropagation()}>
                 <span className={cl("viewer-name")}>{name}</span>
-                <a className={cl("viewer-btn")} href={url} download={name} title="Save the decrypted image">Save</a>
-                <button className={cl("viewer-btn")} onClick={props.onClose}>Close</button>
+                <button type="button" className={cl("viewer-btn")} title="Save the decrypted image" onClick={() => saveDecrypted(url, name)}>Save</button>
+                <button type="button" className={cl("viewer-btn")} onClick={props.onClose}>Close</button>
             </div>
         </div>
     ));
@@ -253,13 +254,14 @@ async function fetchBytes(url: string): Promise<ArrayBuffer> {
 }
 
 /** Decrypts the file – downloaded, or the .bin the user picked (Gofile) */
-function load(messageId: string, info: FileInfo, picked?: File) {
+function load(messageId: string, info: FileInfo, picked?: File, onDecrypt?: () => void) {
     let p = picked ? undefined : loaded.get(messageId);
     if (!p) {
         p = (async () => {
             const key = getKeyBytes(info.keyId);
             if (!key) throw new Error("The key of this file was deleted");
             const bytes = picked ? await picked.arrayBuffer() : await fetchBytes(info.url);
+            onDecrypt?.();
             let plain: ArrayBuffer;
             try {
                 plain = await decryptFile(key, info.manifest.iv, bytes);
@@ -304,6 +306,7 @@ export function EncryptedFile({ message }: { message: Message; }) {
     const [url, setUrl] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [busy, setBusy] = useState(false);
+    const [phase, setPhase] = useState("Loading…");
     const { emergency } = settings.use(["emergency"]);
 
     // Gofile has only a download page: the user downloads the .bin there and picks it here
@@ -311,13 +314,23 @@ export function EncryptedFile({ message }: { message: Message; }) {
     // Pictures, videos and audio load right away (big ones on click), other files on click
     const auto = !!info && kind !== "file" && !gofile && info.manifest.s <= AUTO_LOAD_MAX;
 
-    const start = (picked?: File) => {
+    const start = (picked?: File, feedback = false) => {
         if (!info || busy) return Promise.resolve(null);
+        const card = feedback ? createFileProgress(info.manifest.n) : null;
+        const phase = picked ? "Reading encrypted file…" : "Downloading encrypted file…";
+        setPhase(phase);
+        card?.update(phase);
         setBusy(true);
         setError(null);
-        return load(message.id, info, picked)
-            .then(u => { setUrl(u); return u; })
-            .catch(e => { logger.error("Loading an encrypted file failed", e); setError(String(e?.message ?? e)); return null; })
+        return load(message.id, info, picked, () => { setPhase("Decrypting…"); card?.update("Decrypting…"); })
+            .then(u => { setUrl(u); card?.finish("done", "File decrypted"); return u; })
+            .catch(e => {
+                logger.error("Loading an encrypted file failed", e);
+                const text = String(e?.message ?? e);
+                setError(text);
+                card?.finish("error", text);
+                return null;
+            })
             .finally(() => setBusy(false));
     };
 
@@ -331,23 +344,18 @@ export function EncryptedFile({ message }: { message: Message; }) {
     if (!info || emergency) return null;
     const m = info.manifest;
 
-    const save = (u: string) => {
-        const a = document.createElement("a");
-        a.href = u;
-        a.download = m.n;
-        a.click();
-    };
+    const save = (u: string) => saveDecrypted(u, m.n);
 
     const download = async () => {
-        const u = url ?? await start();
-        if (u) save(u);
+        const u = url ?? await start(undefined, true);
+        if (u) await save(u);
     };
 
     const decryptDownloaded = async () => {
         const picked = await pickFile();
         if (!picked) return;
-        const u = await start(picked);
-        if (u && kind === "file") save(u);
+        const u = await start(picked, true);
+        if (u && kind === "file") await save(u);
     };
 
     const badge = (
@@ -378,7 +386,7 @@ export function EncryptedFile({ message }: { message: Message; }) {
             <div className={cl("file")}>
                 {!url ? (
                     <div className={cl("file-wait")} style={kind === "audio" ? undefined : size}>
-                        {busy ? "Decrypting …" : "Loading …"}
+                        {busy ? phase : "Loading …"}
                     </div>
                 ) : kind === "image" ? (
                     <img
@@ -416,12 +424,12 @@ export function EncryptedFile({ message }: { message: Message; }) {
                         Open Gofile
                     </Button>
                     <Button small color="green" disabled={busy} title="Pick the .bin you downloaded from Gofile" onClick={url ? () => save(url) : decryptDownloaded}>
-                        {busy ? "Decrypting …" : url ? "Save" : "Decrypt .bin"}
+                        {busy ? phase : url ? "Save" : "Decrypt .bin"}
                     </Button>
                 </>
             ) : (
-                <Button small color="green" disabled={busy} onClick={error ? () => start() : kind === "file" ? download : () => start()}>
-                    {busy ? "Decrypting …" : error ? "Retry" : kind === "file" ? "Download" : "Show"}
+                <Button small color="green" disabled={busy} onClick={error ? () => start(undefined, true) : kind === "file" ? download : () => start(undefined, true)}>
+                    {busy ? phase : error ? "Retry" : kind === "file" ? "Download" : "Show"}
                 </Button>
             )}
         </div>
