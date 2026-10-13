@@ -357,4 +357,4 @@ export function loadCover(url: string) {
 }
 
 /** YouTube link of the song, for the MP3 download */
-export const findYouTube = (song: Song) => native().findYouTube(song.title, song.artist);
+export const findYouTube = (song: Song) => native().findYouTube(song.title, song.artist, song.album);

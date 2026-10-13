@@ -151,7 +151,7 @@ async function downloadMp3(song: Song) {
     try {
         const url = await findYouTube(song);
         if (!url) {
-            showToast("Couldn't find this song on YouTube", "failure");
+            showToast("Couldn't find exactly this song on YouTube Music", "failure");
             return;
         }
         await grab({ url, kind: "audio", maxHeight: 0, toChat: false, toDisk: true });
@@ -160,19 +160,22 @@ async function downloadMp3(song: Song) {
     }
 }
 
+/** Slider position → audio volume. Ears hear loudness logarithmically: squared, the left half of the slider is really quiet */
+const audioVolume = (v: number) => Math.min(1, Math.max(0, Number(v) || 0)) ** 2;
+
 /** Cover with a play button for Apple's 30 s preview */
 function Cover({ song, size = 96 }: { song: Song; size?: number; }) {
     const audio = useRef<HTMLAudioElement | null>(null);
     const [playing, setPlaying] = useState(false);
     const { previewVolume } = settings.use(["previewVolume"]);
-    useEffect(() => { if (audio.current) audio.current.volume = previewVolume; }, [previewVolume]);
+    useEffect(() => { if (audio.current) audio.current.volume = audioVolume(previewVolume); }, [previewVolume]);
     useEffect(() => () => { audio.current?.pause(); }, [song.key]);
 
     const toggle = () => {
         if (!song.previewUrl) return;
         if (!audio.current) {
             audio.current = new Audio(song.previewUrl);
-            audio.current.volume = settings.store.previewVolume;
+            audio.current.volume = audioVolume(settings.store.previewVolume);
             audio.current.onended = () => setPlaying(false);
         }
         if (audio.current.paused) {

@@ -66,16 +66,55 @@ export async function downloadMedia(_: IpcMainInvokeEvent, url: string) {
 
 const BROWSER_UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0 Safari/537.36";
 
-/** First YouTube result for a song (for "Download MP3", which hands the link to MediaGrab / yt-dlp) */
-export async function findYouTube(_: IpcMainInvokeEvent, title: string, artist: string) {
-    const q = encodeURIComponent(`${String(title)} ${String(artist)} audio`.slice(0, 200));
-    const res = await fetch(`https://www.youtube.com/results?search_query=${q}`, {
-        headers: { "User-Agent": BROWSER_UA, "Accept-Language": "en-US,en;q=0.8" },
+// Lowercase letters / digits only, without "(feat. …)", "- Remastered" etc. – for comparing names
+const norm = (s: string) => s.toLowerCase().replace(/\s[([].*?(feat|ft|with|remaster|version|edit)[^)\]]*[)\]]/g, "").replace(/[^\p{L}\p{N}]+/gu, " ").trim();
+const artistsOf = (s: string) => s.split(/\s*(?:[&,]|\b(?:feat|ft|x|and|with)\b\.?)\s*/i).map(norm).filter(Boolean);
+
+/**
+ * The recognized song on YouTube (for "Download MP3", which hands the link to MediaGrab / yt-dlp).
+ * Searches YouTube Music's song catalog – the official audio of the same release Shazam / Apple know – and only takes a
+ * result whose title and artist really match. A plain YouTube search often returns another song with the same name.
+ */
+export async function findYouTube(_: IpcMainInvokeEvent, title: string, artist: string, album?: string) {
+    title = String(title); artist = String(artist);
+    const res = await fetch("https://music.youtube.com/youtubei/v1/search?prettyPrint=false", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "User-Agent": BROWSER_UA, "Origin": "https://music.youtube.com" },
+        body: JSON.stringify({
+            context: { client: { clientName: "WEB_REMIX", clientVersion: "1.20241023.01.00", hl: "en", gl: "US" } },
+            query: `${title} ${artist}`.slice(0, 200),
+            params: "EgWKAQIIAWoKEAkQBRAKEAMQBA==" // filter: songs
+        }),
         signal: AbortSignal.timeout(15_000)
     });
-    if (!res.ok) throw new Error(`YouTube: HTTP ${res.status}`);
-    const id = /"videoId":"([\w-]{11})"/.exec(await res.text())?.[1];
-    return id ? `https://www.youtube.com/watch?v=${id}` : null;
+    if (!res.ok) throw new Error(`YouTube Music: HTTP ${res.status}`);
+
+    const items: { id: string; title: string; byline: string; }[] = [];
+    (function walk(o: any) {
+        if (!o || typeof o !== "object" || items.length >= 20) return;
+        const r = o.musicResponsiveListItemRenderer;
+        if (r) {
+            const col = (i: number) => (r.flexColumns?.[i]?.musicResponsiveListItemFlexColumnRenderer?.text?.runs ?? []).map((x: any) => x.text).join("");
+            const id = r.playlistItemData?.videoId;
+            if (typeof id === "string" && /^[\w-]{11}$/.test(id)) items.push({ id, title: col(0), byline: col(1) });
+            return;
+        }
+        for (const k in o) walk(o[k]);
+    })(await res.json());
+
+    const wantTitle = norm(title), wantArtists = artistsOf(artist), wantAlbum = album ? norm(album) : "";
+    let best: { id: string; score: number; } | null = null;
+    for (const it of items) {
+        // byline: "Artist • Album • 2:09"
+        const parts = it.byline.split(" • ");
+        const gotTitle = norm(it.title), gotArtists = artistsOf(parts[0] ?? ""), gotAlbum = norm(parts[1] ?? "");
+        const titleOk = gotTitle === wantTitle ? 2 : (gotTitle.includes(wantTitle) || wantTitle.includes(gotTitle)) && gotTitle ? 1 : 0;
+        const artistOk = wantArtists.some(a => gotArtists.some(g => g === a || g.includes(a) || a.includes(g)));
+        if (!titleOk || !artistOk) continue;
+        const score = titleOk * 2 + (wantAlbum && gotAlbum === wantAlbum ? 1 : 0);
+        if (!best || score > best.score) best = { id: it.id, score };
+    }
+    return best ? `https://www.youtube.com/watch?v=${best.id}` : null;
 }
 
 const IMAGE_HOSTS = /(^|\.)(mzstatic\.com|shazam\.com)$/;
