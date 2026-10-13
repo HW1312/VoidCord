@@ -10,10 +10,10 @@ import definePlugin, { OptionType } from "@utils/types";
 import { ChannelStore, GuildRoleStore, Menu, PermissionsBits, PermissionStore, SelectedGuildStore, showToast, UserStore } from "@webpack/common";
 import type { ReactElement } from "react";
 
-import { getMacros, hasAnyModPermission, Macro, makePresets, stepProblem, targetFromMessage } from "./macros";
+import { getMacros, hasAnyModPermission, Macro, makePresets, stepProblem, targetFromMessage, translateOldPresets } from "./macros";
 import { clearStored, ensureLoaded, getNotesChannelId, getNotesForUser, isNotesChannel, onMessageCreate, onMessageDelete, onMessageUpdate, resetAll } from "./notes";
 import { clearScamCache } from "./scam";
-import { MemberListBadge, MessageBadge, ModKitIcon, openNotesModal, openQuickPick, runOrConfirm, ScamAccessory, SettingsPanel } from "./ui";
+import { MemberListBadge, MessageBadge, ModKitIcon, NoteCard, openNotesModal, openQuickPick, runOrConfirm, ScamAccessory, SettingsPanel } from "./ui";
 
 // ---------------------------------------------------------------- Settings
 
@@ -162,7 +162,7 @@ const messageContext: NavContextMenuPatchCallback = (children, { message, channe
                 <Menu.MenuItem
                     id={`vc-modkit-macro-${macro.id}`}
                     key={macro.id}
-                    label={`${macro.emoji} ${macro.name}`}
+                    label={macro.name}
                     subtext={allBlocked ? (problems.find(Boolean) ?? "No steps") : undefined}
                     disabled={allBlocked}
                     action={() => runOrConfirm(macro, target)}
@@ -227,7 +227,7 @@ export default definePlugin({
         }
     },
 
-    renderMessageAccessory: props => <ScamAccessory message={props.message} />,
+    renderMessageAccessory: props => <><ScamAccessory message={props.message} /><NoteCard message={props.message} /></>,
     renderMessageDecoration: props => <MessageBadge message={props.message} channel={props.channel} />,
     renderMemberListDecorator: props => props.type === "guild" && props.user ? <MemberListBadge userId={props.user.id} /> : null,
 
@@ -248,6 +248,7 @@ export default definePlugin({
 
     start() {
         if (!Array.isArray(settings.store.macros)) settings.store.macros = makePresets();
+        else translateOldPresets();
     },
 
     stop() {

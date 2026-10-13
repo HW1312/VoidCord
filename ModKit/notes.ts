@@ -125,12 +125,12 @@ export function buildNoteContent(n: NewNote, authorId: string) {
     // Backticks and pipes would break the code block / spoiler -> use \u escapes
     const json = JSON.stringify(payload).replace(/`/g, "\\u0060").replace(/\|/g, "\\u007c");
 
+    // Readable without ModKit too: what, who, why – the data for ModKit follows small (-#) in a spoiler at the end.
+    // ModKit itself shows a card instead and hides this text (NoteCard in ui.tsx).
     const reason = n.reason.replace(/\s+/g, " ").trim().slice(0, 900) || "_no reason given_";
-    const dur = n.duration ? ` (${formatDuration(n.duration)})` : "";
-    let text = `${NOTE_EMOJI[n.type]} **${NOTE_LABELS[n.type]}**${dur} for <@${n.userId}> by <@${authorId}>: ${reason}`;
-    if (n.ref) text += `\n↪ ${n.ref}`;
-    text += `\n||\`${json}\`||`;
-    return text;
+    const dur = n.duration ? ` · ${formatDuration(n.duration)}` : "";
+    const meta = [`by <@${authorId}>`, n.ref && `[Jump to message](${n.ref})`, `||\`${json}\`||`].filter(Boolean).join(" · ");
+    return `${NOTE_EMOJI[n.type]} **${NOTE_LABELS[n.type]}**${dur} · <@${n.userId}>\n> ${reason}\n-# ${meta}`;
 }
 
 export function parseNote(msg: any): Note | null {

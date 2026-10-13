@@ -112,6 +112,41 @@ export function makePresets(): Macro[] {
     ];
 }
 
+/**
+ * Presets saved before the plugin was translated still carry the German texts. Only fields that still hold the old
+ * preset text are replaced – anything the user changed stays as it is.
+ */
+const GERMAN_PRESET_TEXTS: Record<string, Partial<Record<"name" | "reason" | "text" | "rule", [string, string]>>> = {
+    [SCAM_MACRO_ID]: { name: ["Scam-Link", "Scam link"], reason: ["Scam-/Phishing-Link", "Scam/phishing link"] },
+    "preset-insult": {
+        name: ["Beleidigung", "Insult"],
+        reason: ["Beleidigung", "Insult"],
+        text: ["{user} bitte bleib respektvoll. Erinnerung an unsere Regel: {rule}", "{user} please stay respectful. Reminder of our rule: {rule}"],
+        rule: ["Respektvoller Umgang – keine Beleidigungen.", "Be respectful - no insults."]
+    },
+    "preset-warn": { name: ["Verwarnung", "Warning"], reason: ["Verwarnung", "Warning"] }
+};
+
+export function translateOldPresets() {
+    const list = settings.store.macros;
+    if (!Array.isArray(list)) return;
+    let changed = false;
+    const swap = (obj: any, key: "name" | "reason" | "text" | "rule", texts: typeof GERMAN_PRESET_TEXTS[string]) => {
+        const pair = texts[key];
+        if (pair && obj[key] === pair[0]) { obj[key] = pair[1]; changed = true; }
+    };
+    // Plain JSON copy – writing settings proxies back fails ("could not be cloned")
+    const next: Macro[] = JSON.parse(JSON.stringify(list));
+    for (const m of next) {
+        const texts = GERMAN_PRESET_TEXTS[m.id];
+        if (!texts) continue;
+        swap(m, "name", texts);
+        swap(m, "reason", texts);
+        for (const s of m.steps ?? []) { swap(s, "text", texts); swap(s, "rule", texts); }
+    }
+    if (changed) settings.store.macros = next;
+}
+
 export function getMacros(): Macro[] {
     const m = settings.store.macros;
     return Array.isArray(m) ? m : makePresets();

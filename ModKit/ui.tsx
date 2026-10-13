@@ -11,10 +11,10 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { classes } from "@utils/misc";
 import { ChannelStore, GuildMemberStore, GuildStore, NavigationRouter, PermissionsBits, PermissionStore, SelectedGuildStore, showToast, useEffect, useMemo, useRef, UserStore, useState, useStateFromStores } from "@webpack/common";
 
-import { Badge, Button, confirm, Empty, Group, Icon, IconButton, ICONS, LinkRow, Note as UiNote, openWindow, Pill, Pills, Row, Section, Segmented, Select, Sheet, Spinner, TextArea, TextField, ToggleRow, UiColor, WindowAction } from "../_ui";
+import { Avatar, Badge, Button, confirm, Empty, Glyph, Group, Icon, IconButton, ICONS, LinkRow, Note as UiNote, openWindow, Pill, Pills, Row, Section, Segmented, Select, Sheet, Spinner, TextArea, TextField, Toggle, ToggleRow, UiColor, WindowAction } from "../_ui";
 import { BadgeMode, settings, unsetNotesChannel } from "./index";
 import { BAN_DELETE_OPTIONS, describeStep, getMacros, getScamMacro, hierarchyProblem, Macro, makePresets, messageLink, needsConfirm, RunHandle, runMacro, Step, STEP_LABELS, STEP_TYPES, stepProblem, StepStatus, StepType, Target, targetFromMessage, TIMEOUT_OPTIONS, uid } from "./macros";
-import { cancelLoad, canDeleteNote, canWriteNotes, deleteNote, describeError, ensureLoaded, formatDuration, getCounts, getLoadState, getNotesChannelId, getNotesForUser, getVersion, Note, NOTE_EMOJI, NOTE_LABELS, NOTE_TYPES, NoteType, resync, subscribe, writeNote } from "./notes";
+import { cancelLoad, canDeleteNote, canWriteNotes, deleteNote, describeError, ensureLoaded, formatDuration, getCounts, getLoadState, getNotesChannelId, getNotesForUser, getVersion, isNotesChannel, Note, NOTE_LABELS, NOTE_TYPES, NoteType, parseNote, resync, subscribe, writeNote } from "./notes";
 import { detectScam } from "./scam";
 
 const cl = classNameFactory("vc-modkit-");
@@ -38,6 +38,23 @@ export function ModKitIcon({ height = 20, width = 20, className }: { height?: nu
 }
 
 const TYPE_COLOR: Record<NoteType, UiColor> = { note: "blue", warn: "yellow", timeout: "orange", kick: "pink", ban: "red", unban: "green" };
+const TYPE_ICON: Record<NoteType, string> = {
+    note: ICONS.edit,
+    warn: WARN_PATH,
+    timeout: "M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm1 5v4.59l3.2 3.2-1.4 1.42L11 12.41V7h2Z",
+    kick: "M10 17v-3H3v-4h7V7l5 5-5 5Zm2-14h7a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-7v-2h7V5h-7V3Z",
+    ban: GAVEL_PATH,
+    unban: ICONS.check
+};
+/** One line under the type picker: what this kind of entry means */
+const TYPE_HINT: Record<NoteType, string> = {
+    note: "Internal note – not a punishment.",
+    warn: "Formal warning – shows as a badge next to their name.",
+    timeout: "Only records it – doesn't time them out.",
+    kick: "Only records it – doesn't kick them.",
+    ban: "Only records it – doesn't ban them.",
+    unban: "Only records it – doesn't unban them."
+};
 
 // ---------------------------------------------------------------- Helpers
 
@@ -82,16 +99,27 @@ function DraftInput({ value, onCommit, placeholder, multiline, maxLength, classN
 }
 
 function TypeBadge({ type, children }: { type: NoteType; children: React.ReactNode; }) {
-    return <Badge color={TYPE_COLOR[type]}>{children}</Badge>;
+    return <Badge color={TYPE_COLOR[type]} icon={TYPE_ICON[type]}>{children}</Badge>;
 }
 
-function Emoji({ children }: { children: React.ReactNode; }) {
-    return <span className={cl("emoji")}>{children}</span>;
+/** Icon of a macro: its strongest step (ban > kick > timeout > delete > note > reply) */
+function MacroGlyph({ macro }: { macro: Macro; }) {
+    const order: StepType[] = ["ban", "kick", "timeout", "delete", "note", "reply"];
+    const type = order.find(t => macro.steps.some(s => s.type === t));
+    return type ? <Glyph path={STEP_GLYPH[type].path} color={STEP_GLYPH[type].color} /> : <Glyph path={GAVEL_PATH} color="gray" />;
+}
+
+/** "Oct 13, 10:25 PM" – the year only when it isn't this year */
+function shortDate(ts: number) {
+    const d = new Date(ts);
+    const opts: Intl.DateTimeFormatOptions = { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" };
+    if (d.getFullYear() !== new Date().getFullYear()) opts.year = "numeric";
+    return d.toLocaleString("en-US", opts);
 }
 
 const DURATION_OPTIONS = TIMEOUT_OPTIONS.map(v => ({ value: v, label: formatDuration(v) }));
 const BAN_OPTIONS = BAN_DELETE_OPTIONS.map(v => ({ value: v, label: v ? `Last ${formatDuration(v)}` : "Delete nothing" }));
-const NOTE_TYPE_OPTIONS = NOTE_TYPES.map(t => ({ value: t as string, label: `${NOTE_EMOJI[t]} ${NOTE_LABELS[t]}` }));
+const NOTE_TYPE_OPTIONS = NOTE_TYPES.map(t => ({ value: t as string, label: NOTE_LABELS[t] }));
 
 // ---------------------------------------------------------------- Warning badges
 
@@ -190,21 +218,21 @@ function NotesModal({ onClose, guildId, userId, target }: { onClose(): void; gui
 
     const notes = getNotesForUser(guildId, userId);
     const guild = GuildStore.getGuild(guildId);
+    const user: any = UserStore.getUser(userId);
 
     return (
         <Sheet
             onClose={onClose}
             header={{
-                app: "ModKit", title: `ModNotes - ${userName(guildId, userId)}`,
-                subtitle: `${guild?.name ?? "Server"} · ID ${userId}`,
-                icon: GAVEL_PATH,
-                iconColor: APP_COLOR
+                title: userName(guildId, userId),
+                subtitle: `${user?.username ? `@${user.username} · ` : ""}ModNotes on ${guild?.name ?? "this server"}`,
+                iconNode: <Avatar src={user?.getAvatarURL?.(guildId, 80)} size={42} />
             }}
             actions={[{ label: "Close", variant: "gray", onClick: onClose }]}
         >
             <LoadBanner guildId={guildId} />
             <Summary notes={notes} />
-            <AddNoteForm guildId={guildId} userId={userId} target={target} />
+            <AddNoteForm guildId={guildId} userId={userId} target={target} startOpen={!notes.length || !!target} />
             <Timeline guildId={guildId} notes={notes} onNavigate={onClose} />
         </Sheet>
     );
@@ -240,13 +268,14 @@ function Summary({ notes }: { notes: Note[]; }) {
     const counts = NOTE_TYPES.map(t => [t, notes.filter(n => n.type === t).length] as const).filter(([, n]) => n);
     return (
         <Pills>
-            {counts.map(([t, n]) => <TypeBadge key={t} type={t}>{NOTE_EMOJI[t]} {n}× {NOTE_LABELS[t]}</TypeBadge>)}
+            {counts.map(([t, n]) => <TypeBadge key={t} type={t}>{n} {NOTE_LABELS[t]}{n > 1 && t !== "ban" && t !== "unban" ? "s" : ""}</TypeBadge>)}
         </Pills>
     );
 }
 
-function AddNoteForm({ guildId, userId, target }: { guildId: string; userId: string; target?: Target; }) {
+function AddNoteForm({ guildId, userId, target, startOpen }: { guildId: string; userId: string; target?: Target; startOpen: boolean; }) {
     const targetLink = target && target.userId === userId ? messageLink(target) : undefined;
+    const [open, setOpen] = useState(startOpen);
     const [type, setType] = useState<NoteType>("warn");
     const [reason, setReason] = useState("");
     const [duration, setDuration] = useState(3600);
@@ -256,6 +285,13 @@ function AddNoteForm({ guildId, userId, target }: { guildId: string; userId: str
     const problem = canWriteNotes(guildId);
     const refInvalid = ref.trim() !== "" && !LINK_RE.test(ref.trim());
     const disabled = !!problem || saving || !reason.trim() || refInvalid;
+    const channel = ChannelStore.getChannel(getNotesChannelId(guildId) ?? "");
+
+    if (!open) return (
+        <Section>
+            <LinkRow icon={ICONS.plus} onClick={() => setOpen(true)}>Add note</LinkRow>
+        </Section>
+    );
 
     async function save() {
         setSaving(true);
@@ -279,25 +315,22 @@ function AddNoteForm({ guildId, userId, target }: { guildId: string; userId: str
     }
 
     return (
-        <Section title="Add note" footer="Saved as a message in the ModNotes channel.">
+        <Section title="Add note">
             <div className={cl("form")}>
                 {problem && <UiNote tone="warn">{problem}</UiNote>}
                 <Pills>
                     {NOTE_TYPES.map(t => (
-                        <Pill key={t} selected={type === t} onClick={problem ? undefined : () => setType(t)}>{NOTE_EMOJI[t]} {NOTE_LABELS[t]}</Pill>
+                        <Pill key={t} icon={TYPE_ICON[t]} selected={type === t} onClick={problem ? undefined : () => setType(t)}>{NOTE_LABELS[t]}</Pill>
                     ))}
                 </Pills>
-                {type === "timeout" && (
-                    <div className={cl("inline")}>
-                        <span className={cl("label")}>Duration</span>
-                        <Select<number> value={duration} options={DURATION_OPTIONS} onChange={setDuration} />
-                        <span className={cl("dim")}>Record only - does not apply a timeout.</span>
-                    </div>
-                )}
+                <div className={cl("inline")}>
+                    <span className={cl("hint")}>{TYPE_HINT[type]}</span>
+                    {type === "timeout" && <Select<number> value={duration} options={DURATION_OPTIONS} onChange={setDuration} />}
+                </div>
                 <TextArea
-                    rows={3}
+                    rows={2}
                     maxLength={900}
-                    placeholder="Reason / description"
+                    placeholder="What happened?"
                     value={reason}
                     disabled={!!problem}
                     onChange={setReason}
@@ -305,15 +338,17 @@ function AddNoteForm({ guildId, userId, target }: { guildId: string; userId: str
                 <TextField
                     type="text"
                     className={refInvalid ? cl("invalid") : undefined}
-                    placeholder="Message link as evidence (optional)"
+                    placeholder="Link to the message (optional)"
                     value={ref}
                     disabled={!!problem}
                     onChange={setRef}
                 />
-                {refInvalid && <div className={cl("dim")}>Discord message links only (https://discord.com/channels/...)</div>}
+                {refInvalid && <span className={cl("hint")}>Paste a Discord message link (right-click a message → Copy Message Link).</span>}
                 <div className={cl("inline")}>
+                    {channel && <span className={cl("hint")}>Posted in #{channel.name}</span>}
                     <span className={cl("grow")} />
-                    <Button disabled={disabled} onClick={save}>{saving ? "Saving ..." : "Save"}</Button>
+                    <Button small variant="plain" onClick={() => setOpen(false)}>Cancel</Button>
+                    <Button small disabled={disabled} onClick={save}>{saving ? "Saving …" : `Save ${NOTE_LABELS[type].toLowerCase()}`}</Button>
                 </div>
             </div>
         </Section>
@@ -321,9 +356,9 @@ function AddNoteForm({ guildId, userId, target }: { guildId: string; userId: str
 }
 
 function Timeline({ guildId, notes, onNavigate }: { guildId: string; notes: Note[]; onNavigate(): void; }) {
-    if (!notes.length) return <Empty icon={GAVEL_PATH} title="No entries for this person yet." />;
+    if (!notes.length) return <Empty icon={ICONS.edit} title="No notes yet" hint="Every mod with ModKit sees the notes you add here." />;
     return (
-        <Section title="History">
+        <Section title={`History · ${notes.length}`}>
             {notes.map(n => <NoteItem key={n.id} note={n} guildId={guildId} onNavigate={onNavigate} />)}
         </Section>
     );
@@ -347,64 +382,120 @@ function NoteItem({ note, guildId, onNavigate }: { note: Note; guildId: string; 
     return (
         <Row
             align="top"
-            className={cl("note")}
-            leading={<span className={cl("note-bar")} style={{ background: `var(--vc-ui-${TYPE_COLOR[note.type]})` }} />}
-            title={<span className={cl("inline")}>
-                <TypeBadge type={note.type}>
-                    {NOTE_EMOJI[note.type]} {NOTE_LABELS[note.type]}{note.duration ? ` · ${formatDuration(note.duration)}` : ""}
-                </TypeBadge>
-                <span className={cl("dim")}>by {userName(guildId, note.authorId)} · {formatDate(note.timestamp)}</span>
-            </span>}
-            trailing={canDeleteNote(note) && (
-                <IconButton icon={ICONS.trash} destructive disabled={busy} label="Delete (deletes the message in the ModNotes channel)" onClick={remove} />
-            )}
-        >
-            <div className={cl("note-reason")}>{note.reason || <i className={cl("dim")}>no reason given</i>}</div>
-            {note.excerpt && <div className={cl("excerpt")}>{note.excerpt}</div>}
-            <div className={cl("inline")}>
+            leading={<Glyph path={TYPE_ICON[note.type]} color={TYPE_COLOR[note.type]} />}
+            title={note.reason || <i className={cl("dim")}>No reason given</i>}
+            subtitle={`${NOTE_LABELS[note.type]}${note.duration ? ` · ${formatDuration(note.duration)}` : ""} · ${userName(guildId, note.authorId)} · ${shortDate(note.timestamp)}`}
+            trailing={<>
                 {note.ref && LINK_RE.test(note.ref) && (
-                    <Button small variant="plain" onClick={() => openDiscordLink(note.ref!, onNavigate)}>↪ Go to message</Button>
+                    <IconButton icon={ICONS.external} label="Go to the message" onClick={() => openDiscordLink(note.ref!, onNavigate)} />
                 )}
-                <Button small variant="plain" onClick={() => openDiscordLink(`https://discord.com/channels/${guildId}/${note.channelId}/${note.id}`, onNavigate)}>
-                    In ModNotes channel
-                </Button>
-            </div>
+                <IconButton icon={CHANNEL_PATH} label="Show in the ModNotes channel" onClick={() => openDiscordLink(`https://discord.com/channels/${guildId}/${note.channelId}/${note.id}`, onNavigate)} />
+                {canDeleteNote(note) && <IconButton icon={ICONS.trash} destructive disabled={busy} label="Delete note" onClick={remove} />}
+            </>}
+        >
+            {note.excerpt && <div className={cl("target-excerpt")}>{note.excerpt}</div>}
         </Row>
     );
 }
 
 // ---------------------------------------------------------------- Run macro
 
-export function runOrConfirm(macro: Macro, target: Target) {
-    if (needsConfirm(macro, target)) openMacroModal(macro, target);
+/** Opened from the quick pick: Cancel goes back there instead of closing everything */
+type Back = (() => void) | undefined;
+
+export function runOrConfirm(macro: Macro, target: Target, back?: Back) {
+    if (needsConfirm(macro, target)) openMacroModal(macro, target, back);
     else void runMacro(macro, target, macro.reason);
 }
 
-export function openMacroModal(macro: Macro, target: Target) {
+export function openMacroModal(macro: Macro, target: Target, back?: Back) {
     openWindow(close => (
         <ErrorBoundary>
-            <MacroModal onClose={close} macro={macro} target={target} />
+            <MacroModal onClose={close} macro={macro} target={target} back={back} />
         </ErrorBoundary>
     ));
 }
 
-const STATUS_ICON: Record<StepStatus, string> = {
-    pending: "•",
-    running: "…",
-    done: "✓",
-    skipped: "–",
-    failed: "✕"
+const CLOCK_PATH = "M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm1 5v4.59l3.2 3.2-1.4 1.42L11 12.41V7h2Z";
+const KICK_PATH = "M10 17v-3H3v-4h7V7l5 5-5 5Zm2-14h7a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-7v-2h7V5h-7V3Z";
+const REPLY_PATH = "M5 4h14a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H9l-5 4V6a2 2 0 0 1 1-2Z";
+
+const STEP_GLYPH: Record<StepType, { path: string; color: UiColor; }> = {
+    delete: { path: ICONS.trash, color: "red" },
+    timeout: { path: CLOCK_PATH, color: "orange" },
+    kick: { path: KICK_PATH, color: "pink" },
+    ban: { path: GAVEL_PATH, color: "red" },
+    reply: { path: REPLY_PATH, color: "blue" },
+    note: { path: ICONS.edit, color: "indigo" }
 };
 
-function MacroModal({ onClose, macro, target }: { onClose(): void; macro: Macro; target: Target; }) {
+/** Leading icon of a step: its type while idle, then its progress */
+function StepGlyph({ type, status }: { type: StepType; status?: StepStatus; }) {
+    if (status === "running") return <span className={cl("step-status")}><Spinner size={14} /></span>;
+    if (status === "done") return <Glyph path={ICONS.check} color="green" />;
+    if (status === "failed") return <Glyph path={ICONS.close} color="red" />;
+    if (status === "skipped") return <Glyph path={STEP_GLYPH[type].path} color="gray" />;
+    return <Glyph path={STEP_GLYPH[type].path} color={STEP_GLYPH[type].color} />;
+}
+
+/** Who the macro hits: avatar, name, and the message it is about */
+function TargetCard({ target }: { target: Target; }) {
+    const user: any = UserStore.getUser(target.userId);
+    return (
+        <Group>
+            <Row
+                align={target.excerpt ? "top" : "center"}
+                leading={<Avatar src={user?.getAvatarURL?.(target.guildId, 80)} size={36} />}
+                title={userName(target.guildId, target.userId)}
+                subtitle={user?.username ? `@${user.username}` : target.userId}
+            >
+                {target.excerpt && <div className={cl("target-excerpt")}>{target.excerpt}</div>}
+            </Row>
+        </Group>
+    );
+}
+
+/** The options of one step, adjustable for this run only (the saved macro stays as it is) */
+function StepOptions({ step, target, onChange }: { step: Step; target: Target; onChange(s: Step): void; }) {
+    switch (step.type) {
+        case "timeout":
+            return <Select<number> value={step.duration ?? 3600} options={DURATION_OPTIONS} onChange={v => onChange({ ...step, duration: v })} />;
+        case "ban":
+            return <Select<number> value={step.deleteSeconds ?? 0} options={BAN_OPTIONS} onChange={v => onChange({ ...step, deleteSeconds: v })} />;
+        case "note":
+            return <Select<string> value={step.noteType ?? "note"} options={NOTE_TYPE_OPTIONS} onChange={v => onChange({ ...step, noteType: v as NoteType })} />;
+        case "reply": {
+            const preview = (step.text ?? "")
+                .replace(/\{user\}/g, `@${userName(target.guildId, target.userId)}`)
+                .replace(/\{rule\}/g, step.rule ?? "");
+            return (
+                <>
+                    <TextArea rows={2} maxLength={1800} value={step.text ?? ""} placeholder="{user} = mention, {rule} = rule text" onChange={v => onChange({ ...step, text: v })} />
+                    {/\{rule\}/.test(step.text ?? "") && (
+                        <TextField type="text" maxLength={300} value={step.rule ?? ""} placeholder="Rule text for {rule}" onChange={v => onChange({ ...step, rule: v })} />
+                    )}
+                    {preview.trim() && preview !== step.text && <div className={cl("reply-preview")}>{preview}</div>}
+                </>
+            );
+        }
+        default:
+            return null;
+    }
+}
+
+function MacroModal({ onClose, macro, target, back }: { onClose(): void; macro: Macro; target: Target; back: Back; }) {
     const [reason, setReason] = useState(macro.reason);
+    const [steps, setSteps] = useState<Step[]>(() => macro.steps.map(s => ({ ...s })));
+    const problems = useMemo(() => macro.steps.map(s => stepProblem(s, target)), [macro, target]);
+    // Steps that can't run start (and stay) off
+    const [on, setOn] = useState<boolean[]>(() => problems.map(p => p == null));
     const [phase, setPhase] = useState<"idle" | "running" | "done">("idle");
     const [status, setStatus] = useState<{ s: StepStatus; info?: string; }[]>(() => macro.steps.map(() => ({ s: "pending" })));
     const handle = useRef<RunHandle>({ cancelled: false });
 
-    const problems = useMemo(() => macro.steps.map(s => stepProblem(s, target)), [macro, target]);
-    const runnable = problems.some(p => p == null);
-    const needsHierarchy = macro.steps.some(s => s.type === "timeout" || s.type === "kick" || s.type === "ban");
+    const active = steps.filter((_, i) => on[i]);
+    const replyEmpty = active.some(s => s.type === "reply" && !(s.text ?? "").trim());
+    const needsHierarchy = active.some(s => s.type === "timeout" || s.type === "kick" || s.type === "ban");
     const hierarchy = needsHierarchy ? hierarchyProblem(target.guildId, target.userId) : null;
 
     // Window closed -> don't run the remaining steps
@@ -412,10 +503,13 @@ function MacroModal({ onClose, macro, target }: { onClose(): void; macro: Macro;
 
     async function run() {
         setPhase("running");
-        const res = await runMacro(macro, target, reason.trim(), (i, s, info) => {
+        // Only the switched-on steps run; their progress is mapped back onto the full list
+        const indices = steps.map((_, i) => i).filter(i => on[i]);
+        setStatus(prev => prev.map((p, i) => (on[i] ? p : { s: "skipped", info: "Switched off" })));
+        const res = await runMacro({ ...macro, steps: active }, target, reason.trim(), (i, s, info) => {
             setStatus(prev => {
                 const next = [...prev];
-                next[i] = { s, info };
+                next[indices[i]] = { s, info };
                 return next;
             });
         }, handle.current);
@@ -423,48 +517,78 @@ function MacroModal({ onClose, macro, target }: { onClose(): void; macro: Macro;
         if (!res.failed && !handle.current.cancelled) setTimeout(onClose, 700);
     }
 
+    const cancel = () => {
+        onClose();
+        back?.();
+    };
+
     const actions: WindowAction[] = phase === "idle"
         ? [
-            { label: "Cancel", onClick: onClose },
-            { label: "Run", variant: "destructive", disabled: !runnable, onClick: run }
+            { label: back ? "Back" : "Cancel", onClick: cancel },
+            {
+                label: active.length ? `Run ${plural(active.length, "step", "steps")}` : "Run",
+                variant: "destructive",
+                disabled: !active.length || replyEmpty,
+                onClick: run
+            }
         ]
         : phase === "running"
             ? [{ label: "Stop", variant: "gray", onClick: () => void (handle.current.cancelled = true) }]
             : [{ label: "Close", variant: "gray", onClick: onClose }];
 
+    const notice = phase !== "idle" ? undefined
+        : hierarchy ? `${hierarchy} Timeout, kick and ban will be skipped.`
+            : replyEmpty ? "The reply text is empty." : undefined;
+
     return (
         <Sheet
             onClose={onClose}
             header={{
-                app: "ModKit", title: `${macro.emoji} Run ${macro.name}?`,
-                subtitle: `Target: ${userName(target.guildId, target.userId)} (${target.userId})`,
+                app: "ModKit",
+                title: `Run "${macro.name}"?`,
+                subtitle: phase === "idle" ? "Changes here only apply to this run" : phase === "running" ? "Running …" : "Done",
                 icon: GAVEL_PATH,
                 iconColor: APP_COLOR
             }}
-            notice={hierarchy ? `${hierarchy} Timeout, kick and ban will be skipped.` : undefined}
+            notice={notice}
             actions={actions}
         >
-            {target.excerpt && <div className={cl("excerpt")}>{target.excerpt}</div>}
+            <TargetCard target={target} />
 
-            <Section title="What will happen">
-                {macro.steps.map((step, i) => {
-                    const st = status[i];
+            <Section title="Steps">
+                {steps.map((step, i) => {
                     const blocked = problems[i];
-                    const state = phase === "idle" ? (blocked ? "skipped" : "pending") : st.s;
+                    const idle = phase === "idle";
+                    const enabled = on[i];
                     return (
                         <Row
                             key={step.id}
-                            leading={<span className={classes(cl("step-icon"), cl(`step-${state}`))}>{STATUS_ICON[state]}</span>}
-                            title={<span className={blocked ? cl("strike") : undefined}>{describeStep(step)}</span>}
-                            subtitle={(blocked || st.info) ? st.info ?? `Will be skipped: ${blocked}` : undefined}
-                            dim={state === "skipped"}
-                        />
+                            align="top"
+                            dim={!enabled}
+                            leading={<StepGlyph type={step.type} status={idle ? (enabled ? undefined : "skipped") : status[i].s} />}
+                            title={describeStep(step)}
+                            subtitle={idle ? (blocked ?? undefined) : status[i].info}
+                            trailing={idle ? (
+                                <Toggle
+                                    checked={enabled}
+                                    disabled={!!blocked}
+                                    label={STEP_LABELS[step.type]}
+                                    onChange={v => setOn(prev => prev.map((x, j) => (j === i ? v : x)))}
+                                />
+                            ) : undefined}
+                        >
+                            {idle && enabled && step.type !== "delete" && step.type !== "kick" && (
+                                <div className={cl("step-options")}>
+                                    <StepOptions step={step} target={target} onChange={s => setSteps(prev => prev.map((x, j) => (j === i ? s : x)))} />
+                                </div>
+                            )}
+                        </Row>
                     );
                 })}
-                {!macro.steps.length && <Row title="This macro has no steps." dim />}
+                {!steps.length && <Row title="This macro has no steps." dim />}
             </Section>
 
-            <Section title="Reason (audit log & note)">
+            <Section title="Reason" footer="Shown in the audit log and in the ModNote.">
                 <div className={cl("form")}>
                     <TextField
                         type="text"
@@ -483,7 +607,10 @@ function MacroModal({ onClose, macro, target }: { onClose(): void; macro: Macro;
 // ---------------------------------------------------------------- Quick pick (message button)
 
 export function openQuickPick(message: any, channel: any) {
-    const target = targetFromMessage(message, channel);
+    openQuickPickFor(targetFromMessage(message, channel));
+}
+
+function openQuickPickFor(target: Target) {
     openWindow(close => (
         <ErrorBoundary>
             <QuickPick onClose={close} target={target} />
@@ -500,7 +627,10 @@ function QuickPick({ onClose, target }: { onClose(): void; target: Target; }) {
     return (
         <Sheet
             onClose={onClose}
-            header={{ app: "ModKit", title: "ModKit", subtitle: `Target: ${userName(target.guildId, target.userId)}`, icon: GAVEL_PATH, iconColor: APP_COLOR }}
+            header={{
+                app: "ModKit", title: "ModKit", icon: GAVEL_PATH, iconColor: APP_COLOR,
+                subtitle: `Target: ${userName(target.guildId, target.userId)}`
+            }}
             actions={[{ label: "Close", variant: "gray", onClick: onClose }]}
         >
             {macros.length > 0
@@ -510,19 +640,20 @@ function QuickPick({ onClose, target }: { onClose(): void; target: Target; }) {
                             const problems = m.steps.map(s => stepProblem(s, target));
                             const blocked = !m.steps.length || problems.every(Boolean);
                             return (
-                                <div key={m.id} title={blocked ? problems.find(Boolean) ?? "No steps" : undefined}>
-                                    <Row
-                                        leading={<Emoji>{m.emoji}</Emoji>}
-                                        title={<span className={cl("inline")}>{m.name}{m.confirm && <Badge color="orange">Confirm</Badge>}</span>}
-                                        subtitle={m.steps.map(s => STEP_LABELS[s.type]).join(" → ") || "No steps"}
-                                        dim={blocked}
-                                        chevron={!blocked}
-                                        onClick={blocked ? undefined : () => {
-                                            onClose();
-                                            runOrConfirm(m, target);
-                                        }}
-                                    />
-                                </div>
+                                <Row
+                                    key={m.id}
+                                    leading={<MacroGlyph macro={m} />}
+                                    title={<span className={cl("inline")}>{m.name}{m.confirm && !blocked && <Badge color="orange">Confirm</Badge>}</span>}
+                                    subtitle={m.steps.map(s => STEP_LABELS[s.type]).join(" → ") || "No steps"}
+                                    // Why it can't run, right in the row (a tooltip alone was easy to miss)
+                                    note={blocked ? problems.find(Boolean) ?? "This macro has no steps." : undefined}
+                                    dim={blocked}
+                                    chevron={!blocked}
+                                    onClick={blocked ? undefined : () => {
+                                        onClose();
+                                        runOrConfirm(m, target, () => openQuickPickFor(target));
+                                    }}
+                                />
                             );
                         })}
                     </Section>
@@ -531,9 +662,9 @@ function QuickPick({ onClose, target }: { onClose(): void; target: Target; }) {
             {hasNotes && (
                 <Section>
                     <Row
-                        leading={<Emoji>📝</Emoji>}
-                        title={`ModNotes (${getNotesForUser(target.guildId, target.userId).length})`}
-                        subtitle="View history & add note"
+                        leading={<Glyph path={ICONS.edit} color="indigo" />}
+                        title="ModNotes"
+                        subtitle={`${plural(getNotesForUser(target.guildId, target.userId).length, "entry", "entries")} · add a note`}
                         chevron
                         onClick={() => {
                             onClose();
@@ -590,7 +721,8 @@ function ChannelList() {
 // ---------------------------------------------------------------- Settings: macro editor
 
 function saveMacros(list: Macro[]) {
-    settings.store.macros = list;
+    // Plain JSON copy: the list holds settings proxies, and writing those back fails silently ("could not be cloned")
+    settings.store.macros = JSON.parse(JSON.stringify(list));
 }
 
 function updateMacro(id: string, fn: (m: Macro) => Macro) {
@@ -668,7 +800,7 @@ function MacroCard({ macro, index, count, open, onToggle }: { macro: Macro; inde
     return (
         <Group className={open ? cl("macro-open") : undefined}>
             <Row
-                leading={<Emoji>{macro.emoji || "⚙️"}</Emoji>}
+                leading={<MacroGlyph macro={macro} />}
                 title={macro.name || "Unnamed"}
                 subtitle={macro.steps.map(s => STEP_LABELS[s.type]).join(" → ") || "No steps"}
                 trailing={<>
@@ -680,10 +812,7 @@ function MacroCard({ macro, index, count, open, onToggle }: { macro: Macro; inde
 
             {open && (
                 <div className={cl("macro-body")}>
-                    <div className={cl("inline")}>
-                        <DraftInput className={cl("emoji-input")} value={macro.emoji} maxLength={8} placeholder="🔨" onCommit={v => update(m => ({ ...m, emoji: v.trim() }))} />
-                        <DraftInput className={cl("grow")} value={macro.name} maxLength={40} placeholder="Name" onCommit={v => update(m => ({ ...m, name: v.trim() || m.name }))} />
-                    </div>
+                    <DraftInput value={macro.name} maxLength={40} placeholder="Name" onCommit={v => update(m => ({ ...m, name: v.trim() || m.name }))} />
                     <DraftInput value={macro.reason} maxLength={400} placeholder="Default reason (audit log & notes)" onCommit={v => update(m => ({ ...m, reason: v }))} />
                     <Group>
                         <ToggleRow
@@ -820,3 +949,49 @@ export const SettingsPanel = ErrorBoundary.wrap(() => {
         </Sheet>
     );
 }, { noop: true });
+
+// ---------------------------------------------------------------- Note card (ModNotes channel)
+
+/**
+ * A note message in the ModNotes channel, shown as a card. The raw text (with the data spoiler) is hidden by
+ * ui.css as long as the card is there – without ModKit, people just see the text.
+ */
+export const NoteCard = ErrorBoundary.wrap(({ message }: { message: any; }) => {
+    useNotesVersion();
+    if (!message?.channel_id || !isNotesChannel(message.channel_id)) return null;
+    const note = parseNote(message);
+    if (!note) return null;
+
+    const guildId: string = ChannelStore.getChannel(note.channelId)?.guild_id ?? "";
+    const user: any = UserStore.getUser(note.userId);
+    const count = guildId ? getNotesForUser(guildId, note.userId).length : 0;
+
+    return (
+        <div className={cl("card")} style={{ "--modkit-type": `var(--vc-ui-${TYPE_COLOR[note.type]})` } as React.CSSProperties}>
+            <div className={cl("card-head")}>
+                <TypeBadge type={note.type}>
+                    {NOTE_LABELS[note.type]}{note.duration ? ` · ${formatDuration(note.duration)}` : ""}
+                </TypeBadge>
+                <span className={cl("grow")} />
+                {note.ref && LINK_RE.test(note.ref) && <Button small variant="plain" onClick={() => openDiscordLink(note.ref!)}>Jump to message</Button>}
+                {guildId && <Button small variant="plain" onClick={() => openNotesModal(guildId, note.userId)}>History{count > 1 ? ` (${count})` : ""}</Button>}
+            </div>
+            <div className={cl("card-user")}>
+                <Avatar src={user?.getAvatarURL?.(guildId, 64)} size={24} />
+                <b>{userName(guildId, note.userId)}</b>
+                {user?.username && <span className={cl("dim")}>@{user.username}</span>}
+            </div>
+            <div className={cl("card-reason")}>{note.reason || <i className={cl("dim")}>no reason given</i>}</div>
+            {note.excerpt && (
+                <div className={cl("card-quote")}>
+                    <span className={cl("label")}>Their message</span>
+                    {note.excerpt}
+                </div>
+            )}
+        </div>
+    );
+}, { noop: true });
+
+// ---------------------------------------------------------------- Icons (ModNotes channel)
+
+const CHANNEL_PATH = "M10.9 3.2a1 1 0 0 0-1.97-.36L8.4 6H5a1 1 0 0 0 0 2h3.05l-.73 4H4a1 1 0 1 0 0 2h2.96l-.57 3.16a1 1 0 0 0 1.97.36L8.99 14h3.95l-.57 3.16a1 1 0 0 0 1.97.36l.63-3.52H19a1 1 0 1 0 0-2h-3.66l.73-4H20a1 1 0 1 0 0-2h-3.57l.48-2.8a1 1 0 0 0-1.97-.36L14.4 6h-3.96l.46-2.8ZM10.08 8h3.96l-.73 4H9.35l.73-4Z";
