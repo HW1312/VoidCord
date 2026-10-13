@@ -163,15 +163,31 @@ const BRAND_RE = /(?<=["'`>]|[A-Za-z,:;!?"'`>] )Vencord(?![\w$./])/g;
 const BRAND_KEEP = /donat|contribut|Vesktop/i;
 const brand = src => src.split("\n").map(l => (BRAND_KEEP.test(l) ? l : l.replace(BRAND_RE, "VoidCord"))).join("\n");
 
+/**
+ * Changed defaults of Vencord's own plugins (same trick: only during the build). Existing installs get them once
+ * through PluginHub's PERF_DEFAULTS, because Vencord saves defaults into settings.json.
+ */
+const SOURCE_TWEAKS = [
+    // BetterSettings eagerLoad: +15 000 CSS rules and +17 MB heap at start (bench, 2026-10-12)
+    ["plugins/betterSettings/index.tsx", /(eagerLoad: \{[^}]*?default: )true/, "$1false"]
+];
+
 function withBranding(fn) {
     const originals = new Map();
     try {
+        for (const [rel, re, to] of SOURCE_TWEAKS) {
+            const file = join(VENCORD, "src", rel);
+            const src = readFileSync(file, "utf8");
+            if (!re.test(src)) throw new Error(`Source tweak no longer matches (Vencord changed?): ${rel}`);
+            originals.set(file, src);
+            writeFileSync(file, src.replace(re, to));
+        }
         for (const rel of BRAND_FILES) {
             const file = join(VENCORD, "src", rel);
             const src = readFileSync(file, "utf8");
             const out = brand(src);
             if (out !== src) {
-                originals.set(file, src);
+                if (!originals.has(file)) originals.set(file, src);
                 writeFileSync(file, out);
             }
         }

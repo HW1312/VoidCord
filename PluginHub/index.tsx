@@ -64,8 +64,32 @@ export const settings = definePluginSettings({
         type: OptionType.CUSTOM,
         default: [] as string[],
         hidden: true
+    },
+    /** How many of PERF_DEFAULTS were already applied once */
+    perfDefaults: {
+        type: OptionType.NUMBER,
+        description: "Applied performance defaults",
+        default: 0,
+        hidden: true
     }
 });
+
+/**
+ * VoidCord performance defaults, each applied ONCE per install (so a user can turn the option back on afterwards).
+ * Needed besides the build's changed default: Vencord saves a default into settings.json the first time it is read,
+ * so existing installs keep the old value. Only append – the index is stored.
+ */
+const PERF_DEFAULTS: (() => void)[] = [
+    // BetterSettings eagerLoad preloads the whole settings UI at start: +15 000 CSS rules, +17 MB heap (bench, 2026-10-12)
+    () => { Settings.plugins.BetterSettings.eagerLoad = false; }
+];
+
+function applyPerfDefaults() {
+    for (let i = settings.store.perfDefaults; i < PERF_DEFAULTS.length; i++) {
+        try { PERF_DEFAULTS[i](); } catch (e) { logger.error("Performance default", i, "failed", e); }
+    }
+    settings.store.perfDefaults = PERF_DEFAULTS.length;
+}
 
 // ---------------------------------------------------------------- Plugins
 
@@ -187,6 +211,7 @@ export default definePlugin({
     renderTitleBarButton: titleBarSlot("PluginHub", renderTitleBarButton),
 
     start() {
+        applyPerfDefaults();
         scheduleThemeUpdates(THEME_CHECK_FIRST);
     },
 
