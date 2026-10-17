@@ -20,7 +20,7 @@ import { Button, Empty, PluginArtwork, IconButton, ICONS, openWindow, Popover, R
 import { grab, needsRestart as mediaGrabNeedsRestart } from "../MediaGrab/grab";
 import { settings } from "./index";
 import { PlatformIcon, PLATFORMS } from "./platforms";
-import { busy, cancel, findYouTube, forget, listen, listeners, loadCover, showSong, Song, spotifyUrl, state } from "./radar";
+import { animating, busy, cancel, findYouTube, forget, listen, listeners, loadCover, showSong, Song, spotifyUrl, state } from "./radar";
 
 const cl = classNameFactory("vc-songradar-");
 const HeaderBarIcon = findComponentByCodeLazy(".HEADER_BAR_BADGE_BOTTOM,", 'position:"bottom"');
@@ -267,7 +267,7 @@ function History() {
 
     return (
         <Section title="Recently recognized">
-            {shown.slice(0, 12).map(song => (
+            {shown.map(song => (
                 <div key={song.key} className={cl("history-row")} onClick={() => showSong(song)}>
                     <CoverImage url={song.cover} className={cl("history-cover")} />
                     <div className={cl("history-text")}>
@@ -350,7 +350,7 @@ function RadarSheet({ onClose, embedded }: { onClose?(): void; embedded?: boolea
                 title: "SongRadar",
                 subtitle: subtitle(),
                 live: busy(),
-                iconNode: <PluginArtwork app="SongRadar" pulse={state.hearing || state.phase === "searching"} fallback={<RadarLogo active={state.hearing || state.phase === "searching"} />} />,
+                iconNode: <PluginArtwork app="SongRadar" pulse={animating()} fallback={<RadarLogo active={animating()} />} />,
                 actions: <><VolumeControl /><RoundButton icon={ICONS.gear} label="Settings" onClick={openSettings} className={cl("bare")} /></>
             }}
         >
@@ -396,7 +396,7 @@ function TitleBarButton() {
                     className={classes(cl("titlebtn"), active && cl("titlebtn-active"))}
                     onClick={() => setShow(v => !v)}
                     tooltip={isShown ? null : active ? "SongRadar – listening…" : "SongRadar – what song is this?"}
-                    icon={() => <Bars active={state.hearing || state.phase === "searching"} size={20} />}
+                    icon={() => <Bars active={animating()} size={20} />}
                     selected={isShown}
                 />
             )}

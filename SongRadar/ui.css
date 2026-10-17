@@ -73,11 +73,11 @@
     position: absolute;
     inset: -30%;
     background: conic-gradient(from 0deg, transparent 0deg, rgb(255 255 255 / 0%) 250deg, rgb(255 255 255 / 35%) 360deg);
-    animation: vc-songradar-spin 4s linear infinite;
 }
 
+/* Sweep only turns while listening – a still logo when idle */
 .vc-songradar-logo-active .vc-songradar-logo-sweep {
-    animation-duration: 1.2s;
+    animation: vc-songradar-spin 1.2s linear infinite;
 }
 
 @keyframes vc-songradar-spin {

@@ -89,6 +89,9 @@ function set(patch: Partial<typeof state>) {
 
 export const busy = () => state.phase === "listening" || state.phase === "searching";
 
+/** Animations only run while sound really comes in or a search is running – never when idle */
+export const animating = () => (state.phase === "listening" && state.hearing) || state.phase === "searching";
+
 let cancelCurrent: (() => void) | null = null;
 
 export function cancel() {
@@ -200,8 +203,13 @@ export async function listen(): Promise<Song | null> {
     let ctx: AudioContext | null = null;
     let cancelled = false;
     let tick: ReturnType<typeof setInterval> | undefined;
+    let processor: ScriptProcessorNode | null = null;
+    let stopped = false;
     const cleanup = () => {
+        // A late audio callback after stopping set "hearing" back on, so the icons kept animating forever
+        stopped = true;
         clearInterval(tick);
+        if (processor) { processor.onaudioprocess = null; processor.disconnect(); }
         if (state.hearing) set({ hearing: false });
         stream?.getTracks().forEach(t => t.stop());
         ctx?.close().catch(() => { });
@@ -217,8 +225,9 @@ export async function listen(): Promise<Song | null> {
         let lastLoud = 0;
 
         const source = ctx.createMediaStreamSource(stream);
-        const processor = ctx.createScriptProcessor(4096, 2, 1);
+        processor = ctx.createScriptProcessor(4096, 2, 1);
         processor.onaudioprocess = e => {
+            if (stopped) return;
             const input = e.inputBuffer;
             const out = new Float32Array(input.length);
             for (let c = 0; c < input.numberOfChannels; c++) {
