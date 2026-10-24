@@ -609,11 +609,11 @@
     width: min(1100px, 94vw);
     height: min(780px, 90vh);
     overflow: hidden;
-    border: 0.5px solid var(--vc-ui-edge);
+    border: none;
     border-radius: 22px;
     background: var(--vc-ui-glass-strong);
     backdrop-filter: blur(40px) saturate(1.8);
-    box-shadow: var(--vc-ui-shadow);
+    box-shadow: none;
     color: var(--vc-ui-text);
     font-family: var(--vc-ui-font);
     animation: vc-secretchat-pop 0.3s var(--vc-ui-spring);
@@ -633,6 +633,11 @@
     align-items: center;
     justify-content: center;
     height: 100%;
+}
+
+/* No dark glow behind the tooltip bubbles of the buttons (ChatPopout gives them the big window shadow) */
+.vc-secretchat-layer-card [data-tip]::after {
+    box-shadow: none;
 }
 
 /* ChatPopout's window fills a whole popout – here it fills the card */
