@@ -541,7 +541,7 @@ const plugin = definePlugin({
         },
         {
             // Before the file is uploaded (Discord does this as soon as it's attached): image editor & metadata
-            find: "CloudUpload.tryConvertToJpeg",
+            find: ".tryConvertToJpeg({file:",
             replacement: {
                 match: /async upload\(\){/,
                 replace: "$&if(await $self.prepareUpload(this))return;"

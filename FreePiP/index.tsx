@@ -60,7 +60,7 @@ export default definePlugin({
 
     patches: [
         {
-            find: "edgeOffsetTop:80,edgeOffsetBottom:132",
+            find: "top:80,bottom:132,left:80,right:80",
             replacement: [
                 {
                     // Min / max width of the video window (Discord: 200 – 960 px)
@@ -69,8 +69,9 @@ export default definePlugin({
                 },
                 {
                     // Gaps to the edges: they also cap the width (window width − left − right)
-                    match: /edgeOffsetTop:80,edgeOffsetBottom:132,edgeOffsetLeft:80,edgeOffsetRight:80/,
-                    replace: "edgeOffsetTop:$self.edge(80,true),edgeOffsetBottom:$self.edge(132),edgeOffsetLeft:$self.edge(80),edgeOffsetRight:$self.edge(80)"
+                    // Discord keeps them in a constant object; getters so the setting applies without a restart
+                    match: /\{top:80,bottom:132,left:80,right:80\}/,
+                    replace: "{get top(){return $self.edge(80,true)},get bottom(){return $self.edge(132)},get left(){return $self.edge(80)},get right(){return $self.edge(80)}}"
                 },
                 {
                     // Dropped: remember the spot instead of flying into the nearest corner
