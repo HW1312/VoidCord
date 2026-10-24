@@ -1,0 +1,18 @@
+.vc-streamthumb-box {
+    padding: 12px;
+}
+
+.vc-streamthumb-preview {
+    display: block;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    border-radius: 8px;
+    background: var(--vc-ui-field);
+}
+
+.vc-streamthumb-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+}

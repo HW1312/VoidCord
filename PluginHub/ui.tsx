@@ -15,7 +15,7 @@ import { useMemo, useState } from "@webpack/common";
 
 import { AppArtwork, appArtwork, Badge, Button, Empty, Icon, IconButton, ICONS, Note, openWindow, Row, SearchField, Section, Segmented, Sheet, Toggle, ToggleRow } from "../_ui";
 import logo from "file://logo.png?base64";
-import { getOwnPlugins, isEnabled, isNew, markTried, needsRestart, setEnabled, settings } from "./index";
+import { getOwnPlugins, isEnabled, isNew, isTesting, markTried, needsRestart, setEnabled, settings } from "./index";
 import { hubThemes, ThemesTab } from "./themes";
 
 const HeaderBarIcon = findComponentByCodeLazy(".HEADER_BAR_BADGE_BOTTOM,", 'position:"bottom"');
@@ -42,6 +42,7 @@ function PluginRow({ plugin }: { plugin: Plugin; }) {
                 <span className="vc-pluginhub-name">
                     {plugin.name}
                     {isNew(plugin) && <Badge color="blue" solid>New</Badge>}
+                    {isTesting(plugin) && <Badge color="orange" title="Not proven to work yet – tell us if it does">Testing</Badge>}
                     {needsRestart(plugin) && <Badge color="orange">Restart required</Badge>}
                 </span>
             }

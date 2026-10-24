@@ -114,6 +114,9 @@ export function markTried(p: Plugin) {
         settings.store.tried = [...settings.store.tried, p.name];
 }
 
+/** Plugin marked `testing: true` in its definition – not proven to work yet */
+export const isTesting = (p: Plugin) => (p as Plugin & { testing?: boolean; }).testing === true;
+
 /** Setting and actual state differ → only takes effect after a restart */
 export const needsRestart = (p: Plugin) => pluginRequiresRestart(p) && isEnabled(p) !== !!p.started;
 

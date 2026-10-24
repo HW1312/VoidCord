@@ -678,6 +678,11 @@
     background: var(--vc-ui-group);
 }
 
+/* A form field (label, control, hint) directly in a group gets the same inset as rows */
+.vc-ui-group > .vc-ui-form-field {
+    padding: 10px 14px 12px;
+}
+
 .vc-ui-row {
     position: relative;
     display: flex;
