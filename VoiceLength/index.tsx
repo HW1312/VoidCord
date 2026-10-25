@@ -72,23 +72,33 @@ async function prepareUpload(upload: any) {
 }
 
 /** The length shown before anyone plays it comes from the message itself – replace it in every voice message sent */
-let originalPost: ((options: any) => Promise<any>) | null = null;
+let originalPost: ((options: any, ...rest: any[]) => Promise<any>) | null = null;
+let running = false;
+
+/*
+ * Pass on every argument: Discord's message queue hands its response callback as the 2nd one. Dropping it
+ * leaves the queue waiting forever – the first message goes out, every later one stays grey until a reload.
+ */
+function wrappedPost(this: any, options: any, ...rest: any[]) {
+    const body = options?.body;
+    if (running && settings.store.enabled && body && (body.flags & IS_VOICE_MESSAGE) && Array.isArray(body.attachments)) {
+        for (const a of body.attachments) if (a && "duration_secs" in a) a.duration_secs = settings.store.seconds;
+    }
+    return originalPost!.call(this, options, ...rest);
+}
 
 function wrapPost() {
+    running = true;
+    // Still installed from before: only acts while running
     if (originalPost) return;
     originalPost = RestAPI.post;
-    const post = originalPost;
-    RestAPI.post = function (this: any, options: any) {
-        const body = options?.body;
-        if (settings.store.enabled && body && (body.flags & IS_VOICE_MESSAGE) && Array.isArray(body.attachments)) {
-            for (const a of body.attachments) if (a && "duration_secs" in a) a.duration_secs = settings.store.seconds;
-        }
-        return post.call(this, options);
-    };
+    RestAPI.post = wrappedPost;
 }
 
 function unwrapPost() {
-    if (!originalPost) return;
+    running = false;
+    // Only restore when nobody (e.g. SilentMode) wrapped on top of us, else we would remove their wrapper too
+    if (!originalPost || RestAPI.post !== wrappedPost) return;
     RestAPI.post = originalPost;
     originalPost = null;
 }

@@ -1,0 +1,30 @@
+.vc-silentmode-btn,
+.vc-silentmode-icon {
+    -webkit-app-region: no-drag;
+}
+
+.vc-silentmode-btn {
+    position: relative;
+}
+
+.vc-silentmode-btn[class*="selected"] .vc-silentmode-icon {
+    color: var(--vc-ui-title);
+}
+
+/* Silent Mode on: indigo icon + dot so you don't forget it */
+.vc-silentmode-btn-active .vc-silentmode-icon,
+.vc-silentmode-btn-active:hover .vc-silentmode-icon {
+    color: var(--vc-ui-indigo);
+}
+
+.vc-silentmode-btn-active::after {
+    content: "";
+    position: absolute;
+    right: 4px;
+    bottom: 4px;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--vc-ui-indigo);
+    pointer-events: none;
+}
