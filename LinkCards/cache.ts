@@ -54,7 +54,13 @@ function emit(key: string) {
 
 export const getEntry = (key: string) => memory.get(key);
 
-export const hasData = (key: string) => memory.get(key)?.data != null;
+/** Card can replace Discord's own embed: it has data, knows the link is gone, or at least tried once */
+export function isSettled(key: string) {
+    const e = memory.get(key);
+    return !!e && (e.data != null || !!e.notFound || !!e.error);
+}
+
+export const isGone = (key: string) => !!memory.get(key)?.notFound;
 
 export function isFresh(provider: Provider, entry: CacheEntry | undefined) {
     if (!entry) return false;
@@ -71,8 +77,8 @@ async function loadFromDisk(key: string) {
     loadedFromDisk.add(key);
     try {
         const entry = await DataStore.get<CacheEntry>(key, getStore());
-        if (entry?.data != null && !memory.get(key)?.fetchedAt) {
-            memory.set(key, { data: entry.data, fetchedAt: entry.fetchedAt });
+        if ((entry?.data != null || entry?.notFound) && !memory.get(key)?.fetchedAt) {
+            memory.set(key, { data: entry.data, fetchedAt: entry.fetchedAt, notFound: entry.notFound, errorAt: entry.notFound ? entry.errorAt : undefined });
             emit(key);
         }
     } catch (e) {
@@ -107,6 +113,8 @@ export function load(provider: Provider, target: Target, force = false): Promise
             } else if (e instanceof HttpError) {
                 next.error = e.message;
                 next.notFound = e.status === 404;
+                // Remember deleted links across restarts so the old data does not come back as "live"
+                if (next.notFound) DataStore.set(key, { data: next.data, fetchedAt: next.fetchedAt, notFound: true, errorAt: now }, getStore()).catch(() => { });
             } else {
                 next.error = "Failed to load";
                 logger.error(`Error for ${key}`, e);
@@ -141,7 +149,8 @@ export async function pruneCache() {
         const now = Date.now();
         const old: IDBValidKey[] = [];
         for (const [key, entry] of await DataStore.entries<IDBValidKey, CacheEntry>(getStore())) {
-            if (!entry?.fetchedAt || now - entry.fetchedAt > MAX_AGE) old.push(key);
+            const at = entry?.fetchedAt ?? entry?.errorAt;
+            if (!at || now - at > MAX_AGE) old.push(key);
         }
         if (old.length) await DataStore.delMany(old, getStore());
     } catch (e) {

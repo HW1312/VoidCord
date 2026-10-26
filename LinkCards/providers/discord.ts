@@ -3,6 +3,9 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { openInviteModal } from "@utils/discord";
+import { GuildStore, NavigationRouter, showToast } from "@webpack/common";
+
 import { ICONS } from "../icons";
 import { api } from "../net";
 import { CardView, formatCompact, hostIs, NotFoundError, Provider, segments, Stat, Target, timeAgo, truncate } from "../types";
@@ -27,6 +30,9 @@ interface InviteData {
     code: string;
     name: string;
     isGroup: boolean;
+    guildId?: string | null;
+    icon?: string | null;
+    banner?: string | null;
     description?: string | null;
     channel?: string | null;
     members?: number | null;
@@ -46,6 +52,9 @@ async function fetchInvite(t: InviteTarget): Promise<InviteData> {
         code: d.code,
         name: d.guild?.name ?? d.channel?.name ?? "Group DM",
         isGroup: !d.guild,
+        guildId: d.guild?.id,
+        icon: d.guild?.icon,
+        banner: d.guild?.banner ? `banners/${d.guild.id}/${d.guild.banner}` : d.guild?.splash ? `splashes/${d.guild.id}/${d.guild.splash}` : null,
         description: d.guild?.description,
         channel: d.guild ? d.channel?.name : null,
         members: d.approximate_member_count,
@@ -55,6 +64,20 @@ async function fetchInvite(t: InviteTarget): Promise<InviteData> {
         partnered: features.includes("PARTNERED"),
         expiresAt: d.expires_at
     };
+}
+
+function iconUrl(d: InviteData) {
+    // Group DM icons would need the channel id – only server icons
+    if (!d.icon || !d.guildId) return undefined;
+    return `https://cdn.discordapp.com/icons/${d.guildId}/${d.icon}.${d.icon.startsWith("a_") ? "gif" : "webp"}?size=64`;
+}
+
+function join(d: InviteData) {
+    if (d.guildId && GuildStore.getGuild(d.guildId)) {
+        NavigationRouter.transitionToGuild(d.guildId);
+        return;
+    }
+    openInviteModal(d.code).catch(() => showToast("This invite is invalid or expired", "failure"));
 }
 
 function render(d: InviteData): CardView {
@@ -76,7 +99,10 @@ function render(d: InviteData): CardView {
             d.expiresAt ? `expires ${timeAgo(d.expiresAt)}` : "never expires"
         ],
         description: truncate(d.description),
-        stats
+        stats,
+        avatar: iconUrl(d),
+        cover: d.banner ? `https://cdn.discordapp.com/${d.banner}.webp?size=480` : undefined,
+        action: { label: d.guildId && GuildStore.getGuild(d.guildId) ? "Open server" : "Join", onClick: () => join(d) }
     };
 }
 
@@ -85,6 +111,7 @@ export const discord: Provider<InviteTarget, InviteData> = {
     label: "Discord",
     hint: "Server invites: online and member count, boosts",
     ttl: 10 * 60_000,
+    gone: { title: "Invalid invite", description: "This invite is expired or was deleted." },
     match,
     fetch: fetchInvite,
     render

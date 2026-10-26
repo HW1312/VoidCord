@@ -12,6 +12,7 @@ import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
 import { RestAPI } from "@webpack/common";
 
+import { encryptsVoice } from "../SecretChat/voice";
 import { FillMode, withLength } from "./ogg";
 import { SettingsPanel } from "./ui";
 
@@ -54,6 +55,8 @@ const isVoiceUpload = (upload: any) => upload?.durationSecs != null || upload?.i
  */
 async function prepareUpload(upload: any) {
     if (!settings.store.enabled || !isVoiceUpload(upload)) return;
+    // Encrypted chats: Unter das OS sends the real recording as an encrypted file
+    if (encryptsVoice(upload.channelId)) return;
     const file = upload.item?.file;
     if (!(file instanceof File)) return;
     const { seconds, fill } = settings.store;

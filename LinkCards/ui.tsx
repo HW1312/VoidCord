@@ -9,17 +9,18 @@ import { updateMessage } from "@api/MessageUpdater";
 import { classNameFactory } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Link } from "@components/Link";
+import { openImageModal } from "@utils/discord";
 import { classes } from "@utils/misc";
 import { useForceUpdater, useIntersection } from "@utils/react";
 import { showToast, useEffect, useState } from "@webpack/common";
 
-import { IconButton, ICONS as UI_ICONS, LinkRow, Progress, Row, Section, Sheet, State, TextField, ToggleRow } from "../_ui";
-import { clearCache, getEntry, isFresh, isLoading, load, subscribe } from "./cache";
+import { Button, IconButton, ICONS as UI_ICONS, LinkRow, Progress, Row, Section, Sheet, State, TextField, ToggleRow } from "../_ui";
+import { clearCache, getEntry, isFresh, isLoading, isSettled, load, subscribe } from "./cache";
 import { ICONS } from "./icons";
 import { settings } from "./index";
 import { getGitHubRate, onGitHubRate, refreshGitHubRate, resetBackoffs } from "./net";
 import { findMatches, Match, matchUrl, PROVIDERS } from "./providers";
-import { CardView, IconDef, ProviderId, timeAgo } from "./types";
+import { CardView, IconDef, Provider, ProviderId, timeAgo, truncate } from "./types";
 
 const cl = classNameFactory("vc-linkcards-");
 
@@ -35,15 +36,138 @@ function Icon({ icon, size = 16, className }: { icon: IconDef; size?: number; cl
     );
 }
 
-/** Messages whose original embed has already been re-rendered once */
+// ---------------------------------------------------------------- Discord's own embed
+
+/** Discord's embed for this card's link – its media and texts go into the card */
+function findEmbed(message: any, key: string): any {
+    return message.embeds?.find((e: any) => e?.url && matchUrl(e.url)?.key === key);
+}
+
+const hasInvite = (message: any, key: string) =>
+    message.codedLinks?.some((l: any) => l?.code && matchUrl(`https://discord.gg/${l.code}`)?.key === key);
+
+/** Message + link pairs that were already re-rendered to drop Discord's embed */
 const rerendered = new Set<string>();
 
-function hideOriginalEmbed(message: any, key: string) {
-    if (!settings.store.hideEmbeds || rerendered.has(message.id)) return;
-    if (!message.embeds?.some((e: any) => e?.url && matchUrl(e.url)?.key === key)) return;
+function takeOverEmbed(message: any, key: string) {
+    const id = `${message.id}:${key}`;
+    if (!settings.store.replaceEmbeds || rerendered.has(id)) return;
+    if (!findEmbed(message, key) && !hasInvite(message, key)) return;
     if (rerendered.size > 1000) rerendered.clear();
-    rerendered.add(message.id);
+    rerendered.add(id);
     updateMessage(message.channel_id, message.id);
+}
+
+/** Card from the embed alone, when the live request failed before it ever had data */
+function viewFromEmbed(embed: any, provider: Provider): CardView {
+    return {
+        color: embed.color || "var(--vc-ui-gray)",
+        provider: embed.provider?.name || provider.label,
+        title: embed.rawTitle || embed.author?.name || embed.url,
+        url: embed.url,
+        meta: [embed.rawTitle && embed.author?.name],
+        description: truncate(embed.rawDescription)
+    };
+}
+
+function goneView(provider: Provider, url: string, last: CardView | null): CardView {
+    const gone = provider.gone ?? { title: "No longer available", description: "This link was deleted, made private or has expired." };
+    return {
+        color: "var(--vc-ui-red)",
+        provider: last?.provider ?? provider.label,
+        context: last?.context,
+        icon: ICONS.warning,
+        title: gone.title,
+        url: last?.url ?? url,
+        description: gone.description,
+        meta: [last && `Last seen as “${last.title}”`]
+    };
+}
+
+// ---------------------------------------------------------------- Media
+
+/** Players Discord itself embeds – other video URLs are web pages, not players */
+const PLAYER_HOSTS = /^https:\/\/(www\.youtube(-nocookie)?\.com\/embed\/|www\.tiktok\.com\/(embed|player)\/|player\.twitch\.tv\/|clips\.twitch\.tv\/embed|player\.vimeo\.com\/|open\.spotify\.com\/embed|w\.soundcloud\.com\/player|streamable\.com\/[eo]\/|www\.dailymotion\.com\/embed\/)/;
+
+const MAX_W = 400;
+const MAX_H = 450;
+/** Narrower pictures are shown small beside the text */
+const SMALL_THUMB = 300;
+
+function fit(w?: number, h?: number) {
+    if (!w || !h) return { width: MAX_W, height: Math.round(MAX_W * 9 / 16) };
+    const scale = Math.min(MAX_W / w, MAX_H / h);
+    return { width: Math.round(w * scale), height: Math.round(h * scale) };
+}
+
+const mediaSrc = (m: any): string | undefined => m?.proxyURL || m?.url;
+const sizeStyle = ({ width, height }: { width: number; height: number; }) => ({ width, aspectRatio: `${width} / ${height}` });
+
+function withAutoplay(url: string) {
+    const u = new URL(url);
+    u.searchParams.set("autoplay", "1");
+    return u.href;
+}
+
+function EmbedMedia({ embed }: { embed: any; }) {
+    const [playing, setPlaying] = useState(false);
+    const { video, thumbnail } = embed;
+    const image = embed.image ?? embed.images?.[0];
+    const poster = mediaSrc(thumbnail) ?? mediaSrc(image);
+
+    // Video files proxied by Discord play directly
+    if (video?.proxyURL) return (
+        <video
+            className={cl("media")}
+            style={sizeStyle(fit(video.width, video.height))}
+            src={video.proxyURL}
+            poster={poster}
+            controls
+            preload="metadata"
+        />
+    );
+
+    // Players (YouTube, TikTok, Twitch …): preview first, iframe on click – like Discord
+    if (video?.url && PLAYER_HOSTS.test(video.url)) {
+        const style = sizeStyle(fit(video.width ?? thumbnail?.width, video.height ?? thumbnail?.height));
+        if (playing) return (
+            <iframe
+                className={cl("media")}
+                style={style}
+                src={withAutoplay(video.url)}
+                allow="autoplay; encrypted-media; fullscreen; picture-in-picture"
+                referrerPolicy="strict-origin-when-cross-origin"
+                sandbox="allow-forms allow-modals allow-popups allow-popups-to-escape-sandbox allow-presentation allow-same-origin allow-scripts"
+                allowFullScreen
+            />
+        );
+        return (
+            <button className={classes(cl("media"), cl("player"))} style={style} onClick={() => setPlaying(true)} aria-label="Play">
+                {poster && <img src={poster} alt="" />}
+                <span className={cl("play")}><Icon icon={ICONS.play} size={56} /></span>
+            </button>
+        );
+    }
+
+    const picture = image ?? thumbnail;
+    if (!mediaSrc(picture) || (!image && (picture.width ?? 0) < SMALL_THUMB)) return null;
+
+    return (
+        <img
+            className={classes(cl("media"), cl("image"))}
+            style={sizeStyle(fit(picture.width, picture.height))}
+            src={mediaSrc(picture)}
+            alt=""
+            onClick={() => openImageModal({ url: mediaSrc(picture)!, original: picture.url, width: picture.width, height: picture.height })}
+        />
+    );
+}
+
+/** Thumbnail beside the text when it is too small to be the main picture */
+function sideThumbnail(embed: any): string | undefined {
+    const t = embed?.thumbnail;
+    if (!t || embed.video || embed.image || embed.images?.length || (t.width ?? 0) >= SMALL_THUMB) return undefined;
+    return mediaSrc(t);
 }
 
 // ---------------------------------------------------------------- Card
@@ -56,13 +180,15 @@ function RefreshButton({ loading, onClick }: { loading: boolean; onClick(): void
     );
 }
 
-function CardBody({ view }: { view: CardView; }) {
+function CardBody({ view, thumbnail, media }: { view: CardView; thumbnail?: string; media?: React.ReactNode; }) {
     const meta = view.meta?.filter(Boolean) as string[] | undefined;
 
-    return (
+    const text = (
         <>
             <div className={cl("title-row")}>
-                {view.icon && <Icon icon={view.icon} className={cl("state-icon")} />}
+                {view.avatar
+                    ? <img className={cl("avatar")} src={view.avatar} alt="" />
+                    : view.icon && <Icon icon={view.icon} className={cl("state-icon")} />}
                 <Link href={view.url} className={cl("title")} title={view.title}>{view.title}</Link>
                 {view.titleSuffix && <span className={cl("suffix")}>{view.titleSuffix}</span>}
                 {view.badge && <span className={cl("badge")}>{view.badge}</span>}
@@ -102,6 +228,20 @@ function CardBody({ view }: { view: CardView; }) {
             )}
         </>
     );
+
+    return (
+        <>
+            {thumbnail
+                ? <div className={cl("with-thumb")}><div className={cl("text")}>{text}</div><img className={cl("thumb")} src={thumbnail} alt="" /></div>
+                : text}
+            {media}
+            {view.action && (
+                <div className={cl("action")}>
+                    <Button small color="green" onClick={view.action.onClick}>{view.action.label}</Button>
+                </div>
+            )}
+        </>
+    );
 }
 
 function LinkCard({ match, active, message }: { match: Match; active: boolean; message: any; }) {
@@ -123,23 +263,29 @@ function LinkCard({ match, active, message }: { match: Match; active: boolean; m
         if (active && !loading && !isFresh(provider, entry)) load(provider, target);
     });
 
-    const hasData = entry?.data != null;
+    const settled = isSettled(key);
     useEffect(() => {
-        if (hasData) hideOriginalEmbed(message, key);
-    }, [hasData, key]);
+        if (settled) takeOverEmbed(message, key);
+    }, [settled, key]);
 
     const refresh = () => {
         load(provider, target, true);
     };
 
-    let view: CardView | null = null;
-    if (hasData) {
+    let live: CardView | null = null;
+    if (entry?.data != null) {
         try {
-            view = provider.render(entry!.data, target);
+            live = provider.render(entry.data, target);
         } catch {
-            view = null;
+            live = null;
         }
     }
+
+    // Discord's embed only feeds the card while the card replaces it
+    const embed = settings.store.replaceEmbeds ? findEmbed(message, key) : null;
+    const gone = !!entry?.notFound;
+    const fromEmbed = !gone && !live && !!entry?.error && !!embed;
+    const view = gone ? goneView(provider, target.url, live) : live ?? (fromEmbed ? viewFromEmbed(embed, provider) : null);
 
     // No data yet: placeholder or error
     if (!view) {
@@ -160,25 +306,36 @@ function LinkCard({ match, active, message }: { match: Match; active: boolean; m
         );
     }
 
-    const stale = !!entry?.error;
+    let status: string;
+    if (loading) status = "Refreshing…";
+    else if (gone) status = `Checked ${timeAgo(entry!.errorAt)}`;
+    else if (fromEmbed) status = "Live data unavailable";
+    else status = `Live · updated ${timeAgo(entry!.fetchedAt)}`;
+
+    const stale = !gone && !!entry?.error;
 
     return (
-        <div className={cl("card")} style={{ "--vc-linkcards-color": view.color } as React.CSSProperties}>
+        <div className={classes(cl("card"), gone && cl("gone"))} style={{ "--vc-linkcards-color": view.color } as React.CSSProperties}>
+            {view.cover && <img className={cl("cover")} src={view.cover} alt="" />}
             <div className={cl("header")}>
                 <span className={cl("provider")}>
                     {view.provider}
                     {view.context && <span className={cl("context")}> · {view.context}</span>}
                 </span>
                 {!provider.static && <>
-                    <span className={cl("status")} title={entry?.fetchedAt ? new Date(entry.fetchedAt).toLocaleString("en-US") : undefined}>
-                        <span className={classes(cl("live-dot"), stale && cl("live-dot-stale"))} />
-                        {loading ? "Refreshing…" : `Live · updated ${timeAgo(entry!.fetchedAt)}`}
+                    <span className={cl("status")} title={entry?.fetchedAt ? `Last data: ${new Date(entry.fetchedAt).toLocaleString("en-US")}` : undefined}>
+                        <span className={classes(cl("live-dot"), stale && cl("live-dot-stale"), gone && cl("live-dot-gone"))} />
+                        {status}
                     </span>
-                    <RefreshButton loading={loading} onClick={refresh} />
+                    {!entry?.backoffUntil && <RefreshButton loading={loading} onClick={refresh} />}
                 </>}
             </div>
-            <CardBody view={view} />
-            {stale && !loading && (
+            <CardBody
+                view={view}
+                thumbnail={gone ? undefined : view.avatar ? undefined : sideThumbnail(embed)}
+                media={embed && !gone && <EmbedMedia embed={embed} />}
+            />
+            {stale && live && !loading && (
                 <div className={cl("stale")}>
                     <Icon icon={ICONS.warning} size={12} />
                     Refresh failed: {entry!.error}
@@ -190,7 +347,7 @@ function LinkCard({ match, active, message }: { match: Match; active: boolean; m
 
 function Accessory({ message }: { message: any; }) {
     // Re-render when provider toggles or country change
-    const { onlyVisible } = settings.use(["onlyVisible", "steamCountry", ...PROVIDER_IDS]);
+    const { onlyVisible } = settings.use(["onlyVisible", "replaceEmbeds", "steamCountry", ...PROVIDER_IDS]);
     const [ref, visible] = useIntersection();
 
     const matches = findMatches(message.content);
@@ -300,7 +457,7 @@ function CountryInput() {
 }
 
 export const SettingsPanel = ErrorBoundary.wrap(() => {
-    const store = settings.use(["onlyVisible", "hideEmbeds", ...PROVIDER_IDS]);
+    const store = settings.use(["onlyVisible", "replaceEmbeds", ...PROVIDER_IDS]);
 
     const clear = async () => {
         await clearCache();
@@ -346,10 +503,10 @@ export const SettingsPanel = ErrorBoundary.wrap(() => {
                 <ToggleRow
                     icon={LINK_PATH}
                     color="gray"
-                    title="Hide Discord embed"
-                    subtitle="Hides the frozen original embed once the card has data"
-                    checked={store.hideEmbeds}
-                    onChange={v => settings.store.hideEmbeds = v}
+                    title="Replace Discord embed"
+                    subtitle="The card takes over Discord's embed incl. video and pictures, and the invite card. Off: card shows below them"
+                    checked={store.replaceEmbeds}
+                    onChange={v => settings.store.replaceEmbeds = v}
                 />
                 <LinkRow icon={UI_ICONS.trash} destructive onClick={clear}>Clear cache</LinkRow>
             </Section>

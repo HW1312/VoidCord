@@ -26,6 +26,7 @@ import { isRoomMessage, onChannelDelete, retryRooms } from "./rooms";
 import { settings } from "./settings";
 import { loadState } from "./store";
 import { ChatButton, LockDecoration, LockIcon, MessageCard } from "./ui";
+import { guardVoicePosts, takeVoiceUpload, unguardVoicePosts } from "./voice";
 import { closeRoomsWindow } from "./window";
 
 const logger = new Logger("SecretChat");
@@ -87,11 +88,21 @@ export default definePlugin({
                 match: /(?<=async function \i\((\i),(\i),\i\)\{)(?=\{let vcKeep=|let\{filesMetadata:)/,
                 replace: "/*vcSC*/if($self.interceptUpload($1,$2))return;/*vcSC*/"
             }
+        },
+        {
+            // Start of every attachment upload (also hooked by OpSec and VoiceLength) – voice messages in encrypted
+            // chats are taken out here before anything is uploaded
+            find: ".tryConvertToJpeg({file:",
+            replacement: {
+                match: /async upload\(\)\{/,
+                replace: "$&if($self.takeVoiceUpload(this))return;"
+            }
         }
     ],
 
     isRoomMessage,
     interceptUpload,
+    takeVoiceUpload,
     renderTitleBarButton: titleBarSlot("SecretChat", renderTitleBarButton),
 
     contextMenus: {
@@ -125,6 +136,7 @@ export default definePlugin({
         } catch (e) {
             logger.error("Could not wrap sendMessage – the rooms window won't send", e);
         }
+        guardVoicePosts();
         loadedMessageHooks.add(decryptLoaded);
         sendFilesOverrides.add(sendFilesOverride);
         addServerListElement(ServerListRenderPosition.Above, ServerListIcon);
@@ -142,6 +154,7 @@ export default definePlugin({
     stop() {
         closeRoomsWindow();
         unwrapMessageActions();
+        unguardVoicePosts();
         loadedMessageHooks.delete(decryptLoaded);
         sendFilesOverrides.delete(sendFilesOverride);
         removeServerListElement(ServerListRenderPosition.Above, ServerListIcon);

@@ -28,6 +28,8 @@ import { VideoPlayer } from "./player";
 import { createFileProgress, saveDecrypted } from "./save";
 import { settings } from "./settings";
 import { channelKey, getKeyBytes, isLoaded } from "./store";
+import { LockIcon } from "./ui";
+import { VoicePlayer } from "./voiceplayer";
 
 const logger = new Logger("SecretChat");
 const cl = classNameFactory("vc-secretchat-");
@@ -58,6 +60,8 @@ interface Manifest {
     h?: number;
     /** Over the upload limit: link to the encrypted file on Catbox / Gofile (no Discord attachment then) */
     u?: string;
+    /** Voice message (shown with the voice player) */
+    vm?: 1;
 }
 
 interface FileInfo {
@@ -122,8 +126,6 @@ export function takeFile(m: any, plain: string, keyId: string): string | null {
     return "";
 }
 
-export const isFileText = (plain: string) => plain.startsWith(FILE_MARK);
-
 // ---------------------------------------------------------------- Sending
 
 function randomName() {
@@ -152,7 +154,7 @@ function mediaSize(file: File): Promise<{ w?: number; h?: number; }> {
  * Sends files into an encrypted chat encrypted – one message per file. Chats without a key get the normal upload.
  * Over the upload limit: the encrypted file goes to Catbox (Gofile as fallback) through GofileUpload.
  */
-export async function sendEncryptedFiles(channel: Channel, list: File[], messageReference?: unknown) {
+export async function sendEncryptedFiles(channel: Channel, list: File[], messageReference?: unknown, { voice = false } = {}) {
     const record = channelKey(channel.id);
     const key = record && getKeyBytes(record.id);
     const me = UserStore.getCurrentUser()?.id;
@@ -173,6 +175,7 @@ export async function sendEncryptedFiles(channel: Channel, list: File[], message
         try {
             const { iv, data } = await encryptFile(key, await file.arrayBuffer());
             const manifest: Manifest = { v: 1, n: file.name.slice(0, 120), t: file.type || "application/octet-stream", s: file.size, iv, ...await mediaSize(file) };
+            if (voice) manifest.vm = 1;
             const bin = new File([data as BlobPart], `${randomName()}.bin`, { type: "application/octet-stream" });
 
             if (external) {
@@ -288,7 +291,8 @@ function pickFile(): Promise<File | null> {
     });
 }
 
-const kindOf = (type: string) => type.startsWith("image/") ? "image" : type.startsWith("video/") ? "video" : type.startsWith("audio/") ? "audio" : "file";
+const kindOf = (m: Manifest) => m.vm === 1 ? "voice" : kindOfType(m.t);
+const kindOfType = (type: string) => type.startsWith("image/") ? "image" : type.startsWith("video/") ? "video" : type.startsWith("audio/") ? "audio" : "file";
 
 /** Fits the media into 400 × 300 like Discord's attachments */
 function box(m: Manifest) {
@@ -302,7 +306,7 @@ const LOCK_PATH = "M6 9V7a6 6 0 1 1 12 0v2h1a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2
 
 export function EncryptedFile({ message }: { message: Message; }) {
     const info = files.get(message.id);
-    const kind = info ? kindOf(info.manifest.t) : "file";
+    const kind = info ? kindOf(info.manifest) : "file";
     const [url, setUrl] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [busy, setBusy] = useState(false);
@@ -378,6 +382,26 @@ export function EncryptedFile({ message }: { message: Message; }) {
                 </button>
             )}
         </Tooltip>
+    );
+
+    // Voice: only a lock – green = decrypted, red = couldn't be decrypted
+    if (kind === "voice" && (auto || url || error)) return (
+        <div className={cl("voice")}>
+            {url ? <VoicePlayer src={url} /> : error ? (
+                <>
+                    <span className={cl("voice-wait")}>Couldn't decrypt</span>
+                    <Button small variant="gray" onClick={() => start(undefined, true)}>Retry</Button>
+                </>
+            ) : <span className={cl("voice-wait")}>{busy ? phase : "Loading …"}</span>}
+            <Tooltip text={error ? `Not decrypted: ${error}` : "Encrypted – only people with the key can hear it"}>
+                {(tip: any) => (
+                    <span {...tip} className={`${cl("voice-lock")} ${error ? cl("voice-lock-bad") : ""}`}>
+                        <LockIcon width={14} height={14} />
+                    </span>
+                )}
+            </Tooltip>
+            {infoButton}
+        </div>
     );
 
     if (kind !== "file" && !error && (auto || url)) {

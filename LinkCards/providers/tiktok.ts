@@ -156,6 +156,7 @@ export const tiktok: Provider<TikTokTarget, TikTokData> = {
     label: "TikTok",
     hint: "Videos: views, likes, comments, shares · profiles: followers",
     ttl: 15 * 60_000,
+    gone: { title: "Content unavailable", description: "This video or profile was deleted or made private." },
     match,
     fetch: fetchTikTok,
     render

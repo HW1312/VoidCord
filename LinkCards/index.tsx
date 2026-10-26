@@ -7,7 +7,7 @@
 import { definePluginSettings } from "@api/Settings";
 import definePlugin, { OptionType } from "@utils/types";
 
-import { hasData, pruneCache, resetMemory } from "./cache";
+import { getEntry, isSettled, pruneCache, resetMemory } from "./cache";
 import { logger, resetBackoffs } from "./net";
 import { clearMatchMemo, findMatches, matchUrl } from "./providers";
 import { LinkCardsAccessory, SettingsPanel } from "./ui";
@@ -139,25 +139,45 @@ export const settings = definePluginSettings({
         default: true,
         hidden: true
     },
-    hideEmbeds: {
+    // New key so everyone gets the replacement once (the old hideEmbeds defaulted to off)
+    replaceEmbeds: {
         type: OptionType.BOOLEAN,
-        description: "Hide Discord's own embed for these links",
-        default: false,
+        description: "Show the card instead of Discord's own embed / invite card",
+        default: true,
         hidden: true
     }
 });
 
-// ---------------------------------------------------------------- Hide original embeds
+// ---------------------------------------------------------------- Replace original embeds
 
-/** Only hide the embed if a card with data is shown for this exact link */
+/** Key of the card shown for this link in this message, if any */
+function cardKeyFor(url: string, message: any) {
+    if (!settings.store.replaceEmbeds || !message?.content) return null;
+    const m = matchUrl(url);
+    if (!m || !findMatches(message.content).some(x => x.key === m.key)) return null;
+    return m.key;
+}
+
+/** The card takes over the embed (incl. its media) once its first load has finished –
+ *  if that failed, the card is built from the embed itself, so nothing gets lost */
 function shouldIgnoreEmbed(embed: any, message: any) {
     try {
-        if (!settings.store.hideEmbeds || !embed?.url || !message?.content) return false;
-        const m = matchUrl(embed.url);
-        if (!m || !hasData(m.key)) return false;
-        return findMatches(message.content).some(x => x.key === m.key);
+        const key = embed?.url && cardKeyFor(embed.url, message);
+        return !!key && isSettled(key);
     } catch (e) {
         logger.error("Error in shouldIgnoreEmbed", e);
+        return false;
+    }
+}
+
+/** Discord's invite card – only replaced when the card has real data or knows the invite is invalid */
+function shouldIgnoreInvite(code: string, message: any) {
+    try {
+        const key = code && cardKeyFor(`https://discord.gg/${code}`, message);
+        const entry = key ? getEntry(key) : null;
+        return !!entry && (entry.data != null || !!entry.notFound);
+    } catch (e) {
+        logger.error("Error in shouldIgnoreInvite", e);
         return false;
     }
 }
@@ -180,10 +200,19 @@ export default definePlugin({
                 match: /(renderEmbeds\((\i)\){)(.+?embeds\.map\(\((\i),\i\)?=>{)/,
                 replace: (_, rest1, message, rest2, embed) => `${rest1}const vcLinkCardsMessage=${message};${rest2}if($self.shouldIgnoreEmbed(${embed},vcLinkCardsMessage))return null;`
             }
+        },
+        {
+            // Discord's own "You received an invite" card
+            find: "}renderStickersAccessories(",
+            replacement: {
+                match: /(renderCodedLinks\((\i)\){.+?case \i\.\i\.INVITE:)(?=if\(!this\.shouldRenderInvite\((\i)\)\))/,
+                replace: "$1if($self.shouldIgnoreInvite($3,$2))return null;"
+            }
         }
     ],
 
     shouldIgnoreEmbed,
+    shouldIgnoreInvite,
 
     renderMessageAccessory: ({ message }) => {
         if (!message?.content || !findMatches(message.content).length) return null;

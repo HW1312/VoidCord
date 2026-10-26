@@ -10,15 +10,16 @@ import { sendMessage } from "@utils/discord";
 import { Logger } from "@utils/Logger";
 import { User } from "@vencord/discord-types";
 import { findByProps } from "@webpack";
-import { ChannelStore, UserStore } from "@webpack/common";
+import { ChannelStore, MessageStore, UserStore } from "@webpack/common";
 
 import { notify } from "../_ui";
 import { ageOf, MessageRef, refOf, removeMessage, STALE } from "./cleanup";
 import { answerHandshake, completeHandshakeKey, decryptEnvelope, encodeText, encryptMessage, fromB64, HANDSHAKE_PUBLIC, newHandshakeKeyPair, open, parseMessage, randomBytes, RUNE_MARKER, seal, toB64, toHex } from "./crypto";
-import { isFileText, takeFile } from "./files";
+import { takeFile } from "./files";
 import { onRoomDeleted, onRoomMessage, processRoomMessage, roomMessages } from "./rooms";
 import { settings } from "./settings";
 import { addKey, cancelPending, channelKey, containsInviteCode, deleteKey, emit, getKey, getKeyBytes, isLoaded, KeyRecord, save, setChannelKey, state } from "./store";
+import { takeVoiceSend } from "./voice";
 
 const logger = new Logger("SecretChat");
 
@@ -359,6 +360,17 @@ export function retryHandshakes() {
 /** Every encrypted message seen: message id → its sent (encrypted) text – to hide / show them again */
 const encryptedSeen = new Map<string, { channelId: string; authorId: string; raw: string; }>();
 
+/**
+ * Shows a message that is already in Discord's store decrypted (keys loaded late, emergency stop off).
+ * File messages: the .bin has to come out of the stored message too, else it stays a plain download.
+ */
+function showDecrypted(channelId: string, id: string, plain: string, keyId: string) {
+    const stored: any = MessageStore.getMessage(channelId, id);
+    const m = { id, attachments: stored?.attachments ?? [] };
+    const content = takeFile(m, plain, keyId) ?? plain;
+    updateMessage(channelId, id, m.attachments !== stored?.attachments ? { content, attachments: m.attachments } : { content });
+}
+
 /** Emergency stop on: every decrypted message goes back to its encrypted text. Off: decrypt them again. */
 export function applyEmergency(on: boolean) {
     if (on) {
@@ -374,7 +386,7 @@ export function applyEmergency(on: boolean) {
             if (!result) continue;
             if (result.plain != null) {
                 decrypted.set(id, result.keyId);
-                updateMessage(e.channelId, id, { content: isFileText(result.plain) ? "" : result.plain });
+                showDecrypted(e.channelId, id, result.plain, result.keyId);
             } else {
                 locked.set(id, e);
                 updateMessage(e.channelId, id, { content: LOCKED_TEXT });
@@ -390,7 +402,7 @@ export function retryLocked() {
         if (result?.plain == null) continue;
         locked.delete(id);
         decrypted.set(id, result.keyId);
-        updateMessage(channelId, id, { content: isFileText(result.plain) ? "" : result.plain });
+        showDecrypted(channelId, id, result.plain, result.keyId);
     }
 }
 
@@ -476,6 +488,8 @@ export function wrapMessageActions() {
     originalEdit = actions.editMessage;
 
     actions.sendMessage = function (this: any, channelId: string, message: any, ...rest: any[]) {
+        // Discord's voice recorder: the recording goes out as an encrypted file instead (4th argument = options)
+        if (takeVoiceSend(channelId, rest[1])) return Promise.resolve();
         if (typeof message?.content === "string") {
             const content = outgoing(channelId, message.content);
             if (content == null) return notSent();

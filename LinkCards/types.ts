@@ -26,6 +26,8 @@ export interface Provider<T extends Target = any, D = any> {
     static?: boolean;
     /** How long data counts as fresh (ms) */
     ttl: number;
+    /** Text for a deleted / expired link (404) */
+    gone?: { title: string; description: string; };
     /** Detect link – null if not responsible */
     match(url: URL): T | null;
     fetch(target: T): Promise<D>;
@@ -64,6 +66,12 @@ export interface CardView {
     labels?: { name: string; color: string; }[];
     stats?: Stat[];
     price?: { final: string; initial?: string; discount?: number; };
+    /** Round picture left of the title (e.g. server icon) */
+    avatar?: string;
+    /** Wide picture on top of the card (e.g. server banner) */
+    cover?: string;
+    /** Button at the bottom (e.g. Join) */
+    action?: { label: string; onClick(): void; };
 }
 
 // ---------------------------------------------------------------- Errors

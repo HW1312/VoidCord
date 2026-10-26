@@ -221,6 +221,109 @@
     font-weight: 700;
 }
 
+/* ---------- Pictures & media ---------- */
+
+/* Server banner across the top, under the color strip */
+.vc-linkcards-cover {
+    display: block;
+    width: calc(100% + 28px);
+    height: 84px;
+    margin: -9px -12px 2px -16px;
+    object-fit: cover;
+}
+
+.vc-linkcards-avatar {
+    flex-shrink: 0;
+    width: 20px;
+    height: 20px;
+    border-radius: 6px;
+    object-fit: cover;
+}
+
+.vc-linkcards-with-thumb {
+    display: flex;
+    gap: 12px;
+    min-width: 0;
+}
+
+.vc-linkcards-text {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+}
+
+.vc-linkcards-thumb {
+    flex-shrink: 0;
+    width: 72px;
+    height: 72px;
+    border-radius: 8px;
+    object-fit: cover;
+}
+
+.vc-linkcards-media {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    margin-top: 4px;
+    padding: 0;
+    border: 0;
+    border-radius: 8px;
+    background: #000;
+    object-fit: contain;
+}
+
+.vc-linkcards-image {
+    cursor: zoom-in;
+    background: var(--vc-ui-track);
+}
+
+.vc-linkcards-player {
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+}
+
+.vc-linkcards-player img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.vc-linkcards-play {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    color: #fff;
+    filter: drop-shadow(0 2px 8px rgb(0 0 0 / 50%));
+    opacity: 0.9;
+    transition: transform 0.15s ease, opacity 0.15s ease;
+}
+
+.vc-linkcards-player:hover .vc-linkcards-play {
+    opacity: 1;
+    transform: scale(1.08);
+}
+
+.vc-linkcards-action {
+    display: flex;
+    margin-top: 4px;
+}
+
+/* ---------- Deleted / expired ---------- */
+
+.vc-linkcards-gone .vc-linkcards-title {
+    color: var(--vc-ui-red) !important;
+}
+
+.vc-linkcards-live-dot-gone {
+    background: var(--vc-ui-red);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--vc-ui-red) 25%, transparent);
+    animation: none;
+}
+
 .vc-linkcards-stale {
     display: flex;
     align-items: center;

@@ -81,6 +81,7 @@ export const youtube: Provider<VideoTarget, VideoData> = {
     label: "YouTube",
     hint: "Videos and Shorts: views, likes, dislikes",
     ttl: 15 * 60_000,
+    gone: { title: "Video unavailable", description: "This video was deleted or made private." },
     match,
     fetch: fetchVideo,
     render
