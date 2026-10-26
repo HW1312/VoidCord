@@ -1170,10 +1170,49 @@ video.vc-secretchat-file-media {
     cursor: default;
 }
 
-.vc-secretchat-file-audio {
-    display: block;
-    width: 360px;
+/* Audio files: a card with name and size, the voice player inside */
+.vc-secretchat-audio {
+    width: 380px;
     max-width: 100%;
+    box-sizing: border-box;
+    margin-top: 4px;
+    padding: 10px 10px 6px 14px;
+    border: 0.5px solid var(--vc-ui-edge);
+    border-radius: 16px;
+    background: var(--vc-ui-group);
+    font-family: var(--vc-ui-font);
+}
+
+.vc-secretchat-audio-head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+}
+
+.vc-secretchat-audio-name {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    color: var(--vc-ui-title);
+    font-size: 14px;
+    font-weight: 500;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.vc-secretchat-audio-size {
+    flex: none;
+    color: var(--vc-ui-dim);
+    font-size: 12px;
+}
+
+.vc-secretchat-audio .vc-secretchat-voice {
+    width: 100%;
+    margin: 0;
+    padding: 6px 0 2px;
+    border: none;
+    background: none;
 }
 
 /* ---------- Encrypted voice messages ---------- */

@@ -384,8 +384,8 @@ export function EncryptedFile({ message }: { message: Message; }) {
         </Tooltip>
     );
 
-    // Voice: only a lock – green = decrypted, red = couldn't be decrypted
-    if (kind === "voice" && (auto || url || error)) return (
+    // Voice messages and audio files: our player, only a lock – green = decrypted, red = couldn't be decrypted
+    const audioRow = (
         <div className={cl("voice")}>
             {url ? <VoicePlayer src={url} /> : error ? (
                 <>
@@ -404,12 +404,34 @@ export function EncryptedFile({ message }: { message: Message; }) {
         </div>
     );
 
+    if (kind === "voice" && (auto || url || error)) return audioRow;
+
+    // Audio files (e.g. a clip): name and size above the player, like Discord's audio attachments
+    if (kind === "audio" && (auto || url || error)) return (
+        <div className={cl("audio")}>
+            <div className={cl("audio-head")}>
+                <span className={cl("audio-name")} title={m.n}>{m.n}</span>
+                <span className={cl("audio-size")}>{formatBytes(m.s)}</span>
+                {url && (
+                    <Tooltip text="Save the decrypted file">
+                        {(tip: any) => (
+                            <button {...tip} className={cl("file-info")} aria-label="Save" onClick={() => save(url)}>
+                                <svg width={16} height={16} viewBox="0 0 24 24" fill="currentColor"><path d={ICONS.download} /></svg>
+                            </button>
+                        )}
+                    </Tooltip>
+                )}
+            </div>
+            {audioRow}
+        </div>
+    );
+
     if (kind !== "file" && !error && (auto || url)) {
         const size = box(m);
         return (
             <div className={cl("file")}>
                 {!url ? (
-                    <div className={cl("file-wait")} style={kind === "audio" ? undefined : size}>
+                    <div className={cl("file-wait")} style={size}>
                         {busy ? phase : "Loading …"}
                     </div>
                 ) : kind === "image" ? (
@@ -420,10 +442,8 @@ export function EncryptedFile({ message }: { message: Message; }) {
                         style={size}
                         onClick={() => openImageViewer(url, m.n)}
                     />
-                ) : kind === "video" ? (
-                    <VideoPlayer src={url} name={m.n} style={size} />
                 ) : (
-                    <audio className={cl("file-audio")} src={url} controls />
+                    <VideoPlayer src={url} name={m.n} style={size} />
                 )}
                 {badge}
                 {infoButton}

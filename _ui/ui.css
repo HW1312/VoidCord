@@ -278,6 +278,13 @@
     min-width: 0 !important;
 }
 
+/* Discord's modal sizes have a minimum height – alerts and small dialogs fit their content instead */
+.vc-ui-alert-window,
+.vc-ui-window-small {
+    min-height: 0 !important;
+    height: auto !important;
+}
+
 .vc-ui-alert {
     display: flex;
     flex-direction: column;
