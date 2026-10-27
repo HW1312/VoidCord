@@ -38,6 +38,12 @@ export const settings = definePluginSettings({
         description: "Show the Unter das OS icon in the title bar at the top (next to Back / Forward)",
         default: true
     },
+    transferChannel: {
+        type: OptionType.STRING,
+        description: "Group only you are in, used to send your keys to your phone",
+        default: "",
+        hidden: true
+    },
     emergency: {
         type: OptionType.BOOLEAN,
         description: "Emergency stop: show all messages encrypted again (right-click the lock in the title bar / server list)",

@@ -4,7 +4,8 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { Note, Row, Section, State } from "../_ui";
+import { Button, Note, Row, Section, State } from "../_ui";
+import { sendKeysToPhone } from "./transfer";
 
 const Algo = ({ title, what, detail, algo }: { title: string; what: string; detail: string; algo: string; }) => (
     <Row title={title} subtitle={what} note={detail} trailing={<b>{algo}</b>} align="top" />
@@ -18,6 +19,14 @@ export function About() {
                 ever get random-looking bytes – only people who have the key can turn them back into the original.
                 There is no Unter das OS server: keys go straight from person to person.
             </Note>
+
+            <Section title="Your phone" footer="The keys go through Discord, encrypted with a one-time code that only this PC shows. Without the code they are useless, and they are deleted once your phone has them. Send them again after you got new keys.">
+                <Row
+                    title="Send keys to phone"
+                    subtitle="Read your encrypted messages there too"
+                    trailing={<Button small onClick={sendKeysToPhone}>Send</Button>}
+                />
+            </Section>
 
             <Section title="Algorithms" footer="All of them are open standards used by Signal, WhatsApp, TLS 1.3 (HTTPS) and WireGuard. Nothing is home-made except the code that puts them together.">
                 <Algo

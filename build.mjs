@@ -7,6 +7,7 @@
  *   node build.mjs --release    ... Paket bauen und als GitHub-Release veröffentlichen
  *                               (Freunde bekommen es dann über den Vencord-Updater)
  *   node build.mjs --update     vorher Vencord aktualisieren (git pull + pnpm install)
+ *   node build.mjs --android    ... und die browser.js für die Android-App (VendroidEnhanced) bauen
  *
  * Jeder Unterordner mit einer index.ts / index.tsx gilt als Plugin.
  */
@@ -63,66 +64,74 @@ const plugins = readdirSync(ROOT, { withFileTypes: true })
     .filter(d => ["index.ts", "index.tsx"].some(f => existsSync(join(ROOT, d.name, f))))
     .map(d => d.name);
 
-mkdirSync(USERPLUGINS, { recursive: true });
-
-const previous = existsSync(MANAGED_FILE) ? JSON.parse(readFileSync(MANAGED_FILE, "utf-8")) : [];
-for (const name of previous) rmSync(join(USERPLUGINS, name), { recursive: true, force: true });
-
 // Gemeinsame Ordner (beginnen mit "_", Vencord lädt sie nicht als Plugin): z. B. _ui = Apple-UI-Kit aller Plugins
 const shared = readdirSync(ROOT, { withFileTypes: true })
     .filter(d => d.isDirectory() && /^_[a-z]/i.test(d.name))
     .map(d => d.name);
 
-for (const name of [...plugins, ...shared]) cpSync(join(ROOT, name), join(USERPLUGINS, name), { recursive: true });
-writeFileSync(MANAGED_FILE, JSON.stringify([...plugins, ...shared]));
-
-// Wann jedes Plugin dazukam (PluginHub sortiert danach und zeigt "NEW"):
-// frühestes Datum aus Ordner-Erstellung und erstem Git-Commit
-const added = {};
-for (const dir of plugins) {
-    const file = ["index.ts", "index.tsx"].map(f => join(ROOT, dir, f)).find(existsSync);
-    const name = readFileSync(file, "utf-8").match(/definePlugin\(\{[\s\S]*?\bname:\s*"([^"]+)"/)?.[1];
-    if (!name) continue;
-    const dates = [statSync(join(ROOT, dir)).birthtimeMs];
-    try {
-        const first = git(`log --diff-filter=A --format=%ct -- "${dir}"`).split("\n").filter(Boolean).at(-1);
-        if (first) dates.push(Number(first) * 1000);
-    } catch { }
-    added[name] = Math.round(Math.min(...dates.filter(d => d > 0)));
+/** Ersetzt die verwalteten Ordner in userplugins durch diese [Name, Quellordner] */
+function syncFolders(list) {
+    mkdirSync(USERPLUGINS, { recursive: true });
+    const previous = existsSync(MANAGED_FILE) ? JSON.parse(readFileSync(MANAGED_FILE, "utf-8")) : [];
+    for (const name of previous) rmSync(join(USERPLUGINS, name), { recursive: true, force: true });
+    for (const [name, src] of list) cpSync(src, join(USERPLUGINS, name), { recursive: true });
+    writeFileSync(MANAGED_FILE, JSON.stringify(list.map(([name]) => name)));
 }
-writeFileSync(join(USERPLUGINS, "PluginHub", "added.json"), JSON.stringify(added));
 
-// Themes für den Theme Hub im PluginHub: jeder Unterordner von Themes/ mit einer *.theme.css.
-// themes.json = Metadaten für die Oberfläche, themes-data.json = CSS, das nur native.ts kennt
-// (so schreibt native.ts ausschließlich eigene Themes in den Theme-Ordner).
-const THEMES = join(ROOT, "Themes");
-const themeMeta = [];
-const themeData = {};
-if (existsSync(THEMES)) {
-    for (const d of readdirSync(THEMES, { withFileTypes: true })) {
-        if (!d.isDirectory()) continue;
-        const dir = join(THEMES, d.name);
-        const fileName = readdirSync(dir).find(f => f.endsWith(".theme.css"));
-        if (!fileName) continue;
-        const css = readFileSync(join(dir, fileName), "utf-8");
-        const header = css.match(/^\s*\/\*\*([\s\S]*?)\*\//)?.[1] ?? "";
-        const meta = Object.fromEntries([...header.matchAll(/@(\w+)[ \t]+([^\r\n]+)/g)].map(m => [m[1], m[2].trim()]));
-        const extra = existsSync(join(dir, "theme.json")) ? JSON.parse(readFileSync(join(dir, "theme.json"), "utf-8")) : {};
-        themeMeta.push({
-            id: d.name,
-            fileName,
-            name: meta.name ?? d.name,
-            author: meta.author ?? "",
-            version: meta.version ?? "1.0.0",
-            description: meta.description ?? "",
-            colors: extra.colors ?? []
-        });
-        themeData[d.name] = { fileName, css };
+function syncAll() {
+    syncFolders([...plugins, ...shared].map(name => [name, join(ROOT, name)]));
+
+    // Wann jedes Plugin dazukam (PluginHub sortiert danach und zeigt "NEW"):
+    // frühestes Datum aus Ordner-Erstellung und erstem Git-Commit
+    const added = {};
+    for (const dir of plugins) {
+        const file = ["index.ts", "index.tsx"].map(f => join(ROOT, dir, f)).find(existsSync);
+        const name = readFileSync(file, "utf-8").match(/definePlugin\(\{[\s\S]*?\bname:\s*"([^"]+)"/)?.[1];
+        if (!name) continue;
+        const dates = [statSync(join(ROOT, dir)).birthtimeMs];
+        try {
+            const first = git(`log --diff-filter=A --format=%ct -- "${dir}"`).split("\n").filter(Boolean).at(-1);
+            if (first) dates.push(Number(first) * 1000);
+        } catch { }
+        added[name] = Math.round(Math.min(...dates.filter(d => d > 0)));
     }
-}
-writeFileSync(join(USERPLUGINS, "PluginHub", "themes.json"), JSON.stringify(themeMeta));
-writeFileSync(join(USERPLUGINS, "PluginHub", "themes-data.json"), JSON.stringify(themeData));
+    writeFileSync(join(USERPLUGINS, "PluginHub", "added.json"), JSON.stringify(added));
 
+    // Themes für den Theme Hub im PluginHub: jeder Unterordner von Themes/ mit einer *.theme.css.
+    // themes.json = Metadaten für die Oberfläche, themes-data.json = CSS, das nur native.ts kennt
+    // (so schreibt native.ts ausschließlich eigene Themes in den Theme-Ordner).
+    const THEMES = join(ROOT, "Themes");
+    const themeMeta = [];
+    const themeData = {};
+    if (existsSync(THEMES)) {
+        for (const d of readdirSync(THEMES, { withFileTypes: true })) {
+            if (!d.isDirectory()) continue;
+            const dir = join(THEMES, d.name);
+            const fileName = readdirSync(dir).find(f => f.endsWith(".theme.css"));
+            if (!fileName) continue;
+            const css = readFileSync(join(dir, fileName), "utf-8");
+            const header = css.match(/^\s*\/\*\*([\s\S]*?)\*\//)?.[1] ?? "";
+            const meta = Object.fromEntries([...header.matchAll(/@(\w+)[ \t]+([^\r\n]+)/g)].map(m => [m[1], m[2].trim()]));
+            const extra = existsSync(join(dir, "theme.json")) ? JSON.parse(readFileSync(join(dir, "theme.json"), "utf-8")) : {};
+            themeMeta.push({
+                id: d.name,
+                fileName,
+                name: meta.name ?? d.name,
+                author: meta.author ?? "",
+                version: meta.version ?? "1.0.0",
+                description: meta.description ?? "",
+                colors: extra.colors ?? []
+            });
+            themeData[d.name] = { fileName, css };
+        }
+    }
+    writeFileSync(join(USERPLUGINS, "PluginHub", "themes.json"), JSON.stringify(themeMeta));
+    writeFileSync(join(USERPLUGINS, "PluginHub", "themes-data.json"), JSON.stringify(themeData));
+
+    return themeMeta;
+}
+
+const themeMeta = syncAll();
 console.log(`Plugins: ${plugins.join(", ") || "(keine)"}`);
 console.log(`Themes: ${themeMeta.map(t => t.name).join(", ") || "(keine)"}`);
 
@@ -209,6 +218,57 @@ build();
 
 if (args.has("--inject")) run("pnpm inject");
 
+// ---- Android (VendroidEnhanced)
+// VendroidEnhanced lädt Discord Web und spielt eine browser.js ein – deren URL steht in seinen Entwickler-Einstellungen
+// ("Vencord location"). Diese hier enthält nur, was das Handy braucht: ANDROID_PLUGINS samt allem, was sie aus
+// anderen Plugin-Ordnern importieren, die Vendroid-Plugins (Einstellungen, handytaugliche Fenster) und
+// VoidCordMobile, das ANDROID_PLUGINS einschaltet. Plugins mit native.ts gehen dort nicht (kein Electron).
+const ANDROID = join(ROOT, "android");
+const ANDROID_PLUGINS = ["SecretChat"];
+const ANDROID_OUT = join(RELEASE, "android", "voidcord-android.js");
+
+/** Plugin-Ordner, die diese Ordner über "../Ordner" oder "../Ordner/…" importieren – rekursiv */
+function importedFolders(start) {
+    const found = new Set(start);
+    const queue = [...start];
+    while (queue.length) {
+        const dir = join(ROOT, queue.pop());
+        for (const f of readdirSync(dir, { recursive: true })) {
+            if (!/\.[jt]sx?$/.test(f)) continue;
+            const src = readFileSync(join(dir, f), "utf-8");
+            for (const [, name] of src.matchAll(/(?:from|import)\s*["']\.\.\/([^/"']+)[/"']/g)) {
+                if (found.has(name) || shared.includes(name) || !existsSync(join(ROOT, name))) continue;
+                found.add(name);
+                queue.push(name);
+            }
+        }
+    }
+    return [...found];
+}
+
+function buildAndroid() {
+    const folders = importedFolders(ANDROID_PLUGINS);
+    const vendroid = join(ANDROID, "vendroid");
+    syncFolders([
+        ...[...folders, ...shared].map(name => [name, join(ROOT, name)]),
+        ...readdirSync(vendroid, { withFileTypes: true }).filter(d => d.isDirectory()).map(d => [d.name, join(vendroid, d.name)]),
+        ["VoidCordMobile", join(ANDROID, "VoidCordMobile")]
+    ]);
+    console.log(`Android: ${folders.join(", ")} + Vendroid`);
+    try {
+        withBranding(() => run("pnpm buildWeb"));
+    } finally {
+        // userplugins wieder mit allen Plugins, wie für dein Discord gebaut
+        syncAll();
+    }
+    // Vendroid lädt nur das CSS des offiziellen Vencord – das eigene kommt mit in die js-Datei
+    const css = readFileSync(join(VENCORD, "dist", "browser.css"), "utf-8");
+    const addCss = `\n;(()=>{const add=()=>document.documentElement.appendChild(Object.assign(document.createElement("style"),{id:"voidcord-css",textContent:${JSON.stringify(css)}}));document.documentElement?add():document.addEventListener("DOMContentLoaded",add,{once:true})})();\n`;
+    mkdirSync(dirname(ANDROID_OUT), { recursive: true });
+    writeFileSync(ANDROID_OUT, readFileSync(join(VENCORD, "dist", "browser.js"), "utf-8") + addCss);
+    console.log(`\nAndroid-Build: ${ANDROID_OUT}`);
+}
+
 // ---- Paket für Freunde
 // Der Updater im Paket schaut auf REPO statt aufs offizielle Vencord, überschreibt also die eigenen Plugins nicht
 if (args.has("--package")) {
@@ -241,6 +301,10 @@ if (args.has("--package")) {
     console.log(`\nInstaller erstellt: ${INSTALLER} (Version ${hash})`);
 }
 
+// Nach dem Paket – --package leert release/. Jedes Release bekommt die Android-Datei, so bleibt die URL in
+// VendroidEnhanced immer dieselbe: .../releases/latest/download/voidcord-android.js
+if (args.has("--android") || args.has("--release")) buildAndroid();
+
 // ---- GitHub-Release
 if (args.has("--release")) {
     // Der Commit muss auf GitHub liegen, sonst findet der Updater keinen Changelog
@@ -249,7 +313,7 @@ if (args.has("--release")) {
     const assets = ["patcher.js", "preload.js", "renderer.js", "renderer.css"]
         .map(f => `"${join(FILES, "dist", f)}"`)
         // Older installers fetch the new exe from here to update themselves
-        .concat(`"${INSTALLER}"`);
+        .concat(`"${INSTALLER}"`, `"${ANDROID_OUT}"`);
     // Release notes = commit body, shown as changelog in the UpdateButton plugin. One line per change:
     //   - Added: Plugin X in the Plugin Hub
     //   - Fixed: Popout shows GIFs again

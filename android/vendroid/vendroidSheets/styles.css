@@ -1,0 +1,16 @@
+.vde-sheet-layer {
+    padding: 0;
+    max-width: 95vw;
+    justify-self: center;
+    justify-content: flex-end;
+}
+
+.vde-sheet-outer {
+    align-items: flex-end;
+    padding: 0;
+}
+
+.vde-sheet-inner, .vde-sheet-layer > div > div {
+    border-bottom-left-radius: 0 !important;
+    border-bottom-right-radius: 0 !important;
+}

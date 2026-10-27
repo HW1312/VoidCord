@@ -217,16 +217,17 @@ export async function safetyCode(key: Uint8Array) {
     return n.toString().padStart(12, "0").replace(/(\d{4})(?=\d)/g, "$1 ");
 }
 
-/** Same password → same key on every PC (fixed salt, so it must be a strong password) */
-export async function keyFromPassword(password: string) {
-    const base = await crypto.subtle.importKey("raw", encodeText(password), "PBKDF2", false, ["deriveBits"]);
-    const bits = await crypto.subtle.deriveBits(
-        { name: "PBKDF2", hash: "SHA-512", salt: encodeText("SecretChat group key v1"), iterations: 310_000 },
-        base,
-        256
-    );
+async function pbkdf2(secret: string, salt: BufferSource) {
+    const base = await crypto.subtle.importKey("raw", encodeText(secret), "PBKDF2", false, ["deriveBits"]);
+    const bits = await crypto.subtle.deriveBits({ name: "PBKDF2", hash: "SHA-512", salt, iterations: 310_000 }, base, 256);
     return new Uint8Array(bits);
 }
+
+/** Same password → same key on every PC (fixed salt, so it must be a strong password) */
+export const keyFromPassword = (password: string) => pbkdf2(password, encodeText("SecretChat group key v1"));
+
+/** One-time transfer code + random salt → key that moves the keyring to another device */
+export const keyFromTransferCode = (code: string, salt: BufferSource) => pbkdf2(`SecretChat transfer v1|${code}`, salt);
 
 const ECDH = { name: "ECDH", namedCurve: "P-256" } as const;
 

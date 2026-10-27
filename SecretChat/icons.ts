@@ -39,3 +39,5 @@ export const EXPAND_ICON = strokeIcon("M15 3h6v6", "m21 3-7 7", "m3 21 7-7", "M9
 export const FULLSCREEN_ICON = strokeIcon("M8 3H5a2 2 0 0 0-2 2v3", "M21 8V5a2 2 0 0 0-2-2h-3", "M3 16v3a2 2 0 0 0 2 2h3", "M16 21h3a2 2 0 0 0 2-2v-3");
 /** Lucide "minimize" */
 export const EXIT_FULLSCREEN_ICON = strokeIcon("M8 3v3a2 2 0 0 1-2 2H3", "M21 8h-3a2 2 0 0 1-2-2V3", "M3 16h3a2 2 0 0 1 2 2v3", "M16 21v-3a2 2 0 0 1 2-2h3");
+/** Lucide "smartphone" */
+export const PHONE_ICON = strokeIcon("M7 2h10a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z", "M12 18h.01");

@@ -19,6 +19,7 @@ import { takeFile } from "./files";
 import { onRoomDeleted, onRoomMessage, processRoomMessage, roomMessages } from "./rooms";
 import { settings } from "./settings";
 import { addKey, cancelPending, channelKey, containsInviteCode, deleteKey, emit, getKey, getKeyBytes, isLoaded, KeyRecord, save, setChannelKey, state } from "./store";
+import { processTransferMessage, transferMessages } from "./transfer";
 import { takeVoiceSend } from "./voice";
 
 const logger = new Logger("SecretChat");
@@ -251,6 +252,7 @@ function processMessage(m: any, live: boolean) {
         return;
     }
 
+    if (processTransferMessage(m)) return;
     if (processRoomMessage(m, live)) return;
 
     const del = DELETE_RE.exec(content);
@@ -322,7 +324,7 @@ function onDeleted(ids: string[]) {
     if (changed) setTimeout(save, 0);
 }
 
-const isProtocolMessage = (id: string) => handshakes.has(id) || keyDeletes.has(id) || roomMessages.has(id);
+const isProtocolMessage = (id: string) => handshakes.has(id) || keyDeletes.has(id) || roomMessages.has(id) || transferMessages.has(id);
 
 export function intercept(action: any) {
     try {

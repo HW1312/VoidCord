@@ -23,6 +23,7 @@ import { acceptHandshake, cancelRequest, declineHandshake, decrypted, deleteKeyF
 import { chatLabel, makeRoom, pruneStale, roomMessages } from "./rooms";
 import { settings } from "./settings";
 import { addKey, channelKey, deleteKey, getKey, inviteCode, KeyRecord, parseInviteCode, renameKey, setChannelKey, toggleChannel, useStore } from "./store";
+import { TransferCard, transferMessages } from "./transfer";
 
 const cl = classNameFactory("vc-secretchat-");
 
@@ -535,6 +536,7 @@ export function MessageCard({ message }: { message: Message; }) {
     /** The ✓ / ✕ that was clicked – the buttons stay until its animation is over */
     const [deciding, setDeciding] = useState<"yes" | "no" | null>(null);
     if (roomMessages.has(message.id)) return <RoomCard message={message} />;
+    if (transferMessages.has(message.id)) return <TransferCard messageId={message.id} />;
     const del = keyDeletes.get(message.id);
     if (del) {
         return (

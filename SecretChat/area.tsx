@@ -20,6 +20,7 @@ import { applyEmergency } from "./messages";
 import { canLetIn, isAnswered, isJoining, joinRoom, letIn, roomMessages, userName } from "./rooms";
 import { settings } from "./settings";
 import { useStore } from "./store";
+import { sendKeysToPhone } from "./transfer";
 import { LockIcon } from "./ui";
 import { closeRoomsWindow, openRoomsWindow, toggleRoomsWindow, toIconDataUrl } from "./window";
 
@@ -98,6 +99,7 @@ function openLockMenu(e: MouseEvent) {
                 action={toggleEmergency}
             />
             {!on && <Menu.MenuItem id="vc-secretchat-open" label="Open secret rooms" action={() => openRoomsWindow()} />}
+            {!on && <Menu.MenuItem id="vc-secretchat-transfer" label="Send keys to phone…" subtext="Read your encrypted messages there too" action={sendKeysToPhone} />}
             {/* Discord's menu only accepts menu items and groups as children – no fragments, or it crashes */}
             {onServerList && (
                 <Menu.MenuGroup>

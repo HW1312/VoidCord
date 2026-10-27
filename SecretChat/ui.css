@@ -2064,3 +2064,37 @@ video.vc-secretchat-file-media {
 .vc-secretchat-file .vc-secretchat-player-root:not(.vc-secretchat-player-fullscreen) .vc-secretchat-player-time {
     font-size: 11px;
 }
+
+/* ---------------------------------------------------------------- Key transfer to the phone */
+
+.vc-secretchat-transfer {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    max-width: 520px;
+}
+
+.vc-secretchat-transfer .vc-secretchat-panel {
+    border-radius: 12px;
+}
+
+.vc-secretchat-transfer-field {
+    font-family: var(--vc-ui-mono);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.vc-secretchat-transfer-code {
+    margin: 4px 0 12px;
+    font-family: var(--vc-ui-mono);
+    font-size: 24px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    color: var(--vc-ui-text);
+    user-select: all;
+}
+
+.vc-secretchat-transfer-inline {
+    font-family: var(--vc-ui-mono);
+    letter-spacing: 0.04em;
+}
