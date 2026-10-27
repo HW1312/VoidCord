@@ -64,6 +64,7 @@ const settings = definePluginSettings({
 export default definePlugin({
     name: "StreamUnlock",
     description: "Screen share with 75 to 360 FPS, a lighter H264 encoder and a custom bitrate, plus a stream debugger with the real FPS",
+    about: "Stream with 75 up to 360 FPS, switch the encoder to H264 and raise the bitrate limit for a sharper stream. Needs FakeNitro (or Nitro). Experimental.",
     authors: [{ name: "5406", id: 1062070744558870548n }],
     tags: ["Media", "Voice"],
     settings,

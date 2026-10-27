@@ -427,6 +427,7 @@ function UpdateButton() {
 export default definePlugin({
     name: "UpdateButton",
     description: "Update button in the title bar instead of Vencord's update popup – check for updates, see what's new and restart with one click.",
+    about: "Replaces Vencord's update popup with a button in the title bar. It turns violet when an update is ready and shows what's new before you install it.",
     authors: [{ name: "5406", id: 1062070744558870548n }],
     tags: ["Utility"],
     required: true,

@@ -55,6 +55,7 @@ const userContext: NavContextMenuPatchCallback = (children, { user }: { user?: U
 export default definePlugin({
     name: "Unter das OS",
     description: "End-to-end encrypted messages: only people with Unter das OS and your key can read them, everyone else sees random characters",
+    about: "Encrypt your messages, voice messages and files in any chat. Only people with this plugin and the same key can read them - everyone else, Discord included, just sees random characters. Turn it on per chat with the lock in the chat bar, or create secret rooms that are always encrypted.",
     authors: [{ name: "5406", id: 1062070744558870548n }],
     tags: ["Chat", "Privacy", "Utility"],
     settings,

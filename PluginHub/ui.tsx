@@ -5,11 +5,11 @@
 
 import "./ui.css";
 
-import { hasAnyVisibleSettings, isSettingHidden, pluginRequiresRestart } from "@api/PluginManager";
+import { hasAnyVisibleSettings, pluginRequiresRestart } from "@api/PluginManager";
 import { useSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { openPluginModal } from "@components/settings";
-import { OptionType, Plugin } from "@utils/types";
+import { Plugin } from "@utils/types";
 import { findComponentByCodeLazy } from "@webpack";
 import { useMemo, useState } from "@webpack/common";
 
@@ -69,68 +69,18 @@ function PluginRow({ plugin }: { plugin: Plugin; }) {
 
 // ---------------------------------------------------------------- Info
 
-const MENU_NAMES: Record<string, string> = {
-    "message": "messages",
-    "user-context": "users",
-    "user-profile-actions": "user profiles",
-    "channel-context": "channels",
-    "thread-context": "threads",
-    "gdm-context": "group DMs",
-    "guild-context": "servers",
-    "guild-header-popout": "the server menu",
-    "textarea-context": "the chat box",
-    "image-context": "images",
-    "expression-picker": "emojis and stickers"
-};
-
-const menuName = (navId: string) => MENU_NAMES[navId] ?? navId.replace(/-context$/, "").replace(/-/g, " ");
-
-/** What the plugin adds to Discord, read from its definition so it never gets out of date */
-function getFeatures(p: Plugin) {
-    const features: string[] = [];
-    if ((p as any).renderTitleBarButton) features.push("An icon in the title bar");
-    if (p.chatBarButton) features.push("A button in the chat bar");
-    if (p.messagePopoverButton) features.push("A button when you hover over a message");
-    if (p.renderMessageAccessory) features.push("Extra content under messages");
-    if (p.contextMenus) {
-        const menus = [...new Set(Object.keys(p.contextMenus).map(menuName))];
-        features.push(`Right-click menu entries for ${menus.join(", ")}`);
-    }
-    if (p.commands?.length) features.push(`Commands: ${p.commands.map(c => "/" + c.name).join(", ")}`);
-    if (p.toolboxActions) features.push(`In the Vencord toolbox: ${Object.keys(p.toolboxActions).join(", ")}`);
-    return features;
-}
-
-function getOptions(p: Plugin) {
-    const { settings } = p;
-    if (!settings) return [];
-    return Object.entries(settings.def)
-        .filter(([, s]) => s.type !== OptionType.COMPONENT && s.type !== OptionType.CUSTOM && !isSettingHidden(settings, s))
-        .map(([, s]) => (s as { description?: string; }).description)
-        .filter(Boolean) as string[];
-}
+/** The plugin's own short explanation (`about` in its definition), or its description if it has none */
+const getAbout = (p: Plugin) => (p as Plugin & { about?: string; }).about ?? p.description;
 
 function InfoContent({ plugin }: { plugin: Plugin; }) {
-    const features = getFeatures(plugin);
-    const options = getOptions(plugin);
     const notes = [
-        hasAnyVisibleSettings(plugin) && !options.length && "Has its own settings page once it is turned on.",
+        isTesting(plugin) && "Not proven to work yet - tell us if it does.",
         pluginRequiresRestart(plugin) && "Turning it on takes effect after a restart."
     ].filter(Boolean) as string[];
 
     return (
         <>
-            <p className="vc-pluginhub-info-desc">{plugin.description}</p>
-            {features.length > 0 && (
-                <Section title="What it adds">
-                    {features.map(f => <Row key={f} title={f} />)}
-                </Section>
-            )}
-            {options.length > 0 && (
-                <Section title="Options">
-                    {options.map(o => <Row key={o} title={o} />)}
-                </Section>
-            )}
+            <p className="vc-pluginhub-info-desc">{getAbout(plugin)}</p>
             {notes.map(n => <Note key={n}>{n}</Note>)}
         </>
     );

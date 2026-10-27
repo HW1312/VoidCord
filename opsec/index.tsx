@@ -516,6 +516,7 @@ function onWindowFocus() {
 const plugin = definePlugin({
     name: "OpSec",
     description: "Privacy & security: type invisibly, strip metadata from uploads, redact images before upload, clean tracking links, IP logger/phishing warnings with a scam blocklist, streaming protection, capture protection, privacy curtain and security check",
+    about: "Privacy and security for Discord: type without the typing indicator, strip metadata from uploads, clean tracking links, warn about IP loggers and phishing, hide DMs while streaming and check your account settings.",
     authors: [{ name: "5406", id: 1062070744558870548n }],
     tags: ["Privacy", "Utility"],
     dependencies: ["UserSettingsAPI", "MessageEventsAPI"],

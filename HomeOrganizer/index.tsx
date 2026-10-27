@@ -102,6 +102,7 @@ const privateChannelPatch: NavContextMenuPatchCallback = (children, { channel, u
 export default definePlugin({
     name: "HomeOrganizer",
     description: "Tidy up Home: group DMs by activity & bulk-close them, review and answer friend requests with a spam score, PinDMs dividers",
+    about: "Tidies up your Home view: sort DMs by activity and close old ones in bulk, and go through friend requests with a spam score so you can spot bots quickly.",
     authors: [{ name: "5406", id: 1062070744558870548n }],
     tags: ["Friends", "Organisation", "Utility"],
     settings,

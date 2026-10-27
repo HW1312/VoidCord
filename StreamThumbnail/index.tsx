@@ -2,8 +2,8 @@
  * StreamThumbnail – Vencord Userplugin
  * Your own picture as the preview of your Go Live stream – what others see when they hover your stream in the
  * channel list or look at it before joining. Discord normally takes a screenshot of your stream every few minutes;
- * this plugin sends your picture (with an optional caption, YouTube thumbnail style) instead. Right-click the
- * "Share Your Screen" button in the voice panel to change it quickly.
+ * this plugin sends your picture (with an optional caption, YouTube thumbnail style) instead, starting a few
+ * seconds after you go live.
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
@@ -14,7 +14,7 @@ import definePlugin, { OptionType } from "@utils/types";
 import { findStoreLazy } from "@webpack";
 import { FluxDispatcher, RestAPI } from "@webpack/common";
 
-import { openShareMenu, SettingsPanel } from "./ui";
+import { SettingsPanel } from "./ui";
 
 const logger = new Logger("StreamThumbnail");
 const ApplicationStreamingStore = findStoreLazy("ApplicationStreamingStore");
@@ -173,9 +173,37 @@ export async function uploadNow() {
     return true;
 }
 
+/** Sends the picture as soon as a new stream starts – Discord itself waits a minute for its first screenshot */
+let lastKey: string | null = null;
+let startTimer: ReturnType<typeof setTimeout> | undefined;
+
+function onStreamChange() {
+    const key = streamKey();
+    if (key === lastKey) return;
+    lastKey = key;
+    clearTimeout(startTimer);
+    if (!key) return;
+
+    // The stream isn't known to the server for a moment after it starts, so try a few times
+    const delays = [2000, 4000, 8000, 15000];
+    const attempt = (i: number) => {
+        startTimer = setTimeout(async () => {
+            if (streamKey() !== key || !settings.store.enabled || !thumbnail) return;
+            try {
+                await uploadNow();
+            } catch (e) {
+                if (i + 1 < delays.length) attempt(i + 1);
+                else logger.error("Could not send the thumbnail at stream start", e);
+            }
+        }, delays[i]);
+    };
+    attempt(0);
+}
+
 export default definePlugin({
     name: "StreamThumbnail",
     description: "Your own picture (with a caption if you like) as the preview of your stream - what others see when they hover it",
+    about: "Choose the picture others see as the preview of your stream instead of a screenshot of your screen - with a big caption if you like. It's sent automatically as soon as you go live.",
     authors: [{ name: "5406", id: 1062070744558870548n }],
     tags: ["Media", "Voice"],
     settings,
@@ -188,18 +216,8 @@ export default definePlugin({
                 match: /let (\i)=(\i\.toDataURL\("image\/jpeg"\));(?=if\(\i\.\i\.dispatch\(\{type:"STREAM_PREVIEW_FETCH_SUCCESS")/,
                 replace: "let $1=$self.thumbnail($2);"
             }
-        },
-        {
-            // "Share Your Screen" button in the voice panel: right-click opens the picture menu
-            find: '"ManageStreamsMenu",',
-            replacement: {
-                match: /(?<=canGoLive:\i,enableActivities:\i.{0,2500}?)"aria-pressed":null!=\i,onClick:/,
-                replace: "onContextMenu:$self.openShareMenu,$&"
-            }
         }
     ],
-
-    openShareMenu,
 
     thumbnail(screenshot: string) {
         return settings.store.enabled && thumbnail ? thumbnail : screenshot;
@@ -209,5 +227,12 @@ export default definePlugin({
         source = await DataStore.get<string>(STORE_KEY) ?? null;
         await render().catch(e => logger.error("Could not render the thumbnail", e));
         emit();
+        lastKey = streamKey();
+        ApplicationStreamingStore.addChangeListener(onStreamChange);
+    },
+
+    stop() {
+        ApplicationStreamingStore.removeChangeListener(onStreamChange);
+        clearTimeout(startTimer);
     }
 });

@@ -91,6 +91,7 @@ const guildContextPatch: NavContextMenuPatchCallback = (children, { guild }: { g
 export default definePlugin({
     name: "ServerDeclutter",
     description: "Declutter servers: overview of all servers with local activity tracking, filters and suggestions – mute, mark as read, archive or leave",
+    about: "An overview of all your servers with how active they are (tracked on your PC), so you can quickly mute, mark as read, archive or leave the ones you don't use.",
     authors: [{ name: "5406", id: 1062070744558870548n }],
     tags: ["Servers", "Utility"],
     settings,

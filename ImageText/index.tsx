@@ -256,6 +256,7 @@ const imageContextMenuPatch: NavContextMenuPatchCallback = (children, props) => 
 export default definePlugin({
     name: "ImageText",
     description: "Right-click an image to copy the text in it. Recognized locally with the Windows OCR engine – nothing is uploaded.",
+    about: "Right-click an image to copy or show the text in it. The text is recognized on your PC with Windows' built-in OCR - nothing is uploaded.",
     authors: [{ name: "5406", id: 1062070744558870548n }],
     settings,
 

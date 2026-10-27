@@ -82,6 +82,7 @@ const messageContextPatch: NavContextMenuPatchCallback = (children, { message }:
 export default definePlugin({
     name: "ServerTools",
     description: "Server tools: backup & restore, Channel Health with heatmap, fair, verifiable giveaways, copying channel names and clickable inviters in the invite list",
+    about: "Tools for server owners: back up and restore your server's channels and roles, see which channels are actually used, and run fair giveaways anyone can verify.",
     authors: [{ name: "5406", id: 1062070744558870548n }],
     tags: ["Servers", "Utility"],
     settings,

@@ -109,6 +109,7 @@ export async function applyHotkey(accelerator = settings.store.hotkey) {
 export default definePlugin({
     name: "CallClips",
     description: "Clip the last seconds of a voice call with a shortcut – saved as audio, with a list to play, trim, rename and send clips",
+    about: "Instant replay for voice calls: while you're in a call, the last seconds of sound are kept in memory. Press the shortcut (works in games too) to save them as a clip, then play, trim or send it into the chat. Audio only, and nobody is told.",
     authors: [{ name: "5406", id: 1062070744558870548n }],
     tags: ["Voice", "Media", "Utility"],
     settings,

@@ -124,6 +124,7 @@ export function stopAll() {
 export default definePlugin({
     name: "GameSpoof",
     description: "Pretend a detectable PC game is running, so Discord detects it like a real game (activity, game badges)",
+    about: "Pretend you're playing any PC game Discord knows. It shows up as your activity and Discord counts it like a really detected game. Games you actually start are still detected next to it.",
     authors: [{ name: "5406", id: 1062070744558870548n }],
     tags: ["Activity", "Fun"],
     // Plugin Hub shows a "Testing" badge: whether Discord counts these games for the Game Variety badge isn't proven yet

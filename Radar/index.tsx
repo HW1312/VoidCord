@@ -168,6 +168,7 @@ let tickTimer: ReturnType<typeof setInterval> | undefined;
 const plugin = definePlugin({
     name: "Radar",
     description: "Local if-then rules: keyword alerts, mentions, friends in voice, status while gaming - plus reminders and bookmarks for messages",
+    about: "Set up your own if-then rules - e.g. notify me when someone says a keyword, joins voice or starts a game - plus reminders and bookmarks. Everything runs on your side; Radar never sends messages.",
     authors: [{ name: "5406", id: 1062070744558870548n }],
     tags: ["Notifications", "Utility"],
     dependencies: ["UserSettingsAPI"],

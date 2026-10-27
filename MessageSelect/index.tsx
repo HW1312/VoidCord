@@ -184,6 +184,7 @@ const messageCtxPatch: NavContextMenuPatchCallback = (children, { message }: { m
 export default definePlugin({
     name: "MessageSelect",
     description: "Select several messages (right-click or Shift+click) and quote, copy, forward, delete or screenshot them all at once",
+    about: "Select several messages at once (Shift+click, or a whole range) and quote, copy, forward, delete or screenshot them together.",
     authors: [{ name: "5406", id: 1062070744558870548n }],
     tags: ["Chat", "Utility"],
     settings,

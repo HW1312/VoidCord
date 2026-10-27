@@ -122,6 +122,7 @@ const ChatButton: ChatBarButtonFactory = ({ channel, isMainChat }) => {
 export default definePlugin({
     name: "MediaGrab",
     description: "Paste a TikTok / YouTube / Instagram … link and get the video or MP3, right into the chat or your Downloads folder",
+    about: "Turn a TikTok, YouTube, Instagram, X or Reddit link into a video or MP3 file - right-click a message with a link or use the chat bar button. The file goes straight into your message box or Downloads folder.",
     authors: [{ name: "5406", id: 1062070744558870548n }],
     tags: ["Media", "Chat", "Utility"],
     settings,

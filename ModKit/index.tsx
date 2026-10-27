@@ -198,6 +198,7 @@ const messageContext: NavContextMenuPatchCallback = (children, { message, channe
 export default definePlugin({
     name: "ModKit",
     description: "Moderation toolkit: ModNotes via a private mod channel, mod macros (delete, timeout, kick, ban, reply, note) and a scam quick action",
+    about: "Tools for mod teams: shared notes about users through a private mod channel, ready-made mod messages, and a quick action to deal with scammers.",
     authors: [{ name: "5406", id: 1062070744558870548n }],
     tags: ["Utility", "Chat"],
     settings,

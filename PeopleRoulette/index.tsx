@@ -145,6 +145,7 @@ export function resetSeen() {
 export default definePlugin({
     name: "PeopleRoulette",
     description: "Just for fun: get a random person from your servers and jump into their DMs to meet someone new",
+    about: "Just for fun: press a button and get a random person from your servers who is likely open to chat. See their profile and jump straight into their DMs.",
     authors: [{ name: "5406", id: 1062070744558870548n }],
     tags: ["Fun", "Friends"],
     settings,

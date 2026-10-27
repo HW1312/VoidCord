@@ -248,6 +248,7 @@ let fallbackTimer: ReturnType<typeof setTimeout> | undefined;
 const plugin = definePlugin({
     name: "SplitView",
     description: "Keep up to two more channels/DMs open as their own panels to the right of the main window (context menu, drag & drop, Ctrl+Shift+S)",
+    about: "Keep up to two extra channels or DMs open as panels next to the main chat, so you can follow several at once.",
     authors: [{ name: "5406", id: 1062070744558870548n }],
     tags: ["Chat", "Utility"],
     settings,

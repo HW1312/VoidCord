@@ -85,6 +85,7 @@ export const settings = definePluginSettings({
 export default definePlugin({
     name: "DoomScroll",
     description: "Scroll TikTok, YouTube Shorts or Instagram Reels right where the chat is - open it from the title bar",
+    about: "Scroll TikTok, YouTube Shorts or Instagram Reels right where the chat normally is, without leaving Discord. Pick a feed and close it again with one click; it uses its own login.",
     authors: [{ name: "5406", id: 1062070744558870548n }],
     tags: ["Fun", "Media"],
     settings,

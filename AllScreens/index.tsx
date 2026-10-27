@@ -114,6 +114,7 @@ function stop() {
 export default definePlugin({
     name: "AllScreens",
     description: "Stream all your monitors at once - adds \"All screens\" to the screen share picker",
+    about: "Discord can only stream one monitor at a time. This adds an \"All screens\" option to the screen share picker that puts all your monitors side by side into a single stream, with system sound like a normal screen share.",
     authors: [{ name: "5406", id: 1062070744558870548n }],
     tags: ["Media", "Voice"],
     settings,

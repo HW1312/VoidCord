@@ -149,6 +149,7 @@ function resendVoiceState() {
 const plugin = definePlugin({
     name: "FakeMute",
     description: "Fake Mute & Fake Deafen: others see you as muted/deafened even though you can still talk/hear - or really mute/deafen yourself, configurable from the title bar",
+    about: "Others see you as muted or deafened while you can actually still talk or hear. Mute and deafen can be faked separately.",
     authors: [{ name: "5406", id: 1062070744558870548n }],
     tags: ["Voice", "Utility"],
     settings,

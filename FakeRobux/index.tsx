@@ -101,6 +101,7 @@ export function removeRecent(id: number) {
 export default definePlugin({
     name: "FakeRobux",
     description: "Your real Roblox profile with any Robux balance you like, plus simulated donations and gifts to real Roblox users - from the title bar",
+    about: "Shows your real Roblox profile with any Robux balance you like, and lets you \"send\" Robux to real users. Everything is simulated - nothing is ever sent and nobody gets anything.",
     authors: [{ name: "5406", id: 1062070744558870548n }],
     tags: ["Fun", "Utility"],
     settings,

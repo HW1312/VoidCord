@@ -233,6 +233,7 @@ function unwrapRequests() {
 export default definePlugin({
     name: "SilentMode",
     description: "One switch to go quiet: no typing indicator, silent messages, no reply pings, calls without ringing, deleted messages overwritten first, invisible and no activity",
+    about: "One switch to go quiet: no typing indicator, messages without push notifications, replies without pings, calls without ringing, invisible status and no activity. Deleted messages are overwritten with gibberish first.",
     authors: [{ name: "5406", id: 1062070744558870548n }],
     tags: ["Privacy", "Chat", "Voice"],
     settings,

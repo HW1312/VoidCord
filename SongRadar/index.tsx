@@ -79,6 +79,7 @@ const messageContext: NavContextMenuPatchCallback = (children, { message }: { me
 export default definePlugin({
     name: "SongRadar",
     description: "Recognize music like Shazam – what your PC plays (voice, streams, videos …) or a video / audio in the chat",
+    about: "Like Shazam inside Discord: find out which song is playing - in a voice channel, a stream, on your PC or in a video in the chat. Shows title, artist and cover with links to Spotify, YouTube and Apple Music.",
     authors: [{ name: "5406", id: 1062070744558870548n }],
     tags: ["Media", "Voice", "Utility"],
     settings,

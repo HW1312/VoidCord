@@ -193,6 +193,7 @@ function scheduleThemeUpdates(delay: number) {
 export default definePlugin({
     name: "PluginHub",
     description: "Toggle all your own plugins and install or apply themes in one place – via the title bar or the settings",
+    about: "All your plugins and themes in one place - turn them on and off without digging through the Vencord list.",
     authors: [{ name: "5406", id: 1062070744558870548n }],
     tags: ["Utility"],
     // on for fresh installs, so the hub icon is in the title bar from the start

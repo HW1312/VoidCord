@@ -81,6 +81,7 @@ const settings = definePluginSettings({
 export default definePlugin({
     name: "FreePiP",
     description: "The small stream window while you're in another channel: no size limit, and it stays exactly where you drop it",
+    about: "The small stream window you get while watching a stream from another channel can be resized as big as you want and dropped anywhere, instead of snapping to a corner. The spot is remembered.",
     authors: [{ name: "5406", id: 1062070744558870548n }],
     tags: ["Media", "Voice"],
     settings,

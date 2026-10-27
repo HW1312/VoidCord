@@ -187,6 +187,7 @@ function shouldIgnoreInvite(code: string, message: any) {
 export default definePlugin({
     name: "LinkCards",
     description: "Live status cards under messages: Discord invites, YouTube/TikTok views, Twitch/Kick live status, X/Reddit/Bluesky posts, GitHub, Steam, Roblox, package versions and more – always up to date instead of a frozen embed",
+    about: "Links to Discord, YouTube, Twitch, Kick, X, Reddit, TikTok, GitHub, Steam and more get a clean live card instead of Discord's embed - e.g. whether a stream is live, view counts or an invite's online members with a Join button.",
     authors: [{ name: "5406", id: 1062070744558870548n }],
     tags: ["Chat", "Utility"],
     dependencies: ["MessageAccessoriesAPI", "MessageUpdaterAPI"],

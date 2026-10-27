@@ -109,6 +109,7 @@ function unwrapPost() {
 export default definePlugin({
     name: "VoiceLength",
     description: "Voice messages you send show any length you want (e.g. 3 seconds that say 69:42) – for everyone",
+    about: "Voice messages you send show any length you want, e.g. a 3 second message that says 69:42. The length is written into the file, so it stays for everyone - even after they play it.",
     authors: [{ name: "5406", id: 1062070744558870548n }],
     tags: ["Chat", "Fun"],
     settings,

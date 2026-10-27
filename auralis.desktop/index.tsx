@@ -220,6 +220,7 @@ const SettingsPanel = ErrorBoundary.wrap(() => {
 export default definePlugin({
     name: "Auralis",
     description: "Private Spotify music activity from local Windows media info, without linking your account.",
+    about: "Shows what you're listening to in the Spotify app as your Discord activity, with cover - without linking your Spotify account.",
     authors: [{ name: "5406", id: 1062070744558870548n }],
     tags: ["Media", "Activity", "Privacy"],
     settings,

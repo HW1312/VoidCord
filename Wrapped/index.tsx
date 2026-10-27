@@ -63,6 +63,7 @@ export const settings = definePluginSettings({
 export default definePlugin({
     name: "Wrapped",
     description: "Your personal Discord Wrapped: voice time, messages, active hours, games, top people and servers – tracked locally",
+    about: "Your personal Discord stats: time in voice, messages, active hours, games and the people you spend the most time with. Everything is recorded and stored only on your PC.",
     authors: [{ name: "5406", id: 1062070744558870548n }],
     tags: ["Fun", "Utility"],
     settings,

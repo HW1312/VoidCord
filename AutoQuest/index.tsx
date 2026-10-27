@@ -921,6 +921,7 @@ function halt() {
 export default definePlugin({
     name: "AutoQuest",
     description: "Accepts Discord quests, completes them in the background and claims the reward",
+    about: "Does Discord quests for you: it accepts them, completes them in the background (videos, games, activities, streams) and claims the reward. Requests are spaced out with random pauses so it looks like normal use. Stream quests still need you to stream any window in a call with someone.",
     authors: [{ name: "5406", id: 1062070744558870548n }],
     settings,
 

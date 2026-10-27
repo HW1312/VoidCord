@@ -72,6 +72,7 @@ function ownBadges(profile: { userId?: string; }, list: any[]): any[] {
 export default definePlugin({
     name: "BadgeUnlock",
     description: "Show any Discord badge on your own profile (Staff, Partner, HypeSquad, Nitro, Boosts …) and pick each one - only visible to you",
+    about: "Put any Discord badge on your own profile and pick exactly which ones show. Only you can see them - nothing is sent to Discord.",
     authors: [{ name: "5406", id: 1062070744558870548n }],
     tags: ["Appearance", "Customisation"],
     settings,

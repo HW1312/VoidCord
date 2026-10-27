@@ -100,6 +100,7 @@ export const settings = definePluginSettings({
 export default definePlugin({
     name: "PeekAnything",
     description: "Hold Alt to peek at channels, DMs, message links, streams and voice channels under the mouse - without opening them or marking them read",
+    about: "Hold Alt over a channel, DM, message link, stream or voice channel to see a small live preview of it - without opening it or marking anything as read. Release to close, click to pin.",
     authors: [{ name: "5406", id: 1062070744558870548n }],
     tags: ["Chat", "Voice", "Utility"],
     settings,

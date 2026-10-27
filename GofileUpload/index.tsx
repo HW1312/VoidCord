@@ -628,6 +628,7 @@ function splitOff(list: File[], limit: number, channel: Channel, options?: { fil
 export default definePlugin({
     name: "GofileUpload",
     description: "Files that are too large for Discord (19.8 MB without Nitro, 999 MB with Nitro) are uploaded to gofile.io (Catbox as fallback) with metadata stripped, and the link is sent in the chat instead. Oversized images are compressed first so they stay normal attachments",
+    about: "Files too big for Discord no longer fail: big images get compressed so they stay normal attachments, everything else is uploaded to Gofile and the download link is sent in the chat instead.",
     authors: [{ name: "5406", id: 1062070744558870548n }],
     tags: ["Chat", "Utility"],
     settings,

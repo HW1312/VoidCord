@@ -138,6 +138,7 @@ const FormatHubButton: ChatBarButtonFactory = ({ isAnyChat, channel }) => {
 export default definePlugin({
     name: "FormatHub",
     description: "All Discord text formats in one place: mentions, timestamps, emojis, markdown & links with real IDs, live preview, copy/insert, decoder and favorites",
+    about: "Every Discord text format in one place - bold, spoilers, timestamps, mentions, code blocks and more - with a live preview. Copy or insert it into the chat with one click.",
     authors: [{ name: "5406", id: 1062070744558870548n }],
     tags: ["Chat", "Utility"],
     settings,

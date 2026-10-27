@@ -1,5 +1,5 @@
 /*
- * StreamThumbnail – settings panel, window and right-click menu of the "Share Your Screen" button
+ * StreamThumbnail – settings panel
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
@@ -9,9 +9,9 @@ import { classNameFactory } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { chooseFile } from "@utils/web";
 import { findStoreLazy } from "@webpack";
-import { ContextMenuApi, Menu, showToast, useEffect, useRef, useState, useStateFromStores } from "@webpack/common";
+import { showToast, useEffect, useRef, useState, useStateFromStores } from "@webpack/common";
 
-import { Button, Empty, Field, Glyph, ICONS, Note, openWindow, Row, Section, Sheet, strokeIcon, TextField, ToggleRow, useListener } from "../_ui";
+import { Button, Empty, Field, Glyph, ICONS, Note, Row, Section, Sheet, strokeIcon, TextField, ToggleRow, useListener } from "../_ui";
 import { getThumbnail, isStreaming, listeners, refresh, setPicture, settings, uploadNow } from "./index";
 
 const cl = classNameFactory("vc-streamthumb-");
@@ -22,8 +22,7 @@ const PICTURE = ICONS.image;
 const LIVE = strokeIcon("M4.9 19.1C1 15.2 1 8.8 4.9 4.9", "M7.8 16.2c-2.3-2.3-2.3-6.1 0-8.5", "M10 12a2 2 0 1 0 4 0a2 2 0 1 0 -4 0", "M16.2 7.8c2.3 2.3 2.3 6.1 0 8.5", "M19.1 4.9C23 8.8 23 15.1 19.1 19");
 const HEADER = { title: "Stream Thumbnail", icon: PICTURE, iconColor: "pink" } as const;
 
-/** With onClose it's a window, without it sits in the plugin's settings */
-const ThumbnailSheet = ErrorBoundary.wrap(({ onClose }: { onClose?(): void; }) => {
+const ThumbnailSheet = ErrorBoundary.wrap(() => {
     useListener(listeners);
     const { enabled, caption } = settings.use(["enabled", "caption"]);
     const streaming = useStateFromStores([ApplicationStreamingStore], () => isStreaming());
@@ -60,8 +59,8 @@ const ThumbnailSheet = ErrorBoundary.wrap(({ onClose }: { onClose?(): void; }) =
     });
 
     return (
-        <Sheet embedded={!onClose} onClose={onClose} header={{ ...HEADER, subtitle: !thumbnail ? "No picture chosen" : enabled ? "Others see your picture as stream preview" : "Off – others see a screenshot", live: !!thumbnail && enabled && streaming }}>
-            <Note>Discord sends a new stream preview every 5 minutes (the first after 1 minute). While you stream, a new picture or caption is sent right away. It doesn't work if stream previews are turned off in Discord.</Note>
+        <Sheet embedded header={{ ...HEADER, subtitle: !thumbnail ? "No picture chosen" : enabled ? "Others see your picture as stream preview" : "Off – others see a screenshot", live: !!thumbnail && enabled && streaming }}>
+            <Note>Your picture is sent a few seconds after you start streaming, and right away when you change it during a stream. Discord replaces the preview every 5 minutes - with your picture again, unless stream previews are turned off in Discord.</Note>
 
             <Section title="Preview">
                 <div className={cl("box")}>
@@ -117,42 +116,3 @@ const ThumbnailSheet = ErrorBoundary.wrap(({ onClose }: { onClose?(): void; }) =
 
 export const SettingsPanel = () => <ThumbnailSheet />;
 
-export const openThumbnailWindow = () => openWindow(close => <ThumbnailSheet onClose={close} />, { size: "small" });
-
-async function pickPicture() {
-    try {
-        const file = await chooseFile("image/*");
-        if (file) await setPicture(file);
-    } catch (e) {
-        showToast({ text: String((e as Error)?.message ?? e), variant: "critical" });
-    }
-}
-
-/** Right-click on the "Share Your Screen" button in the voice panel */
-export function openShareMenu(e: React.MouseEvent) {
-    ContextMenuApi.openContextMenu(e, () => {
-        const streaming = isStreaming();
-        const thumbnail = getThumbnail();
-        // Discord's menu only accepts menu items and groups as children – no fragments, or it crashes
-        return (
-            <Menu.Menu navId="vc-streamthumb" onClose={ContextMenuApi.closeContextMenu} aria-label="Stream Thumbnail">
-                <Menu.MenuItem id="vc-streamthumb-pick" label={thumbnail ? "Change stream picture…" : "Choose stream picture…"} action={pickPicture} />
-                <Menu.MenuItem id="vc-streamthumb-open" label="Stream picture & caption…" action={openThumbnailWindow} />
-                <Menu.MenuSeparator />
-                <Menu.MenuCheckboxItem
-                    id="vc-streamthumb-enabled"
-                    label="Use my picture as preview"
-                    checked={settings.store.enabled}
-                    disabled={!thumbnail}
-                    action={() => {
-                        settings.store.enabled = !settings.store.enabled;
-                        if (settings.store.enabled) refresh();
-                    }}
-                />
-                {streaming && thumbnail && settings.store.enabled
-                    ? <Menu.MenuItem id="vc-streamthumb-send" label="Send preview now" action={() => uploadNow().then(ok => ok && showToast({ text: "Thumbnail sent", variant: "success" }), err => showToast({ text: String(err?.message ?? err), variant: "critical" }))} />
-                    : null}
-            </Menu.Menu>
-        );
-    });
-}

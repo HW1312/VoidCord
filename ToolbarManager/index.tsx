@@ -56,6 +56,7 @@ function onContextMenu(e: MouseEvent) {
 export default definePlugin({
     name: "ToolbarManager",
     description: "Tidies up the chat bar and title bar: sort, hide or move buttons into a ⋯ menu - with profiles",
+    about: "Tidy up the chat bar and title bar: put buttons in the order you like, hide the ones you don't need or tuck them into a ⋯ menu.",
     authors: [{ name: "5406", id: 1062070744558870548n }],
     tags: ["Appearance", "Utility"],
     settings,

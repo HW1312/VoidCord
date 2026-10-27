@@ -365,6 +365,7 @@ function onMessageDelete({ id, ids, channelId: cid }: { id?: string; ids?: strin
 export default definePlugin({
     name: "StreamOverlay",
     description: "OBS overlay for voice channels: participants, who is speaking and chat as a browser source – a nicer replacement for Discord StreamKit",
+    about: "An overlay for OBS that shows who is in your voice channel, who is speaking and the chat - a nicer replacement for Discord StreamKit. Runs locally.",
     authors: [{ name: "5406", id: 1062070744558870548n }],
     tags: ["Voice", "Utility"],
     settings,

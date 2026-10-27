@@ -141,6 +141,7 @@ const ChatButton: ChatBarButtonFactory = ({ channel, isMainChat }) => {
 export default definePlugin({
     name: "MediaGallery",
     description: "All images, videos and files of a channel as a grid: filter, view in the lightbox and download as a ZIP",
+    about: "See every image, video and file of a channel as a grid. Filter it, open things in a viewer and download many at once as a ZIP.",
     authors: [{ name: "5406", id: 1062070744558870548n }],
     tags: ["Media", "Chat", "Utility"],
     settings,

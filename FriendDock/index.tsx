@@ -400,6 +400,7 @@ const UserContext: NavContextMenuPatchCallback = (children, { user }: { user?: U
 export default definePlugin({
     name: "FriendDock",
     description: "A dock of your favorite friends with live status, activity and voice channel - join with one click or follow them through voice channels",
+    about: "A dock with your favorite friends: see who is online, what they play and which voice channel they're in. Join them with one click, or follow them so you move along when they switch channels.",
     authors: [{ name: "5406", id: 1062070744558870548n }],
     tags: ["Friends", "Voice", "Utility"],
     settings,

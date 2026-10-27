@@ -251,6 +251,7 @@ function onKeyDown(e: KeyboardEvent) {
 export default definePlugin({
     name: "ChatPopout",
     description: "Open DMs, channels and voice chats in their own windows – optionally together with the call window and always on top.",
+    about: "Open any DM, group, channel or voice chat in its own window, so you can keep several conversations open at once - optionally together with the call.",
     authors: [{ name: "5406", id: 1062070744558870548n }],
     tags: ["Chat", "Utility", "Voice"],
     settings,
