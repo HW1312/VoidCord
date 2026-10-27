@@ -9,7 +9,7 @@ import * as DataStore from "@api/DataStore";
 import { Logger } from "@utils/Logger";
 import { PluginNative } from "@utils/types";
 import type { Channel } from "@vencord/discord-types";
-import { ChannelStore, DraftType, GuildStore, SelectedChannelStore, UploadHandler } from "@webpack/common";
+import { ChannelStore, DraftType, GuildStore, PermissionsBits, PermissionStore, RestAPI, SelectedChannelStore, UploadHandler } from "@webpack/common";
 
 import { notify } from "../_ui";
 import { sendFiles } from "../ChatPopout/upload";
@@ -28,6 +28,13 @@ export interface ClipMeta {
     where?: string;
     seconds?: number;
     created?: number;
+    /** Uploaded to a server's soundboard – played in calls from there */
+    sound?: ClipSound;
+}
+
+export interface ClipSound {
+    guildId: string;
+    soundId: string;
 }
 
 export interface Clip extends ClipFile, ClipMeta { }
@@ -210,3 +217,98 @@ export async function trimClip(clip: Clip, tracks: Float32Array[], start: number
 
 export const showInFolder = (clip: Clip) => Native.showClip(clip.file);
 export const openFolder = () => Native.openFolder();
+
+// ---------------------------------------------------------------- Soundboard
+// Discord records the mic natively (outside JavaScript), so a clip can't be fed into it. The soundboard is the way
+// to play one in a call: everyone hears it, like any soundboard sound.
+
+/** Discord's limits for soundboard sounds */
+export const SOUND_MAX_SECONDS = 5.2;
+const SOUND_MAX_BYTES = 512 * 1024;
+/** A little under the limit – Opus adds padding Discord may count */
+const SOUND_SAFE_SECONDS = 5.1;
+
+/** Error text from a failed RestAPI call (it rejects with the response, not an Error) */
+function apiError(e: any) {
+    return new Error(e?.body?.message ?? e?.message ?? String(e));
+}
+
+/** Servers where you may add soundboard sounds */
+export function soundboardGuilds() {
+    return Object.values(GuildStore.getGuilds())
+        .filter(g => PermissionStore.can(PermissionsBits.CREATE_GUILD_EXPRESSIONS, g) || PermissionStore.can(PermissionsBits.MANAGE_GUILD_EXPRESSIONS, g))
+        .sort((a, b) => a.name.localeCompare(b.name));
+}
+
+const asDataUrl = (blob: Blob) => new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = () => reject(reader.error);
+    reader.readAsDataURL(blob);
+});
+
+/** Uploads start..end (seconds, at most 5.2 s) of the clip as a soundboard sound of the server */
+export async function addToSoundboard(clip: Clip, tracks: Float32Array[], start: number, end: number, guildId: string, name: string) {
+    const a = Math.max(0, Math.floor(start * RATE));
+    const b = Math.min(tracks[0].length, Math.ceil(end * RATE), a + Math.floor(SOUND_SAFE_SECONDS * RATE));
+    if (b - a < RATE / 4) throw new Error("Too short");
+    const { data, ext, type } = await encode(tracks.map(t => t.slice(a, b)));
+    if (ext !== ".ogg") throw new Error("Opus encoding isn't available here – the soundboard needs it");
+    if (data.length > SOUND_MAX_BYTES) throw new Error("The sound is larger than Discord's 512 KB limit");
+
+    let soundId: string;
+    try {
+        const res = await RestAPI.post({
+            url: `/guilds/${guildId}/soundboard-sounds`,
+            body: { name, sound: await asDataUrl(new Blob([data as BlobPart], { type })), volume: 1, emoji_id: null, emoji_name: null }
+        });
+        soundId = res.body.sound_id;
+    } catch (e) {
+        throw apiError(e);
+    }
+
+    const m = await loadMeta();
+    // An older upload of this clip is replaced
+    const old = m[clip.file]?.sound;
+    if (old) void RestAPI.del({ url: `/guilds/${old.guildId}/soundboard-sounds/${old.soundId}` }).catch(() => { });
+    m[clip.file] = { ...m[clip.file], sound: { guildId, soundId } };
+    await saveMeta();
+    await refresh();
+}
+
+async function forgetSound(clip: Clip) {
+    const m = await loadMeta();
+    if (m[clip.file]) delete m[clip.file].sound;
+    await saveMeta();
+    await refresh();
+}
+
+/** Plays the clip's soundboard sound in your call. Throws if you're not in one or the sound is gone. */
+export async function playInCall(clip: Clip) {
+    const channelId = SelectedChannelStore.getVoiceChannelId();
+    if (!channelId) throw new Error("Join a voice call first");
+    if (!clip.sound) throw new Error("The clip isn't on a soundboard yet");
+    try {
+        await RestAPI.post({
+            url: `/channels/${channelId}/send-soundboard-sound`,
+            body: { sound_id: clip.sound.soundId, source_guild_id: clip.sound.guildId }
+        });
+    } catch (e: any) {
+        if (e?.status === 404) {
+            await forgetSound(clip);
+            throw new Error("The sound was removed from the server's soundboard – add it again");
+        }
+        throw apiError(e);
+    }
+}
+
+export async function removeFromSoundboard(clip: Clip) {
+    const { sound } = clip;
+    if (!sound) return;
+    try {
+        await RestAPI.del({ url: `/guilds/${sound.guildId}/soundboard-sounds/${sound.soundId}` });
+    } catch (e: any) {
+        if (e?.status !== 404) throw apiError(e);
+    }
+    await forgetSound(clip);
+}

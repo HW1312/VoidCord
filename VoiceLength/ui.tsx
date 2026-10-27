@@ -6,11 +6,11 @@
 import ErrorBoundary from "@components/ErrorBoundary";
 import { useState } from "@webpack/common";
 
-import { Field, Note, Pill, Pills, Section, Segmented, Sheet, TextField, ToggleRow } from "../_ui";
+import { Field, ICONS, Note, Pill, Pills, Section, Segmented, Sheet, TextField, ToggleRow } from "../_ui";
 import { FillMode } from "./ogg";
 import { settings } from "./index";
 
-const CLOCK = "M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm1 10.41V7h-2v6l4.6 2.76 1-1.64L13 12.41Z";
+const CLOCK = ICONS.clock;
 const HEADER = { title: "Voice Length", icon: CLOCK, iconColor: "orange" } as const;
 
 /** Discord shows lengths as minutes:seconds only (1 hour = "60:00") – up to 9999:59 */
@@ -52,7 +52,7 @@ export const SettingsPanel = ErrorBoundary.wrap(() => {
             <Section>
                 <ToggleRow
                     icon={CLOCK}
-                    color="orange"
+                    color="gray"
                     title="Fake length"
                     subtitle="For every voice message you send"
                     checked={enabled}

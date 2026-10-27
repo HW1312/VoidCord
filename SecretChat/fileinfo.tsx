@@ -11,11 +11,12 @@ import { showToast, useState } from "@webpack/common";
 import { Button, Note, openWindow, Row, Section, Sheet, State } from "../_ui";
 import { formatBytes } from "../ChatPopout/upload";
 import { decryptFile, fromB64, toHex } from "./crypto";
+import { LOCK_ICON } from "./icons";
 import { getKey, getKeyBytes } from "./store";
 
 const cl = classNameFactory("vc-secretchat-");
 
-const LOCK_PATH = "M6 9V7a6 6 0 1 1 12 0v2h1a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-9a2 2 0 0 1 2-2h1Zm2-2a4 4 0 1 1 8 0v2H8V7Z";
+const LOCK_PATH = LOCK_ICON;
 
 export interface FileInfoData {
     manifest: { n: string; t: string; s: number; iv: string; };
@@ -201,7 +202,7 @@ function FileInfoWindow({ info, close, fetchBytes, pickFile }: {
             <Section
                 title="Proof"
                 right={
-                    <Button small color="green" disabled={busy} onClick={check}>
+                    <Button small disabled={busy} onClick={check}>
                         {busy ? "Checking …" : gofile ? "Check downloaded .bin" : proof ? "Check again" : "Check now"}
                     </Button>
                 }

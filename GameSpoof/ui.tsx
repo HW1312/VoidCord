@@ -7,13 +7,14 @@ import { getUserSettingLazy } from "@api/UserSettings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { useEffect, useMemo, useState } from "@webpack/common";
 
-import { Avatar, Button, Empty, Note, Row, SearchField, Section, Sheet, Spinner, ToggleRow, useListener } from "../_ui";
+import { Avatar, Button, Empty, Note, Row, SearchField, Section, Sheet, Spinner, strokeIcon, ToggleRow, useListener } from "../_ui";
 import { Detectable, iconUrl, listeners, loadDetectable, running, settings, startGame, stopGame } from "./index";
 
-const GAMEPAD = "M7.5 6h9a5.5 5.5 0 0 1 5.4 6.6l-.9 4.6a2.6 2.6 0 0 1-4.5 1.3L14.2 16H9.8l-2.3 2.5A2.6 2.6 0 0 1 3 17.2l-.9-4.6A5.5 5.5 0 0 1 7.5 6Zm0 3a.75.75 0 0 0-.75.75v1h-1a.75.75 0 0 0 0 1.5h1v1a.75.75 0 0 0 1.5 0v-1h1a.75.75 0 0 0 0-1.5h-1v-1A.75.75 0 0 0 7.5 9Zm8 1a1 1 0 1 0 0 2 1 1 0 0 0 0-2Zm2 2a1 1 0 1 0 0 2 1 1 0 0 0 0-2Z";
+// Lucide gamepad-2 / eye
+const GAMEPAD = strokeIcon("M6 11h4", "M8 9v4", "M15 12h.01", "M18 10h.01", "M17.32 5H6.68a4 4 0 0 0-3.978 3.59c-.006.052-.01.101-.017.152C2.604 9.416 2 14.456 2 16a3 3 0 0 0 3 3c1 0 1.5-.5 2-1l1.414-1.414A2 2 0 0 1 9.828 16h4.344a2 2 0 0 1 1.414.586L17 18c.5.5 1 1 2 1a3 3 0 0 0 3-3c0-1.545-.604-6.584-.685-7.258-.007-.05-.011-.1-.017-.151A4 4 0 0 0 17.32 5z");
 const HEADER = { title: "Game Spoof", icon: GAMEPAD, iconColor: "indigo" } as const;
 const MAX_RESULTS = 40;
-const EYE = "M12 5c-5 0-9.27 3.11-11 7.5C2.73 16.89 7 20 12 20s9.27-3.11 11-7.5C21.27 8.11 17 5 12 5Zm0 12.5a5 5 0 1 1 0-10 5 5 0 0 1 0 10Zm0-8a3 3 0 1 0 0 6 3 3 0 0 0 0-6Z";
+const EYE = strokeIcon("M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0", "M9 12a3 3 0 1 0 6 0a3 3 0 1 0 -6 0");
 
 /** Discord's "Share your detected activities with others" – without it only you see the game */
 const ShowCurrentGame = getUserSettingLazy<boolean>("status", "showCurrentGame")!;

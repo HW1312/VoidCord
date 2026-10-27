@@ -1,64 +1,105 @@
 /*
- * _ui – shared Apple style UI kit for all own plugins (macOS / iOS look, like AutoQuest).
+ * _ui – shared "Void" UI kit for all own plugins (flat, near-black, hairlines – like the VOID dashboard).
  * Not a plugin itself (folders starting with "_" are skipped by Vencord); build.mjs copies it next to the plugins,
  * they import it with `from "../_ui"`.
  *
- * Colors live in CSS variables (--vc-ui-*) on :root and follow Discord's light/dark theme, so they can be used in any
+ * Colors live in CSS variables (--vc-ui-*) on :root (always dark), so they can be used in any
  * plugin's CSS as well, e.g. small chips inside the chat.
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import "./fonts.generated.css";
 import "./ui.css";
 
 import { classNameFactory } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { classes } from "@utils/misc";
 import { ModalRoot, ModalSize } from "@utils/modal";
-import { createRoot, openModal, Tooltip, useEffect, useRef, useState } from "@webpack/common";
+import { createRoot, openModal, ReactDOM, Tooltip, useEffect, useRef, useState } from "@webpack/common";
 import type { CSSProperties, ReactNode } from "react";
 
-import { APP_ICONS } from "./appIcons.generated";
+import { APP_GLYPHS } from "./appGlyphs";
 
 export const cl = classNameFactory("vc-ui-");
 export { classes };
 
 // ---------------------------------------------------------------- Icons
 
-/** Common 24×24 icon paths, so plugins don't each carry their own copy */
+/** Paths drawn as thin strokes (Lucide style) instead of filled shapes */
+const STROKE = new Set<string>();
+
+/** Circle as a path, so every icon part is path data */
+const circle = (cx: number, cy: number, r: number) => `M${cx - r} ${cy}a${r} ${r} 0 1 0 ${r * 2} 0a${r} ${r} 0 1 0 ${-r * 2} 0`;
+
+/**
+ * Registers a stroke icon (Lucide, 24×24, 2px grid) and returns its path for `<Icon path>` / `icon` props.
+ * Plain path strings that were not registered are still drawn filled (old plugin icons keep working).
+ */
+export function strokeIcon(...parts: string[]) {
+    // Parts stay separate <path>s (a joined "m…" would turn relative); "|" never occurs in path data
+    const d = parts.join("|");
+    STROKE.add(d);
+    return d;
+}
+
+/** Common icons (Lucide), so plugins don't each carry their own copy */
 export const ICONS = {
-    close: "M17.3 18.7a1 1 0 0 0 1.4-1.4L13.42 12l5.3-5.3a1 1 0 0 0-1.42-1.4L12 10.58l-5.3-5.3a1 1 0 0 0-1.4 1.42L10.58 12l-5.3 5.3a1 1 0 1 0 1.42 1.4L12 13.42l5.3 5.3Z",
-    check: "M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2Z",
-    chevron: "M9.3 5.3a1 1 0 0 0 0 1.4l5.3 5.3-5.3 5.3a1 1 0 1 0 1.4 1.4l6-6a1 1 0 0 0 0-1.4l-6-6a1 1 0 0 0-1.4 0Z",
-    back: "M14.7 5.3a1 1 0 0 1 0 1.4L9.4 12l5.3 5.3a1 1 0 1 1-1.4 1.4l-6-6a1 1 0 0 1 0-1.4l6-6a1 1 0 0 1 1.4 0Z",
-    plus: "M12 4a1 1 0 0 1 1 1v6h6a1 1 0 1 1 0 2h-6v6a1 1 0 1 1-2 0v-6H5a1 1 0 1 1 0-2h6V5a1 1 0 0 1 1-1Z",
-    search: "M10.5 3a7.5 7.5 0 0 1 5.96 12.05l4.25 4.24a1 1 0 0 1-1.42 1.42l-4.24-4.25A7.5 7.5 0 1 1 10.5 3Zm0 2a5.5 5.5 0 1 0 0 11 5.5 5.5 0 0 0 0-11Z",
-    refresh: "M17.65 6.35A7.96 7.96 0 0 0 12 4a8 8 0 1 0 7.73 10h-2.08A6 6 0 1 1 12 6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35Z",
-    gear: "M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.49.49 0 0 0-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.48.48 0 0 0-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96a.49.49 0 0 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58a.49.49 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58ZM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6Z",
-    trash: "M9 3h6a1 1 0 0 1 1 1v1h4a1 1 0 1 1 0 2h-1l-.9 12.1A2 2 0 0 1 16.1 21H7.9a2 2 0 0 1-2-1.9L5 7H4a1 1 0 0 1 0-2h4V4a1 1 0 0 1 1-1Zm1 6a1 1 0 0 0-1 1v7a1 1 0 1 0 2 0v-7a1 1 0 0 0-1-1Zm4 0a1 1 0 0 0-1 1v7a1 1 0 1 0 2 0v-7a1 1 0 0 0-1-1Z",
-    edit: "M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25ZM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83Z",
-    info: "M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm1 15h-2v-6h2v6Zm0-8h-2V7h2v2Z",
-    warning: "M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm1 15h-2v-2h2v2Zm0-4h-2V7h2v6Z",
-    bell: "M12 22a2.5 2.5 0 0 0 2.45-2h-4.9A2.5 2.5 0 0 0 12 22Zm7-6V11a7 7 0 0 0-5.5-6.84V3.5a1.5 1.5 0 0 0-3 0v.66A7 7 0 0 0 5 11v5l-2 2v1h18v-1l-2-2Z",
-    download: "M12 3a1 1 0 0 1 1 1v9.59l3.3-3.3a1 1 0 1 1 1.4 1.42l-5 5a1 1 0 0 1-1.4 0l-5-5a1 1 0 1 1 1.4-1.42l3.3 3.3V4a1 1 0 0 1 1-1ZM5 19h14a1 1 0 1 1 0 2H5a1 1 0 1 1 0-2Z",
-    external: "M14 3h6a1 1 0 0 1 1 1v6a1 1 0 1 1-2 0V6.41l-8.3 8.3a1 1 0 0 1-1.4-1.42L17.58 5H14a1 1 0 1 1 0-2ZM5 7h5a1 1 0 1 1 0 2H5v10h10v-5a1 1 0 1 1 2 0v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2Z",
-    copy: "M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1Zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2Zm0 16H8V7h11v14Z",
-    user: "M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4Z",
-    folder: "M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2Z",
-    play: "M8 5.14v13.72a1 1 0 0 0 1.5.86l11-6.86a1 1 0 0 0 0-1.72l-11-6.86A1 1 0 0 0 8 5.14Z"
+    close: strokeIcon("M18 6 6 18", "m6 6 12 12"),
+    check: strokeIcon("M20 6 9 17l-5-5"),
+    chevron: strokeIcon("m9 18 6-6-6-6"),
+    chevronDown: strokeIcon("m6 9 6 6 6-6"),
+    back: strokeIcon("m15 18-6-6 6-6"),
+    plus: strokeIcon("M5 12h14", "M12 5v14"),
+    search: strokeIcon(circle(11, 11, 8), "m21 21-4.3-4.3"),
+    refresh: strokeIcon("M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8", "M21 3v5h-5", "M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16", "M8 16H3v5"),
+    gear: strokeIcon(
+        "M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z",
+        circle(12, 12, 3)
+    ),
+    trash: strokeIcon("M3 6h18", "M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6", "M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2", "M10 11v6", "M14 11v6"),
+    edit: strokeIcon("M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z", "m15 5 4 4"),
+    info: strokeIcon(circle(12, 12, 10), "M12 16v-4", "M12 8h.01"),
+    warning: strokeIcon("m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3", "M12 9v4", circle(12, 17, 0.4)),
+    bell: strokeIcon("M10.268 21a2 2 0 0 0 3.464 0", "M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326"),
+    download: strokeIcon("M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4", "m7 10 5 5 5-5", "M12 15V3"),
+    external: strokeIcon("M15 3h6v6", "M10 14 21 3", "M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"),
+    copy: strokeIcon("M10 8h10a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H10a2 2 0 0 1-2-2V10a2 2 0 0 1 2-2z", "M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"),
+    user: strokeIcon("M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2", circle(12, 7, 4)),
+    folder: strokeIcon("M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"),
+    play: strokeIcon("M6 3 20 12 6 21Z"),
+    // door frame, arrow head, arrow shaft (the arrow parts are animated in leave buttons)
+    leave: strokeIcon("M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4", "m16 17 5-5-5-5", "M21 12H9"),
+    arrowRight: strokeIcon("M5 12h14", "m12 5 7 7-7 7"),
+    checkAll: strokeIcon("M18 6 7 17l-5-5", "m22 10-7.5 7.5L13 16"),
+    // face, hands (the hands turn in clock buttons)
+    clock: strokeIcon(circle(12, 12, 10), "M12 6v6l4 2"),
+    bookmark: strokeIcon("m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"),
+    inbox: strokeIcon("M22 12h-6l-2 3h-4l-2-3H2", "M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"),
+    image: strokeIcon("M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z", circle(9, 9, 2), "m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"),
+    file: strokeIcon("M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z", "M14 2v4a2 2 0 0 0 2 2h4", "M10 9H8", "M16 13H8", "M16 17H8"),
+    zap: strokeIcon("M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"),
+    music: strokeIcon(circle(8, 18, 4), "M12 18V2l7 4"),
+    hash: strokeIcon("M4 9h16", "M4 15h16", "M10 3 8 21", "M16 3l-2 18"),
+    server: strokeIcon("M4 2h16a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z", "M4 14h16a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2z", "M6 6h.01", "M6 18h.01"),
+    sliders: strokeIcon("M21 4h-7", "M10 4H3", "M21 12h-9", "M8 12H3", "M21 20h-5", "M12 20H3", "M14 2v4", "M8 10v4", "M16 18v4")
 } as const;
 
 export function Icon({ path, size = 16, className, style }: { path: string; size?: number; className?: string; style?: CSSProperties; }) {
     return (
         <svg viewBox="0 0 24 24" width={size} height={size} className={className} style={style} aria-hidden>
-            <path fill="currentColor" d={path} />
+            {STROKE.has(path)
+                ? <g fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round">
+                    {path.split("|").map(d => <path key={d} d={d} />)}
+                </g>
+                : <path fill="currentColor" d={path} />}
         </svg>
     );
 }
 
 // ---------------------------------------------------------------- Colors
 
-/** Apple system colors; used for app icons, glyphs, buttons and states */
-export type UiColor = "blue" | "green" | "orange" | "red" | "purple" | "indigo" | "teal" | "yellow" | "pink" | "gray" | "mint";
+/** accent = the neutral (white) main color; the rest are data / status colors */
+export type UiColor = "accent" | "blue" | "green" | "orange" | "red" | "purple" | "indigo" | "teal" | "yellow" | "pink" | "gray" | "mint";
 
 /** Big rounded app icon, e.g. in a window header */
 export function AppIcon({ path, color = "blue", size = 42, children }: { path?: string; color?: UiColor; size?: number; children?: ReactNode; }) {
@@ -129,23 +170,85 @@ export function Segmented<T extends string>({ value, options, onChange, small }:
 
 export type ButtonVariant = "filled" | "tinted" | "gray" | "plain" | "destructive";
 
-/** Capsule button. filled = main action, tinted/gray = secondary, plain = text only */
-export function Button({ children, onClick, variant = "filled", color = "blue", icon, small, disabled, wide, title }: {
+/**
+ * Every button with an icon animates it on hover and click (CSS, classes vc-ui-ia-<name>).
+ * Kit icons have their own motion, any other icon gets the generic "pop". ms = length of the click animation.
+ */
+const ICON_ANIMS = new Map<string, { name: string; ms: number; }>([
+    [ICONS.trash, { name: "trash", ms: 600 }],
+    [ICONS.leave, { name: "leave", ms: 480 }],
+    [ICONS.close, { name: "close", ms: 380 }],
+    [ICONS.plus, { name: "plus", ms: 380 }],
+    [ICONS.check, { name: "check", ms: 450 }],
+    [ICONS.chevron, { name: "chevron", ms: 380 }],
+    [ICONS.back, { name: "back", ms: 380 }],
+    [ICONS.search, { name: "search", ms: 450 }],
+    [ICONS.refresh, { name: "refresh", ms: 600 }],
+    [ICONS.gear, { name: "gear", ms: 600 }],
+    [ICONS.edit, { name: "edit", ms: 450 }],
+    [ICONS.info, { name: "shake", ms: 420 }],
+    [ICONS.warning, { name: "shake", ms: 420 }],
+    [ICONS.bell, { name: "bell", ms: 600 }],
+    [ICONS.download, { name: "download", ms: 500 }],
+    [ICONS.external, { name: "external", ms: 450 }],
+    [ICONS.copy, { name: "copy", ms: 420 }],
+    [ICONS.user, { name: "pop", ms: 350 }],
+    [ICONS.folder, { name: "pop", ms: 350 }],
+    [ICONS.play, { name: "play", ms: 400 }],
+    [ICONS.arrowRight, { name: "chevron", ms: 380 }],
+    [ICONS.checkAll, { name: "check", ms: 450 }],
+    [ICONS.clock, { name: "clock", ms: 600 }],
+    [ICONS.bookmark, { name: "bookmark", ms: 450 }],
+    [ICONS.zap, { name: "zap", ms: 420 }],
+    [ICONS.sliders, { name: "sliders", ms: 500 }]
+]);
+
+const POP = { name: "pop", ms: 350 };
+const iconAnim = (icon: string) => ICON_ANIMS.get(icon) ?? POP;
+
+/** Classes for a button whose icon animates */
+const animClasses = (icon: string | undefined) => icon && classes(cl("ia"), cl(`ia-${iconAnim(icon).name}`));
+
+/** Restarts the click animation (re-adding the class replays it on every click) */
+function playHit(el: HTMLElement) {
+    el.classList.remove(cl("ia-hit"));
+    void el.offsetWidth;
+    el.classList.add(cl("ia-hit"));
+}
+
+/** Copy buttons confirm the click: the icon turns into a green check for a moment. Returns the icon to show. */
+function useCopyFeedback(icon: string | undefined) {
+    const [copied, setCopied] = useState(false);
+    const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+    useEffect(() => () => clearTimeout(timer.current), []);
+    const trigger = () => {
+        if (icon !== ICONS.copy) return;
+        setCopied(true);
+        clearTimeout(timer.current);
+        timer.current = setTimeout(() => setCopied(false), 1500);
+    };
+    return { shown: copied ? ICONS.check : icon, copied, trigger };
+}
+
+/** Button. filled = main action (white), gray/tinted = secondary, plain = text only, destructive = red outline */
+export function Button({ children, onClick, variant = "filled", color = "accent", icon, small, disabled, wide, title }: {
     children?: ReactNode; onClick?(e: React.MouseEvent): void; variant?: ButtonVariant; color?: UiColor;
     icon?: string; small?: boolean; disabled?: boolean; wide?: boolean; title?: string;
 }) {
     const tone = variant === "destructive" ? "red" : color;
+    const copy = useCopyFeedback(icon);
     return (
         <button
             type="button"
             title={title}
             disabled={disabled}
-            className={classes(cl("btn"), cl(`btn-${variant === "destructive" ? "filled" : variant}`), small && cl("btn-small"), wide && cl("btn-wide"), !children && cl("btn-icon-only"))}
+            className={classes(cl("btn"), cl(`btn-${variant}`), small && cl("btn-small"), wide && cl("btn-wide"), !children && cl("btn-icon-only"), animClasses(icon), copy.copied && cl("ia-copied"))}
             style={{ "--vc-ui-tone": `var(--vc-ui-${tone})` } as CSSProperties}
-            onClick={onClick}
+            onClick={icon ? e => { playHit(e.currentTarget); copy.trigger(); onClick?.(e); } : onClick}
         >
-            {icon && <Icon path={icon} size={small ? 14 : 16} />}
-            {children != null && <span>{children}</span>}
+            {/* keyed, so the swapped icon mounts fresh and plays its entrance */}
+            {copy.shown && <Icon key={copy.shown} path={copy.shown} size={small ? 14 : 16} />}
+            {children != null && <span>{copy.copied && children === "Copy" ? "Copied" : children}</span>}
         </button>
     );
 }
@@ -154,19 +257,20 @@ export function Button({ children, onClick, variant = "filled", color = "blue", 
 export function RoundButton({ icon, label, onClick, disabled, size = 30, active, className }: {
     icon: string; label: string; onClick(e: React.MouseEvent): void; disabled?: boolean; size?: number; active?: boolean; className?: string;
 }) {
+    const copy = useCopyFeedback(icon);
     return (
-        <Tooltip text={label}>
+        <Tooltip text={copy.copied ? "Copied" : label}>
             {(tip: any) => (
                 <button
                     {...tip}
                     type="button"
                     aria-label={label}
                     disabled={disabled}
-                    className={classes(cl("round-btn"), active && cl("round-btn-active"), className)}
+                    className={classes(cl("round-btn"), active && cl("round-btn-active"), animClasses(icon), copy.copied && cl("ia-copied"), className)}
                     style={{ width: size, height: size }}
-                    onClick={e => { e.stopPropagation(); onClick(e); }}
+                    onClick={e => { e.stopPropagation(); playHit(e.currentTarget); copy.trigger(); onClick(e); }}
                 >
-                    <Icon path={icon} size={Math.round(size * 0.5)} />
+                    <Icon key={copy.shown} path={copy.shown!} size={Math.round(size * 0.5)} />
                 </button>
             )}
         </Tooltip>
@@ -177,18 +281,19 @@ export function RoundButton({ icon, label, onClick, disabled, size = 30, active,
 export function IconButton({ icon, label, onClick, destructive, disabled, active }: {
     icon: string; label: string; onClick(e: React.MouseEvent): void; destructive?: boolean; disabled?: boolean; active?: boolean;
 }) {
+    const copy = useCopyFeedback(icon);
     return (
-        <Tooltip text={label}>
+        <Tooltip text={copy.copied ? "Copied" : label}>
             {(tip: any) => (
                 <button
                     {...tip}
                     type="button"
                     aria-label={label}
                     disabled={disabled}
-                    className={classes(cl("icon-btn"), destructive && cl("icon-btn-destructive"), active && cl("icon-btn-active"))}
-                    onClick={e => { e.stopPropagation(); onClick(e); }}
+                    className={classes(cl("icon-btn"), destructive && cl("icon-btn-destructive"), active && cl("icon-btn-active"), animClasses(icon), copy.copied && cl("ia-copied"))}
+                    onClick={e => { e.stopPropagation(); playHit(e.currentTarget); copy.trigger(); onClick(e); }}
                 >
-                    <Icon path={icon} size={16} />
+                    <Icon key={copy.shown} path={copy.shown!} size={16} />
                 </button>
             )}
         </Tooltip>
@@ -204,7 +309,7 @@ export function Spinner({ size = 14 }: { size?: number; }) {
     );
 }
 
-export function Progress({ value, color = "blue" }: { value: number; color?: UiColor; }) {
+export function Progress({ value, color = "accent" }: { value: number; color?: UiColor; }) {
     return (
         <div className={cl("progress")}>
             <div style={{ width: `${Math.max(0, Math.min(100, value))}%`, background: `var(--vc-ui-${color})` }} />
@@ -226,7 +331,7 @@ export function Badge({ children, color = "gray", solid, icon, title, onClick }:
             onClick={onClick ? (e: React.MouseEvent) => { e.stopPropagation(); onClick(e); } : undefined}
         >
             {icon && <Icon path={icon} size={11} />}
-            {children}
+            {children != null && <span className={cl("badge-label")}>{children}</span>}
         </Tag>
     );
 }
@@ -321,19 +426,127 @@ export function TextArea({ value, onChange, className, ...rest }: AreaProps) {
     return <textarea {...rest} className={classes(cl("field"), cl("textarea"), className)} value={value} onChange={e => onChange(e.currentTarget.value)} />;
 }
 
+const MENU_ROW = 32;
+const MENU_MAX = 280;
+
+/**
+ * Dropdown with an own menu (the native <select> popup can't be styled). The menu is portaled to <body> so groups and
+ * windows don't clip it, opens upwards when there's no room below, and is driven from the focused trigger (arrows,
+ * Enter, Esc, Home/End) – focus never leaves it, so Discord's modal focus lock doesn't interfere.
+ */
 export function Select<T extends string | number>({ value, options, onChange, width, className, disabled }: {
     value: T; options: { value: T; label: string; }[]; onChange(v: T): void; width?: number | string; className?: string; disabled?: boolean;
 }) {
+    const [open, setOpen] = useState(false);
+    const [active, setActive] = useState(-1);
+    const [pos, setPos] = useState<{ left: number; top: number; width: number; up: boolean; maxHeight: number; } | null>(null);
+    const trigger = useRef<HTMLButtonElement>(null);
+    const menu = useRef<HTMLDivElement>(null);
+    const index = options.findIndex(o => o.value === value);
+
+    const show = () => {
+        if (disabled || !trigger.current) return;
+        const r = trigger.current.getBoundingClientRect();
+        const below = innerHeight - r.bottom - 12, above = r.top - 12;
+        const up = below < Math.min(options.length * MENU_ROW + 10, MENU_MAX) && above > below;
+        setPos({ left: r.left, top: up ? r.top - 4 : r.bottom + 4, width: r.width, up, maxHeight: Math.min(MENU_MAX, up ? above : below) });
+        setActive(Math.max(0, index));
+        setOpen(true);
+    };
+
+    const pick = (i: number) => {
+        setOpen(false);
+        const o = options[i];
+        if (o && o.value !== value) onChange(o.value);
+    };
+
+    // Close on outside click, scroll / resize outside the menu, and Esc (captured, so the window around stays open)
+    useEffect(() => {
+        if (!open) return;
+        const inside = (t: EventTarget | null) => !!t && (trigger.current?.contains(t as Node) || menu.current?.contains(t as Node));
+        const down = (e: MouseEvent) => { if (!inside(e.target)) setOpen(false); };
+        const scroll = (e: Event) => { if (!inside(e.target)) setOpen(false); };
+        const resize = () => setOpen(false);
+        const esc = (e: KeyboardEvent) => {
+            if (e.key !== "Escape") return;
+            e.stopPropagation();
+            e.preventDefault();
+            setOpen(false);
+        };
+        addEventListener("mousedown", down, true);
+        addEventListener("scroll", scroll, true);
+        addEventListener("resize", resize);
+        addEventListener("keydown", esc, true);
+        return () => {
+            removeEventListener("mousedown", down, true);
+            removeEventListener("scroll", scroll, true);
+            removeEventListener("resize", resize);
+            removeEventListener("keydown", esc, true);
+        };
+    }, [open]);
+
+    useEffect(() => {
+        if (open) menu.current?.children[active]?.scrollIntoView({ block: "nearest" });
+    }, [open, active]);
+
+    const onKeyDown = (e: React.KeyboardEvent) => {
+        const last = options.length - 1;
+        const step = (i: number) => { e.preventDefault(); open ? setActive(Math.max(0, Math.min(last, i))) : show(); };
+        switch (e.key) {
+            case "ArrowDown": return step(active + 1);
+            case "ArrowUp": return step(active - 1);
+            case "Home": return step(0);
+            case "End": return step(last);
+            case "Enter":
+            case " ":
+                e.preventDefault();
+                return open ? pick(active) : show();
+            case "Tab": return setOpen(false);
+        }
+    };
+
     return (
-        <select
-            className={classes(cl("field"), cl("select"), className)}
-            style={width != null ? { width } : undefined}
-            disabled={disabled}
-            value={String(value)}
-            onChange={e => onChange(options.find(o => String(o.value) === e.currentTarget.value)!.value)}
-        >
-            {options.map(o => <option key={String(o.value)} value={String(o.value)}>{o.label}</option>)}
-        </select>
+        <>
+            <button
+                ref={trigger}
+                type="button"
+                className={classes(cl("field"), cl("select"), open && cl("select-open"), className)}
+                style={width != null ? { width } : undefined}
+                disabled={disabled}
+                aria-haspopup="listbox"
+                aria-expanded={open}
+                onClick={() => open ? setOpen(false) : show()}
+                onKeyDown={onKeyDown}
+            >
+                <span className={cl("select-value")}>{options[index]?.label ?? ""}</span>
+                <Icon path={ICONS.chevronDown} size={14} className={cl("select-arrow")} />
+            </button>
+            {open && pos && ReactDOM.createPortal(
+                <div
+                    ref={menu}
+                    role="listbox"
+                    className={classes(cl("menu"), pos.up && cl("menu-up"))}
+                    style={{ left: pos.left, top: pos.top, minWidth: pos.width, maxHeight: pos.maxHeight }}
+                >
+                    {options.map((o, i) => (
+                        <div
+                            key={String(o.value)}
+                            role="option"
+                            aria-selected={i === index}
+                            className={classes(cl("menu-item"), i === active && cl("menu-item-active"), i === index && cl("menu-item-selected"))}
+                            onMouseEnter={() => setActive(i)}
+                            // keep focus on the trigger
+                            onMouseDown={e => e.preventDefault()}
+                            onClick={() => pick(i)}
+                        >
+                            <span className={cl("menu-label")}>{o.label}</span>
+                            {i === index && <Icon path={ICONS.check} size={14} className={cl("menu-check")} />}
+                        </div>
+                    ))}
+                </div>,
+                document.body
+            )}
+        </>
     );
 }
 
@@ -480,15 +693,33 @@ export function Avatar({ src, size = 32, fallback = ICONS.user, square }: { src?
 // ---------------------------------------------------------------- Windows
 
 const normalize = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, "");
-const ARTWORK = new Map(Object.entries(APP_ICONS).map(([name, src]) => [normalize(name), src]));
+const GLYPHS = new Map(Object.entries(APP_GLYPHS).map(([name, glyph]) => [normalize(name), glyph]));
+const GLYPH_PREFIX = "vc-glyph:";
 
-/** App icon artwork of a plugin by name ("Friend Dock" finds FriendDock), or undefined */
-export const appArtwork = (name: unknown) => (typeof name === "string" ? ARTWORK.get(normalize(name)) : undefined);
+/**
+ * App icon artwork of a plugin by name ("Friend Dock" finds FriendDock), or undefined.
+ * Returns a token for AppArtwork (the artwork is a duotone line icon from appGlyphs.ts, not an image).
+ */
+export const appArtwork = (name: unknown) =>
+    typeof name === "string" && GLYPHS.has(normalize(name)) ? GLYPH_PREFIX + normalize(name) : undefined;
 
-/** A plugin's app icon artwork with Apple corners, same size rules as AppIcon. `pulse` shows a ring while the plugin is busy */
+/**
+ * A plugin's app icon: its duotone line icon (white + the plugin's color) on a transparent ground; any other `src` is
+ * shown as an image. `size` is the box (like AppIcon); `pulse` shows a pulsing dot while the plugin is busy.
+ */
 export function AppArtwork({ src, size = 42, pulse }: { src: string; size?: number; pulse?: boolean; }) {
-    const img = <img src={src} className={cl("app-art")} style={{ width: size, height: size, borderRadius: size * 0.225 }} alt="" draggable={false} />;
-    return pulse ? <span className={cl("app-art-pulse")} style={{ borderRadius: size * 0.225 }}>{img}</span> : img;
+    const glyph = src.startsWith(GLYPH_PREFIX) ? GLYPHS.get(src.slice(GLYPH_PREFIX.length)) : undefined;
+    const art = glyph
+        ? (
+            <span className={cl("app-art")} style={{ width: size, height: size, "--vc-ui-art": `var(--vc-ui-${glyph.color})` } as CSSProperties}>
+                <svg viewBox="0 0 24 24" width={Math.round(size * 0.74)} height={Math.round(size * 0.74)} fill="none" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                    {glyph.base.map(d => <path key={d} d={d} />)}
+                    <g className={cl("app-art-accent")}>{glyph.accent.map(d => <path key={d} d={d} />)}</g>
+                </svg>
+            </span>
+        )
+        : <img src={src} className={classes(cl("app-art"), cl("app-art-img"))} style={{ width: size, height: size }} alt="" draggable={false} />;
+    return pulse ? <span className={cl("app-art-pulse")}>{art}</span> : art;
 }
 
 /** Header picture of a plugin: its artwork (with a busy ring if `pulse`), else the plugin's own fallback logo */
@@ -548,7 +779,7 @@ export function Sheet({ header, onClose, top, children, footer, notice, actions,
                 <header className={cl("header")}>
                     {header.iconNode ?? (() => {
                         const art = appArtwork(header.app ?? header.title);
-                        return art ? <AppArtwork src={art} /> : header.icon && <AppIcon path={header.icon} color={header.iconColor} />;
+                        return art ? <AppArtwork src={art} size={36} /> : header.icon && <AppIcon path={header.icon} color={header.iconColor} size={36} />;
                     })()}
                     <div className={cl("header-text")}>
                         <h2 className={cl("title")}>{header.title}</h2>
@@ -605,11 +836,19 @@ export function openWindow(render: (close: () => void) => ReactNode, { size = "m
 /** macOS alert: icon, title, text and up to three buttons. Resolves with the clicked index (-1 = closed). */
 export function openAlert({ title, body, icon, iconColor = "blue", buttons }: {
     title: ReactNode; body?: ReactNode; icon?: string; iconColor?: UiColor;
-    buttons: { label: ReactNode; variant?: ButtonVariant; color?: UiColor; }[];
+    buttons: { label: ReactNode; variant?: ButtonVariant; color?: UiColor; icon?: string; }[];
 }) {
     return new Promise<number>(resolve => {
         let done = false;
         const finish = (i: number) => { if (!done) { done = true; resolve(i); } };
+        // An animated button (trash, leave) plays its click animation before the alert closes
+        const click = (i: number, close: () => void) => {
+            if (done) return;
+            finish(i);
+            const icon = buttons[i].icon;
+            if (icon === ICONS.trash || icon === ICONS.leave) setTimeout(close, iconAnim(icon).ms + 20);
+            else close();
+        };
         openModal(props => (
             <Root {...props} size={ModalSize.SMALL} className={classes(cl("window"), cl("alert-window"))}>
                 <div className={cl("alert")}>
@@ -618,7 +857,7 @@ export function openAlert({ title, body, icon, iconColor = "blue", buttons }: {
                     {body && <div className={cl("alert-body")}>{body}</div>}
                     <div className={classes(cl("alert-buttons"), buttons.length > 2 && cl("alert-buttons-stacked"))}>
                         {buttons.map((b, i) => (
-                            <Button key={i} wide variant={b.variant ?? (i === buttons.length - 1 ? "filled" : "gray")} color={b.color} onClick={() => { finish(i); props.onClose(); }}>
+                            <Button key={i} wide variant={b.variant ?? (i === buttons.length - 1 ? "filled" : "gray")} color={b.color} icon={b.icon} onClick={() => click(i, props.onClose)}>
                                 {b.label}
                             </Button>
                         ))}
@@ -630,12 +869,17 @@ export function openAlert({ title, body, icon, iconColor = "blue", buttons }: {
 }
 
 /** Yes/no question; true if confirmed */
-export async function confirm({ title, body, confirmText = "OK", cancelText = "Cancel", destructive, icon, iconColor }: {
+export async function confirm({ title, body, confirmText = "OK", cancelText = "Cancel", destructive, icon, iconColor, confirmIcon }: {
     title: ReactNode; body?: ReactNode; confirmText?: string; cancelText?: string; destructive?: boolean; icon?: string; iconColor?: UiColor;
+    /** Icon in the confirm button; a deleting / leaving dialog (trash / leave icon) gets the animated one by default */
+    confirmIcon?: string;
 }) {
     const i = await openAlert({
         title, body, icon, iconColor: iconColor ?? (destructive ? "red" : "blue"),
-        buttons: [{ label: cancelText }, { label: confirmText, variant: destructive ? "destructive" : "filled" }]
+        buttons: [
+            { label: cancelText },
+            { label: confirmText, variant: destructive ? "destructive" : "filled", icon: confirmIcon ?? (destructive && (icon === ICONS.trash || icon === ICONS.leave) ? icon : undefined) }
+        ]
     });
     return i === 1;
 }

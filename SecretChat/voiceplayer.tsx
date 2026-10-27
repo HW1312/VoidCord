@@ -7,14 +7,17 @@
 import { classNameFactory } from "@api/Styles";
 import { useEffect, useRef, useState } from "@webpack/common";
 
+import { Icon, ICONS } from "../_ui";
+import { MUTE_ICON, PAUSE_ICON, VOLUME_ICON, VOLUME_LOW_ICON } from "./icons";
+
 const cl = classNameFactory("vc-secretchat-");
 
-const PLAY_PATH = "M8 5.14v13.72a1 1 0 0 0 1.52.85l10.6-6.86a1 1 0 0 0 0-1.7L9.52 4.29A1 1 0 0 0 8 5.14Z";
-const PAUSE_PATH = "M7 4h3a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1Zm7 0h3a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-3a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1Z";
+const PLAY_PATH = ICONS.play;
+const PAUSE_PATH = PAUSE_ICON;
 
-const VOLUME_PATH = "M3 10v4a1 1 0 0 0 1 1h3l3.7 3.7a.75.75 0 0 0 1.3-.53V5.83a.75.75 0 0 0-1.3-.53L7 9H4a1 1 0 0 0-1 1Zm13.5 2A4.5 4.5 0 0 0 14 7.97v8.05A4.47 4.47 0 0 0 16.5 12ZM14 3.23v2.06a7 7 0 0 1 0 13.42v2.06a9 9 0 0 0 0-17.54Z";
-const VOLUME_LOW_PATH = "M5 10v4a1 1 0 0 0 1 1h3l3.7 3.7a.75.75 0 0 0 1.3-.53V5.83a.75.75 0 0 0-1.3-.53L9 9H6a1 1 0 0 0-1 1Zm13.5 2A4.5 4.5 0 0 0 16 7.97v8.05A4.47 4.47 0 0 0 18.5 12Z";
-const MUTED_PATH = "M3 10v4a1 1 0 0 0 1 1h3l3.7 3.7a.75.75 0 0 0 1.3-.53V5.83a.75.75 0 0 0-1.3-.53L7 9H4a1 1 0 0 0-1 1Zm12.3-1.7a1 1 0 0 1 1.4 0L18.5 10l1.8-1.7a1 1 0 1 1 1.4 1.4L19.9 11.5l1.8 1.8a1 1 0 0 1-1.4 1.4l-1.8-1.8-1.8 1.8a1 1 0 0 1-1.4-1.4l1.8-1.8-1.8-1.8a1 1 0 0 1 0-1.4Z";
+const VOLUME_PATH = VOLUME_ICON;
+const VOLUME_LOW_PATH = VOLUME_LOW_ICON;
+const MUTED_PATH = MUTE_ICON;
 
 /** Shared by all voice players for this session, like Discord's own */
 let lastVolume = 1;
@@ -91,7 +94,7 @@ export function VoicePlayer({ src }: { src: string; }) {
     return (
         <div className={cl("voice-player")}>
             <button type="button" className={cl("voice-play")} aria-label={playing ? "Pause" : "Play"} onClick={toggle}>
-                <svg width={16} height={16} viewBox="0 0 24 24" fill="currentColor"><path d={playing ? PAUSE_PATH : PLAY_PATH} /></svg>
+                <Icon path={playing ? PAUSE_PATH : PLAY_PATH} size={16} />
             </button>
             <div className={cl("voice-track")} onClick={seek}>
                 <div className={cl("voice-fill")} style={{ width: `${progress * 100}%` }} />
@@ -112,9 +115,7 @@ export function VoicePlayer({ src }: { src: string; }) {
                     onChange={e => changeVolume(Number(e.currentTarget.value))}
                 />
                 <button type="button" className={cl("voice-mute")} aria-label={silent ? "Unmute" : "Mute"} onClick={toggleMute}>
-                    <svg width={18} height={18} viewBox="0 0 24 24" fill="currentColor">
-                        <path d={silent ? MUTED_PATH : volume < 0.5 ? VOLUME_LOW_PATH : VOLUME_PATH} />
-                    </svg>
+                    <Icon path={silent ? MUTED_PATH : volume < 0.5 ? VOLUME_LOW_PATH : VOLUME_PATH} size={18} />
                 </button>
             </div>
             <audio

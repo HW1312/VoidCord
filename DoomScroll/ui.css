@@ -35,7 +35,7 @@
 .vc-doomscroll-handle {
     flex: none;
     box-sizing: border-box;
-    border-left: 0.5px solid var(--vc-ui-sep);
+    border-left: 1px solid var(--vc-ui-sep);
     background: var(--vc-ui-group);
     cursor: col-resize;
     touch-action: none;
@@ -44,7 +44,7 @@
 
 .vc-doomscroll-handle:hover,
 .vc-doomscroll-handle-active {
-    background: var(--vc-ui-pink);
+    background: var(--vc-ui-edge);
 }
 
 .vc-doomscroll-strip {
@@ -55,9 +55,8 @@
     gap: 8px;
     box-sizing: border-box;
     padding: 0 8px;
-    border-bottom: 0.5px solid var(--vc-ui-sep);
+    border-bottom: 1px solid var(--vc-ui-sep);
     background: var(--vc-ui-glass);
-    backdrop-filter: blur(40px) saturate(180%);
 }
 
 .vc-doomscroll-tabs,
@@ -84,28 +83,35 @@
     color: var(--vc-ui-text);
     font: inherit;
     cursor: pointer;
-    transition: background 0.15s, color 0.15s, transform 0.2s var(--vc-ui-spring);
+    transition: background 0.15s var(--vc-ui-ease), color 0.15s var(--vc-ui-ease);
 }
 
 .vc-doomscroll-tab {
     width: 38px;
-    border-radius: 10px;
+    border-radius: 8px;
 }
 
 .vc-doomscroll-strip-btn {
     width: 30px;
-    border-radius: 50%;
+    border-radius: 8px;
 }
 
-.vc-doomscroll-tab:hover,
-.vc-doomscroll-strip-btn:hover {
+.vc-doomscroll-tab:hover {
     background: var(--vc-ui-field);
     color: var(--vc-ui-title);
 }
 
-.vc-doomscroll-tab:active,
+/* Icon buttons: no box behind the icon, hover only changes its color */
+.vc-doomscroll-strip-btn:hover {
+    color: var(--vc-ui-title);
+}
+
+.vc-doomscroll-tab:active {
+    background: var(--vc-ui-group-active);
+}
+
 .vc-doomscroll-strip-btn:active {
-    transform: scale(0.92);
+    color: var(--vc-ui-dim);
 }
 
 .vc-doomscroll-tab-active,
@@ -116,7 +122,7 @@
 
 .vc-doomscroll-strip-btn-active,
 .vc-doomscroll-strip-btn-active:hover {
-    color: var(--vc-ui-red);
+    color: var(--vc-ui-title);
 }
 
 .vc-doomscroll-placeholder {
@@ -137,7 +143,7 @@
 
 .vc-doomscroll-titlebtn[class*="selected"] .vc-ui-tb-icon,
 .vc-doomscroll-titlebtn-active .vc-ui-tb-icon {
-    color: var(--vc-ui-pink);
+    color: var(--vc-ui-title);
 }
 
 .vc-doomscroll-menu {
@@ -153,10 +159,10 @@
     width: 44px;
     height: 44px;
     border: none;
-    border-radius: 12px;
+    border-radius: 8px;
     background: none;
     cursor: pointer;
-    transition: background 0.15s, transform 0.2s var(--vc-ui-spring);
+    transition: background 0.15s var(--vc-ui-ease);
 }
 
 .vc-doomscroll-menu-item:hover {
@@ -164,7 +170,7 @@
 }
 
 .vc-doomscroll-menu-item:active {
-    transform: scale(0.92);
+    background: var(--vc-ui-group-active);
 }
 
 .vc-doomscroll-menu-item-active,
@@ -179,16 +185,13 @@
 
 /* ---------------------------------------------------------------- Settings */
 
-/* Brand logo on a gray app-icon tile (the TikTok logo is white) */
+/* Brand logo in a settings row – no tile behind it (the window is dark, so TikTok's white logo reads) */
 .vc-doomscroll-brand-tile {
     display: flex;
     align-items: center;
     justify-content: center;
     width: 28px;
     height: 28px;
-    border-radius: 7px;
-    background: var(--vc-ui-gray);
-    box-shadow: inset 0 0 0 0.5px var(--vc-ui-edge);
 }
 
 .vc-doomscroll-slider {
@@ -212,7 +215,7 @@
     width: 0;
     margin: 0;
     opacity: 0;
-    transition: width 0.2s var(--vc-ui-ease), opacity 0.15s, margin 0.2s var(--vc-ui-ease);
+    transition: width 0.2s var(--vc-ui-ease), opacity 0.15s var(--vc-ui-ease), margin 0.2s var(--vc-ui-ease);
 }
 
 .vc-doomscroll-volume:hover .vc-doomscroll-volume-slider,
@@ -225,7 +228,7 @@
 .vc-doomscroll-volume-slider {
     height: 4px;
     border-radius: 2px;
-    background: linear-gradient(to right, var(--vc-ui-blue) var(--vc-doomscroll-fill, 100%), var(--vc-ui-track) var(--vc-doomscroll-fill, 100%));
+    background: linear-gradient(to right, var(--vc-ui-accent) var(--vc-doomscroll-fill, 100%), var(--vc-ui-track) var(--vc-doomscroll-fill, 100%));
     cursor: pointer;
     appearance: none;
 }
@@ -234,8 +237,7 @@
     width: 14px;
     height: 14px;
     border-radius: 50%;
-    background: #fff;
-    box-shadow: 0 1px 4px rgb(0 0 0 / 30%), 0 0 0 0.5px rgb(0 0 0 / 8%);
+    background: var(--vc-ui-accent);
     appearance: none;
 }
 
@@ -245,8 +247,8 @@
     position: fixed;
     z-index: 1000;
     padding: 5px 10px;
-    border: 0.5px solid var(--vc-ui-edge);
-    border-radius: 10px;
+    border: 1px solid var(--vc-ui-edge);
+    border-radius: 6px;
     background: var(--vc-ui-glass-strong);
     box-shadow: var(--vc-ui-shadow);
     color: var(--vc-ui-title);
@@ -257,7 +259,6 @@
     white-space: nowrap;
     pointer-events: none;
     transform: translate(-50%, -100%);
-    backdrop-filter: blur(30px) saturate(180%);
 }
 
 .vc-doomscroll-tip-right {

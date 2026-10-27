@@ -8,14 +8,13 @@
     gap: 10px;
     width: 240px;
     padding: 10px 12px 12px;
-    border: 0.5px solid var(--vc-ui-edge);
-    border-radius: 14px;
+    border: 1px solid var(--vc-ui-edge);
+    border-radius: 12px;
     background: var(--vc-ui-glass-strong);
-    box-shadow: 0 10px 30px rgb(0 0 0 / 35%);
+    box-shadow: var(--vc-ui-shadow);
     color: var(--vc-ui-text);
     font-family: var(--vc-ui-font);
     font-size: 12.5px;
-    backdrop-filter: blur(20px) saturate(1.6);
 }
 
 .vc-streamunlock-head {
@@ -47,14 +46,15 @@
     color: var(--vc-ui-title);
     font-family: var(--vc-ui-mono);
     font-weight: 500;
+    font-variant-numeric: tabular-nums;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
 
 .vc-streamunlock-line b.vc-streamunlock-strong {
-    color: var(--vc-ui-green);
+    color: var(--vc-ui-title);
     font-size: 14px;
-    font-weight: 700;
+    font-weight: 600;
 }
 
 .vc-streamunlock-hint {
@@ -64,8 +64,9 @@
     gap: 6px;
     margin-top: 6px;
     padding: 8px;
-    border-radius: 10px;
-    background: color-mix(in srgb, var(--vc-ui-orange) 14%, transparent);
+    border: 1px solid color-mix(in srgb, var(--vc-ui-orange) 30%, transparent);
+    border-radius: 8px;
+    background: color-mix(in srgb, var(--vc-ui-orange) 10%, transparent);
     color: var(--vc-ui-title);
     font-size: 12px;
     line-height: 1.35;

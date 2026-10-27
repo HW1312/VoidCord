@@ -10,7 +10,7 @@ import { saveFile } from "@utils/web";
 import { findComponentByCodeLazy } from "@webpack";
 import { ChannelStore, GuildStore, IconUtils, showToast, useEffect, useMemo, UserStore, useState } from "@webpack/common";
 
-import { Avatar, Button, confirm, Empty as UiEmpty, Glyph, Icon, ICONS as UI, Note, openWindow, Progress, Row, Section, Segmented, Select, Sheet, Stats, ToggleRow } from "../_ui";
+import { Avatar, Button, confirm, Empty as UiEmpty, Glyph, Icon, ICONS as UI, Note, openWindow, Progress, Row, Section, Segmented, Select, Sheet, Stats, strokeIcon, ToggleRow } from "../_ui";
 import { AllTimeData, cancelBackfill, clearAllTime, getBackfill, onBackfillChange, runBackfill } from "./backfill";
 import { BarChart, cl, Heatmap, MeterRow } from "./charts";
 import { settings } from "./index";
@@ -22,16 +22,19 @@ const HeaderBarIcon = findComponentByCodeLazy(".HEADER_BAR_BADGE_BOTTOM,", 'posi
 
 // ---------------------------------------------------------------- Icons
 
+/** Circle as path data (for Lucide icons drawn with strokeIcon) */
+const circle = (cx: number, cy: number, r: number) => `M${cx - r} ${cy}a${r} ${r} 0 1 0 ${r * 2} 0a${r} ${r} 0 1 0 ${-r * 2} 0`;
+
 const ICONS = {
-    chart: "M5 9.2h3V19H5V9.2ZM10.6 5h2.8v14h-2.8V5Zm5.6 8H19v6h-2.8v-6Z",
-    voice: "M12 14a3 3 0 0 0 3-3V5a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3Zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.92V21h2v-3.08A7 7 0 0 0 19 11h-2Z",
-    message: "M20 2H4a2 2 0 0 0-2 2v18l4-4h14a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2Z",
-    clock: "M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm.5 5v5.25l4.5 2.67-.75 1.23L11 13V7h1.5Z",
-    game: "M21 6H3a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h18a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2Zm-10 7H8v3H6v-3H3v-2h3V8h2v3h3v2Zm4.5 2a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3Zm4-3a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3Z",
-    at: "M12 2a10 10 0 0 0 0 20h5v-2h-5a8 8 0 1 1 8-8v1.43c0 .79-.71 1.57-1.5 1.57s-1.5-.78-1.5-1.57V12a5 5 0 1 0-1.46 3.53A3.7 3.7 0 0 0 18.5 17c1.97 0 3.5-1.6 3.5-3.57V12A10 10 0 0 0 12 2Zm0 13a3 3 0 1 1 0-6 3 3 0 0 1 0 6Z",
-    hash: "M10 3 9.3 7H5.5l-.35 2H9l-.7 4H4.5l-.35 2H8l-.7 4h2l.7-4h4l-.7 4h2l.7-4h3.8l.35-2H16.3l.7-4h3.8l.35-2H17.3l.7-4h-2l-.7 4h-4l.7-4h-2Zm1 6h4l-.7 4h-4l.7-4Z",
-    reset: "M12 5V2L7 6l5 4V7a5 5 0 1 1-5 5H5a7 7 0 1 0 7-7Z",
-    timer: "M15 1H9v2h6V1Zm-4 13h2V8h-2v6Zm8.03-6.61 1.42-1.42c-.43-.51-.9-.99-1.41-1.41l-1.42 1.42A8.96 8.96 0 0 0 12 4a9 9 0 1 0 9 9c0-2.12-.74-4.07-1.97-5.61ZM12 20a7 7 0 1 1 0-14 7 7 0 0 1 0 14Z"
+    chart: strokeIcon("M3 3v16a2 2 0 0 0 2 2h16", "M18 17V9", "M13 17V5", "M8 17v-3"),
+    voice: strokeIcon("M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z", "M19 10v2a7 7 0 0 1-14 0v-2", "M12 19v3"),
+    message: strokeIcon("M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"),
+    clock: UI.clock,
+    game: strokeIcon("M6 11h4", "M8 9v4", "M15 12h.01", "M18 10h.01", "M17.32 5H6.68a4 4 0 0 0-3.978 3.59c-.006.052-.01.101-.017.152C2.604 9.416 2 14.456 2 16a3 3 0 0 0 3 3c1 0 1.5-.5 2-1l1.414-1.414A2 2 0 0 1 9.828 16h4.344a2 2 0 0 1 1.414.586L17 18c.5.5 1 1 2 1a3 3 0 0 0 3-3c0-1.545-.604-6.584-.685-7.258-.007-.05-.011-.1-.017-.151A4 4 0 0 0 17.32 5z"),
+    at: strokeIcon(circle(12, 12, 4), "M16 8v5a3 3 0 0 0 6 0v-1a10 10 0 1 0-4 8"),
+    hash: UI.hash,
+    reset: strokeIcon("M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8", "M3 3v5h5"),
+    timer: strokeIcon("M10 2h4", "M12 14l3-3", circle(12, 14, 8))
 };
 
 // ---------------------------------------------------------------- Hooks
@@ -109,7 +112,7 @@ function AllTime() {
 
     const button = bf.running
         ? <Button small variant="gray" onClick={cancelBackfill}>Stop</Button>
-        : <Button small variant="tinted" color="purple" icon={UI.search} onClick={() => void runBackfill()}>{data ? "Count again" : "Count my messages"}</Button>;
+        : <Button small variant="tinted" icon={UI.search} onClick={() => void runBackfill()}>{data ? "Count again" : "Count my messages"}</Button>;
 
     return (
         <>
@@ -120,7 +123,7 @@ function AllTime() {
             >
                 {bf.running && (
                     <Row title={`${bf.done} / ${bf.total}`} subtitle={bf.waiting ? `Waiting ${bf.waiting}s (rate limit or search index)…` : bf.label}>
-                        <Progress value={bf.total ? bf.done / bf.total : 0} color="purple" />
+                        <Progress value={bf.total ? bf.done / bf.total : 0} />
                     </Row>
                 )}
                 {data && !bf.running && (
@@ -352,7 +355,7 @@ function Panel() {
                 subtitle: `Tracking since ${dateLong(stats.since)} · ${days} ${days === 1 ? "day" : "days"} with data · stored only on this device (last 366 days).`,
                 icon: ICONS.chart,
                 iconColor: "purple",
-                actions: <Button icon={ICONS.chart} color="purple" onClick={openWrappedModal}>Open dashboard</Button>
+                actions: <Button icon={ICONS.chart} onClick={openWrappedModal}>Open dashboard</Button>
             }}
         >
             <Section title="Tracking">

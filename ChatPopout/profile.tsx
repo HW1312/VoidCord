@@ -9,6 +9,7 @@ import { fetchUserProfile, openUserProfile } from "@utils/discord";
 import { classes } from "@utils/misc";
 import { GuildMemberStore, GuildRoleStore, IconUtils, PresenceStore, showToast, useEffect, useLayoutEffect, useRef, UserProfileStore, UserStore, useState, useStateFromStores } from "@webpack/common";
 
+import { ICONS, strokeIcon } from "../_ui";
 import { MediaItem, openExternal } from "./media";
 import { CDN, cl, COPY_PATH, Icon, log, Markdown, tip } from "./shared";
 
@@ -23,16 +24,19 @@ export interface ProfileTarget {
 
 const EDGE = 8;
 const STATUS_COLOR: Record<string, string> = {
-    online: "var(--status-positive, #23a55a)",
-    idle: "var(--status-warning, #f0b232)",
-    dnd: "var(--status-danger, #f23f43)",
-    streaming: "#593695"
+    online: "var(--vc-ui-green)",
+    idle: "var(--vc-ui-orange)",
+    dnd: "var(--vc-ui-red)",
+    streaming: "var(--vc-ui-purple)"
 };
 
-const CHAT_PATH = "M12 3C6.48 3 2 6.92 2 11.5c0 2.3 1.13 4.38 2.96 5.88L4 21l4.13-2.07c1.2.37 2.5.57 3.87.57 5.52 0 10-3.92 10-8.5S17.52 3 12 3Z";
-const AT_PATH = "M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10h5v-2h-5c-4.34 0-8-3.66-8-8s3.66-8 8-8 8 3.66 8 8v1.43c0 .79-.71 1.57-1.5 1.57s-1.5-.78-1.5-1.57V12c0-2.76-2.24-5-5-5s-5 2.24-5 5 2.24 5 5 5c1.38 0 2.64-.56 3.54-1.47.65.89 1.77 1.47 2.96 1.47 1.97 0 3.5-1.6 3.5-3.57V12c0-5.52-4.48-10-10-10Zm0 13c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3Z";
-const PROFILE_PATH = "M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2Zm0 4c1.93 0 3.5 1.57 3.5 3.5S13.93 13 12 13s-3.5-1.57-3.5-3.5S10.07 6 12 6Zm0 14c-2.03 0-4.43-.82-6.14-2.88a9.95 9.95 0 0 1 12.28 0C16.43 19.18 14.03 20 12 20Z";
-const CHECK_PATH = "M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2Z";
+// message-circle
+const CHAT_PATH = strokeIcon("M7.9 20A9 9 0 1 0 4 16.1L2 22Z");
+// at-sign
+const AT_PATH = strokeIcon("M8 12a4 4 0 1 0 8 0a4 4 0 1 0-8 0", "M16 8v5a3 3 0 0 0 6 0v-1a10 10 0 1 0-4 8");
+// circle-user
+const PROFILE_PATH = strokeIcon("M2 12a10 10 0 1 0 20 0a10 10 0 1 0-20 0", "M9 10a3 3 0 1 0 6 0a3 3 0 1 0-6 0", "M7 20.662V19a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v1.662");
+const CHECK_PATH = ICONS.check;
 
 /** Copies the user ID; the icon turns into a green check for a moment instead of a toast in the main window */
 function CopyIdButton({ userId }: { userId: string; }) {
@@ -160,7 +164,7 @@ export function ProfileCard({ target, onClose, onMessage, onMention, onOpenMedia
 
     const bannerHash: string | undefined = guildProfile?.banner || profile?.banner || raw.banner;
     const bannerUrl = bannerHash ? `${CDN}/banners/${userId}/${bannerHash}.${bannerHash.startsWith("a_") ? "gif" : "png"}?size=480` : null;
-    const accent = toColor(profile?.themeColors?.[0] ?? profile?.accentColor ?? raw.accentColor ?? raw.accent_color) ?? member?.colorString ?? "var(--brand-500, #5865f2)";
+    const accent = toColor(profile?.themeColors?.[0] ?? profile?.accentColor ?? raw.accentColor ?? raw.accent_color) ?? member?.colorString ?? "var(--vc-ui-track)";
     const bio: string | undefined = guildProfile?.bio || profile?.bio;
     const pronouns: string | undefined = guildProfile?.pronouns || profile?.pronouns;
     const badges: any[] = profile?.badges ?? [];

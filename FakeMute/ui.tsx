@@ -10,7 +10,7 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { findComponentByCodeLazy } from "@webpack";
 import { MediaEngineStore, Popout, SelectedChannelStore, useRef, useState, useStateFromStores } from "@webpack/common";
 
-import { classes, Icon, Note, Popover, Row, Section, Segmented, Sheet, State, ToggleRow } from "../_ui";
+import { classes, Icon, Note, Popover, Row, Section, Segmented, Sheet, State, strokeIcon, ToggleRow } from "../_ui";
 import { Mode, setDeafMode, setMicMode, settings } from "./index";
 
 const cl = classNameFactory("vc-fakemute-");
@@ -18,8 +18,9 @@ const HeaderBarIcon = findComponentByCodeLazy(".HEADER_BAR_BADGE_BOTTOM,", 'posi
 
 // ---------------------------------------------------------------- Icons
 
-const MIC_PATH = "M12 2a4 4 0 0 0-4 4v5a4 4 0 0 0 8 0V6a4 4 0 0 0-4-4Zm-6 9a1 1 0 1 0-2 0 8 8 0 0 0 7 7.94V21H8a1 1 0 1 0 0 2h8a1 1 0 1 0 0-2h-3v-2.06A8 8 0 0 0 20 11a1 1 0 1 0-2 0 6 6 0 0 1-12 0Z";
-const HEADPHONES_PATH = "M12 3a9 9 0 0 0-9 9v6a3 3 0 0 0 3 3h1a2 2 0 0 0 2-2v-4a2 2 0 0 0-2-2H5v-1a7 7 0 0 1 14 0v1h-2a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h1a3 3 0 0 0 3-3v-6a9 9 0 0 0-9-9Z";
+// Lucide mic / headphones
+const MIC_PATH = strokeIcon("M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z", "M19 10v2a7 7 0 0 1-14 0v-2", "M12 19v3");
+const HEADPHONES_PATH = strokeIcon("M3 14h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-7a9 9 0 0 1 18 0v7a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3");
 
 const ICON_COLOR = "orange";
 const HEADER = { title: "Fake Mute", icon: HEADPHONES_PATH, iconColor: ICON_COLOR } as const;

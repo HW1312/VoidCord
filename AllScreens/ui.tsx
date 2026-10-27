@@ -5,13 +5,19 @@
 
 import ErrorBoundary from "@components/ErrorBoundary";
 
-import { Glyph, Note, Row, Section, Segmented, Select, Sheet } from "../_ui";
+import { Glyph, Note, Row, Section, Segmented, Select, Sheet, strokeIcon } from "../_ui";
 import { lastSize, settings } from "./index";
 
-const MONITORS_PATH = "M2 6a2 2 0 0 1 2-2h7a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H8v2h2a1 1 0 1 1 0 2H5a1 1 0 1 1 0-2h1v-2H4a2 2 0 0 1-2-2V6Zm11-1a1 1 0 0 1 1-1h6a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-2v2h1a1 1 0 1 1 0 2h-5a1 1 0 1 1 0-2h2v-2h-2a1 1 0 0 1-1-1V5Z";
-const GRID_PATH = "M3 4a1 1 0 0 1 1-1h7v8H3V4Zm10-1h7a1 1 0 0 1 1 1v7h-8V3ZM3 13h8v8H4a1 1 0 0 1-1-1v-7Zm10 0h8v7a1 1 0 0 1-1 1h-7v-8Z";
-const SPEED_PATH = "M20.38 8.57l-1.23 1.85a8 8 0 0 1-.22 7.58H5.07A8 8 0 0 1 15.58 6.85l1.85-1.23A10 10 0 0 0 3.35 19a2 2 0 0 0 1.72 1h13.85a2 2 0 0 0 1.74-1 10 10 0 0 0-.27-10.44Zm-9.79 6.84a2 2 0 0 0 2.83 0l5.66-8.49-8.49 5.66a2 2 0 0 0 0 2.83Z";
-const WIDTH_PATH = "M7 11V8l-4 4 4 4v-3h10v3l4-4-4-4v3H7Z";
+// Lucide monitor / layout-grid / gauge / move-horizontal
+const MONITORS_PATH = strokeIcon("M4 3h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z", "M8 21h8", "M12 17v4");
+const GRID_PATH = strokeIcon(
+    "M4 3h5a1 1 0 0 1 1 1v5a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z",
+    "M15 3h5a1 1 0 0 1 1 1v5a1 1 0 0 1-1 1h-5a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z",
+    "M15 14h5a1 1 0 0 1 1 1v5a1 1 0 0 1-1 1h-5a1 1 0 0 1-1-1v-5a1 1 0 0 1 1-1z",
+    "M4 14h5a1 1 0 0 1 1 1v5a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-5a1 1 0 0 1 1-1z"
+);
+const SPEED_PATH = strokeIcon("m12 14 4-4", "M3.34 19a10 10 0 1 1 17.32 0");
+const WIDTH_PATH = strokeIcon("m18 8 4 4-4 4", "M2 12h20", "m6 8-4 4 4 4");
 const HEADER = { title: "All Screens", icon: MONITORS_PATH, iconColor: "teal" } as const;
 
 const FPS = [30, 60, 120, 144].map(v => ({ value: v, label: `${v} FPS` }));
@@ -47,7 +53,7 @@ export const SettingsPanel = ErrorBoundary.wrap(() => {
                 title="Picture"
                 footer={`Changes apply to the next stream. More than 3840 px isn't possible: graphics cards can't encode H264 that wide.${lastSize ? ` Last picture: ${lastSize}.` : ""}`}
             >
-                <Row leading={<Glyph path={SPEED_PATH} color="orange" />} title="Frame rate" subtitle="Per monitor" trailing={<Select value={fps} options={FPS} onChange={v => settings.store.fps = v} />} />
+                <Row leading={<Glyph path={SPEED_PATH} color="gray" />} title="Frame rate" subtitle="Per monitor" trailing={<Select value={fps} options={FPS} onChange={v => settings.store.fps = v} />} />
                 <Row leading={<Glyph path={WIDTH_PATH} color="indigo" />} title="Widest picture" subtitle="Larger setups are scaled down" trailing={<Select value={maxWidth} options={WIDTHS} onChange={v => settings.store.maxWidth = v} />} />
             </Section>
             <Note>

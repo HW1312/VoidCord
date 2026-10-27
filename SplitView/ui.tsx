@@ -13,7 +13,7 @@ import { findComponentByCodeLazy } from "@webpack";
 import { createRoot, Popout, ReactDOM, useEffect, useLayoutEffect, useReducer, useRef, useState } from "@webpack/common";
 import type { Root } from "react-dom/client";
 
-import { AppIcon, Avatar, Icon, IconButton, ICONS, LinkRow, Popover, Row, Section, Sheet, ToggleRow, UiColor } from "../_ui";
+import { AppIcon, Avatar, Icon, IconButton, ICONS, LinkRow, Popover, Row, Section, Sheet, strokeIcon, ToggleRow, UiColor } from "../_ui";
 import { closePanel, DEFAULT_WIDTH, MAX_PANELS, MIN_WIDTH, openPanel, parsePanels, parseWidths, setPanelWidth, settings, toggleVisible } from "./index";
 import { openInMain, Panel, useChannelInfo } from "./panel";
 
@@ -21,7 +21,8 @@ const cl = classNameFactory("vc-splitview-");
 export const ICON_COLOR: UiColor = "indigo";
 const HeaderBarIcon = findComponentByCodeLazy(".HEADER_BAR_BADGE_BOTTOM,", 'position:"bottom"');
 
-export const SPLIT_PATH = "M3 5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5Zm2 0v14h7V5H5Zm9 0v14h5V5h-5Z";
+/** Lucide "columns-2" as a thin stroke icon like the kit */
+export const SPLIT_PATH = strokeIcon("M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z", "M12 3v18");
 
 /** Discord should always stay at least this wide */
 const MIN_MAIN_WIDTH = 480;

@@ -9,11 +9,12 @@ import { IS_WINDOWS } from "@utils/constants";
 import { showToast, useEffect, useRef, useState } from "@webpack/common";
 import type { RefObject } from "react";
 
-import { Empty, Note, openWindow, Row, Section, Sheet, Spinner } from "../_ui";
+import { Empty, Note, openWindow, Row, Section, Sheet, Spinner, strokeIcon } from "../_ui";
 import { joinText, Native, recognize } from "./index";
 import type { OcrLanguage, OcrResult } from "./native";
 
-export const TEXT_ICON = "M4 4h6v2H6v4H4V4Zm10 0h6v6h-2V6h-4V4ZM4 14h2v4h4v2H4v-6Zm14 4v-4h2v6h-6v-2h4ZM8 8h8v2h-3v6h-2v-6H8V8Z";
+// Lucide scan-text
+export const TEXT_ICON = strokeIcon("M3 7V5a2 2 0 0 1 2-2h2", "M17 3h2a2 2 0 0 1 2 2v2", "M21 17v2a2 2 0 0 1-2 2h-2", "M7 21H5a2 2 0 0 1-2-2v-2", "M7 8h8", "M7 12h10", "M7 16h6");
 const ICON_COLOR = "mint" as const;
 
 // ---------------------------------------------------------------- Text window

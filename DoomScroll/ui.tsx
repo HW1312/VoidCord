@@ -12,7 +12,7 @@ import { findComponentByCodeLazy } from "@webpack";
 import { createRoot, Popout, showToast, Tooltip, useEffect, useRef, useState } from "@webpack/common";
 import type { Root } from "react-dom/client";
 
-import { Button, Popover, Row, Section, Segmented, Sheet, Slider, ToggleRow } from "../_ui";
+import { Button, Icon as UiIcon, ICONS, Popover, Row, Section, Segmented, Sheet, Slider, strokeIcon, ToggleRow } from "../_ui";
 import { closeFeed, DoomState, getState, HANDLE_WIDTH, MIN_CHAT_WIDTH, MIN_SIDE_WIDTH, openFeed, refresh, sideAreaWidth, STRIP_HEIGHT, subscribe } from "./controller";
 import { BrandIcon } from "./icons";
 import { Native, settings } from "./index";
@@ -23,14 +23,19 @@ const HeaderBarIcon = findComponentByCodeLazy(".HEADER_BAR_BADGE_BOTTOM,", 'posi
 
 // ---------------------------------------------------------------- Icons
 
-const FEED_PATH = "M7 2h10a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Zm0 2v16h10V4H7Zm3 4.5 5 3.5-5 3.5v-7Z";
-const BACK_PATH = "M20 11H7.8l5.6-5.6L12 4l-8 8 8 8 1.4-1.4L7.8 13H20v-2Z";
-const RELOAD_PATH = "M17.65 6.35A7.96 7.96 0 0 0 12 4a8 8 0 1 0 7.73 10h-2.08A6 6 0 1 1 12 6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35Z";
-const VOLUME_PATH = "M3 9v6h4l5 5V4L7 9H3Zm13.5 3A4.5 4.5 0 0 0 14 7.97v8.05A4.48 4.48 0 0 0 16.5 12ZM14 3.23v2.06a7 7 0 0 1 0 13.42v2.06a9 9 0 0 0 0-17.54Z";
-const MUTED_PATH = "M16.5 12A4.5 4.5 0 0 0 14 7.97v2.21l2.45 2.45c.03-.2.05-.41.05-.63Zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51A8.8 8.8 0 0 0 21 12a9 9 0 0 0-7-8.77v2.06A7 7 0 0 1 19 12ZM4.27 3 3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06a8.99 8.99 0 0 0 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3ZM12 4 9.91 6.09 12 8.18V4Z";
-const FULL_PATH = "M3 5v14h18V5H3Zm2 2h14v10H5V7Z";
-const CHAT_ONLY_PATH = "M3 5v14h18V5H3Zm2 2h10v10H5V7Zm12 0h2v10h-2V7Z";
-const SIDE_PATH = "M3 5v14h18V5H3Zm2 2h6v10H5V7Zm8 0h6v10h-6V7Z";
+/** Lucide rounded square (rect 3,3 18×18 rx 2) */
+const SQUARE = "M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z";
+const SPEAKER = "M11 4.702a.705.705 0 0 0-1.203-.498L6.413 7.587A1.4 1.4 0 0 1 5.416 8H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2.416a1.4 1.4 0 0 1 .997.413l3.383 3.384A.705.705 0 0 0 11 19.298z";
+
+// Lucide smartphone, arrow-left, volume-2, volume-x, square, panel-right, columns-2
+const FEED_PATH = strokeIcon("M7 2h10a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z", "M12 18h.01");
+const BACK_PATH = strokeIcon("m12 19-7-7 7-7", "M19 12H5");
+const RELOAD_PATH = ICONS.refresh;
+const VOLUME_PATH = strokeIcon(SPEAKER, "M16 9a5 5 0 0 1 0 6", "M19.364 18.364a9 9 0 0 0 0-12.728");
+const MUTED_PATH = strokeIcon(SPEAKER, "m22 9-6 6", "m16 9 6 6");
+const FULL_PATH = strokeIcon(SQUARE);
+const CHAT_ONLY_PATH = strokeIcon(SQUARE, "M15 3v18");
+const SIDE_PATH = strokeIcon(SQUARE, "M12 3v18");
 
 type Layout = "replace" | "chat" | "side";
 const LAYOUTS: { value: Layout; label: string; path: string; }[] = [
@@ -38,14 +43,12 @@ const LAYOUTS: { value: Layout; label: string; path: string; }[] = [
     { value: "chat", label: "Replace only the chat", path: CHAT_ONLY_PATH },
     { value: "side", label: "Next to the chat", path: SIDE_PATH }
 ];
-const EXTERNAL_PATH = "M19 19H5V5h7V3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7h-2v7ZM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7Z";
-const CLOSE_PATH = "M18.4 4.2 12 10.6 5.6 4.2 4.2 5.6l6.4 6.4-6.4 6.4 1.4 1.4 6.4-6.4 6.4 6.4 1.4-1.4-6.4-6.4 6.4-6.4-1.4-1.4Z";
+const EXTERNAL_PATH = ICONS.external;
+const CLOSE_PATH = ICONS.close;
 
 function Icon({ path, size = 20, className }: { path: string; size?: number; className?: string; }) {
     return (
-        <svg viewBox="0 0 24 24" width={size} height={size} className={classes(cl("icon"), className)}>
-            <path fill="currentColor" fillRule="evenodd" d={path} />
-        </svg>
+        <UiIcon path={path} size={size} className={classes(cl("icon"), className)} />
     );
 }
 
@@ -423,7 +426,7 @@ export const SettingsPanel = ErrorBoundary.wrap(() => {
     const { layout, muted, volume } = settings.use(["layout", "muted", "volume"]);
 
     return (
-        <Sheet embedded header={{ title: "DoomScroll", subtitle: "TikTok, Shorts and Reels right inside Discord", icon: FEED_PATH, iconColor: "pink" }}>
+        <Sheet embedded header={{ title: "DoomScroll", subtitle: "TikTok, Shorts and Reels right inside Discord", icon: FEED_PATH, iconColor: "gray" }}>
             <Section title="Open a feed">
                 {PLATFORM_IDS.map(id => (
                     <Row

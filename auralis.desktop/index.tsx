@@ -10,7 +10,7 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import definePlugin, { OptionType, type PluginNative } from "@utils/types";
 import { ApplicationAssetUtils, FluxDispatcher, React } from "@webpack/common";
 
-import { Avatar, Badge, Field, Note, Row, Section, Sheet, TextField, ToggleRow } from "../_ui";
+import { Avatar, Badge, Field, ICONS, Note, Row, Section, Sheet, TextField, ToggleRow } from "../_ui";
 import { safeCoverUrl, trackKey } from "./artwork";
 import { createPresence, type Track } from "./presence";
 
@@ -19,7 +19,7 @@ const socketId = "Auralis";
 // Public default supplied by https://github.com/MrBoxik/Taskbar-Media-Presence
 // Discord can display that application's registered name in the activity header.
 const PUBLIC_APP_ID = "1528896038163710112";
-const NOTE_PATH = "M12 3v10.55A4 4 0 1 0 14 17V7h4V3h-6Z";
+const NOTE_PATH = ICONS.music;
 const isAppId = (value: string) => /^\d{17,20}$/.test(value);
 
 const settings = definePluginSettings({

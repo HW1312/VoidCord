@@ -13,7 +13,7 @@
 .vc-mediagrab-hint {
     color: var(--vc-ui-dim);
     font-size: 12px;
-    line-height: 1.4;
+    line-height: 1.45;
 }
 
 .vc-mediagrab-quality {
@@ -77,6 +77,7 @@
     margin-top: 2px;
     color: var(--vc-ui-dim);
     font-size: 12px;
+    font-variant-numeric: tabular-nums;
 }
 
 .vc-mediagrab-action {
@@ -91,7 +92,7 @@
 
 .vc-mediagrab-fill {
     width: 0;
-    background: var(--vc-ui-blue);
+    background: var(--vc-ui-accent);
     transition: width 0.2s linear;
 }
 
@@ -153,7 +154,7 @@
 }
 
 .vc-mediagrab-ring-fill {
-    stroke: var(--vc-ui-pink);
+    stroke: var(--vc-ui-accent);
     stroke-linecap: round;
     transition: stroke-dashoffset 0.3s linear;
 }
@@ -166,10 +167,12 @@
     height: 14px;
     padding: 0 3px;
     border-radius: 7px;
-    background: var(--vc-ui-pink);
-    color: #fff;
+    background: var(--vc-ui-accent);
+    color: var(--vc-ui-on-accent);
+    font-family: var(--vc-ui-mono);
     font-size: 10px;
-    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
     line-height: 14px;
     text-align: center;
 }

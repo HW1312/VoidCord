@@ -15,7 +15,7 @@ import {
 } from "@webpack/common";
 import type { Root } from "react-dom/client";
 
-import { Button, confirm, Empty, Icon, ICONS, openWindow, Pill, Pills, Progress, RoundButton, Row, SearchField, Section, Segmented, Sheet, Spinner, ToggleRow } from "../_ui";
+import { Button, confirm, Empty, Icon, ICONS, openWindow, Pill, Pills, Progress, RoundButton, Row, SearchField, Section, Segmented, Sheet, Spinner, strokeIcon, ToggleRow } from "../_ui";
 import { copyPng, copySelected, deleteSelected, forwardSelected, logger, quoteSelected, savePng } from "./actions";
 import { settings } from "./index";
 import { canRenderShot, canvasToPng, renderScreenshot, ShotOptions } from "./screenshot";
@@ -25,11 +25,17 @@ const cl = classNameFactory("vc-msgselect-");
 
 // ---------------------------------------------------------------- Icons
 
-const QUOTE_PATH = "M4 5a2 2 0 0 1 2-2h3a2 2 0 0 1 2 2v4a6 6 0 0 1-6 6 1 1 0 1 1 0-2 4 4 0 0 0 4-4H6a2 2 0 0 1-2-2V5Zm9 0a2 2 0 0 1 2-2h3a2 2 0 0 1 2 2v4a6 6 0 0 1-6 6 1 1 0 1 1 0-2 4 4 0 0 0 4-4h-3a2 2 0 0 1-2-2V5Z";
-const FORWARD_PATH = "M21.7 7.3a1 1 0 0 1 0 1.4l-5 5a1 1 0 0 1-1.4-1.4L18.58 9H13a7 7 0 0 0-7 7v4a1 1 0 1 1-2 0v-4a9 9 0 0 1 9-9h5.59l-3.3-3.3a1 1 0 0 1 1.42-1.4l5 5Z";
-const CAMERA_PATH = "M9.4 3a2 2 0 0 0-1.7.9L6.5 6H5a3 3 0 0 0-3 3v9a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3V9a3 3 0 0 0-3-3h-1.5l-1.2-2.1a2 2 0 0 0-1.7-.9H9.4ZM12 17.5a4.5 4.5 0 1 1 0-9 4.5 4.5 0 0 1 0 9Zm0-2a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z";
-const HASH_PATH = "M10.99 3.16A1 1 0 1 0 9 2.84L8.15 8H4a1 1 0 0 0 0 2h3.82l-.67 4H3a1 1 0 1 0 0 2h3.82l-.8 4.84a1 1 0 0 0 1.97.32L8.85 16h4.97l-.8 4.84a1 1 0 0 0 1.97.32l.86-5.16H20a1 1 0 1 0 0-2h-3.82l.67-4H21a1 1 0 1 0 0-2h-3.82l.8-4.84a1 1 0 1 0-1.97-.32L15.15 8h-4.97l.8-4.84ZM14.15 14l.67-4H9.85l-.67 4h4.97Z";
-const AT_PATH = "M12 2a10 10 0 1 0 4.6 18.9 1 1 0 1 0-.9-1.8A8 8 0 1 1 20 12v1a2 2 0 0 1-4 0V8a1 1 0 1 0-2 0v.3A5 5 0 1 0 15 15.6 4 4 0 0 0 22 13v-1A10 10 0 0 0 12 2Zm0 13a3 3 0 1 1 0-6 3 3 0 0 1 0 6Z";
+/** Circle as path data (for Lucide icons drawn with strokeIcon) */
+const circle = (cx: number, cy: number, r: number) => `M${cx - r} ${cy}a${r} ${r} 0 1 0 ${r * 2} 0a${r} ${r} 0 1 0 ${-r * 2} 0`;
+
+const QUOTE_PATH = strokeIcon(
+    "M16 3a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2 1 1 0 0 1 1 1v1a2 2 0 0 1-2 2 1 1 0 0 0-1 1v2a1 1 0 0 0 1 1 6 6 0 0 0 6-6V5a2 2 0 0 0-2-2z",
+    "M5 3a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2 1 1 0 0 1 1 1v1a2 2 0 0 1-2 2 1 1 0 0 0-1 1v2a1 1 0 0 0 1 1 6 6 0 0 0 6-6V5a2 2 0 0 0-2-2z"
+);
+const FORWARD_PATH = strokeIcon("m15 17 5-5-5-5", "M4 18v-2a4 4 0 0 1 4-4h12");
+const CAMERA_PATH = strokeIcon("M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z", circle(12, 13, 3));
+const HASH_PATH = ICONS.hash;
+const AT_PATH = strokeIcon(circle(12, 12, 4), "M16 8v5a3 3 0 0 0 6 0v-1a10 10 0 1 0-4 8");
 
 // ---------------------------------------------------------------- State hook
 
@@ -80,7 +86,7 @@ function useBarPosition(active: boolean, channelId: string | null) {
 function BarButton({ path, label, onClick, danger, disabled, title }: { path: string; label: string; onClick(): void; danger?: boolean; disabled?: boolean; title?: string; }) {
     return (
         <span className={cl("bar-btn")} title={title ?? label}>
-            <Button variant="plain" small icon={path} color={danger ? "red" : "blue"} onClick={onClick} disabled={disabled}>{label}</Button>
+            <Button variant="plain" small icon={path} color={danger ? "red" : "accent"} onClick={onClick} disabled={disabled}>{label}</Button>
         </span>
     );
 }

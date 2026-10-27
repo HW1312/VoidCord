@@ -16,6 +16,7 @@ import type { ReactNode } from "react";
 
 import { Avatar as KitAvatar, Button, PluginArtwork, confirm, openAlert, Empty, Glyph, Icon, IconButton, ICONS, LinkRow, Note, openWindow, Pill, Pills, Row, Section, Segmented, Sheet, State, TextField } from "../_ui";
 import { RoomCard } from "./area";
+import { LOCK_ICON, SHIELD_ICON, UNLOCK_ICON, USERS_ICON } from "./icons";
 import { SecretLogo } from "./logo";
 import { keyFromPassword, randomBytes } from "./crypto";
 import { acceptHandshake, cancelRequest, declineHandshake, decrypted, deleteKeyForBoth, handshakes, keyDeletes, retryLocked, startHandshake } from "./messages";
@@ -27,25 +28,22 @@ const cl = classNameFactory("vc-secretchat-");
 
 // ---------------------------------------------------------------- Icons
 
-export const LOCK_PATH = "M6 9V7a6 6 0 1 1 12 0v2h1a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-9a2 2 0 0 1 2-2h1Zm2-2a4 4 0 1 1 8 0v2H8V7Zm4 6a2 2 0 0 0-1 3.73V18a1 1 0 1 0 2 0v-1.27A2 2 0 0 0 12 13Z";
-const UNLOCK_PATH = "M8 7a4 4 0 0 1 7.75-1.4 1 1 0 1 0 1.87-.7A6 6 0 0 0 6 7v2H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-9a2 2 0 0 0-2-2H8V7Zm4 6a2 2 0 0 0-1 3.73V18a1 1 0 1 0 2 0v-1.27A2 2 0 0 0 12 13Z";
-export const GROUP_PATH = "M16 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm-8 0a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5C15 14.17 10.33 13 8 13Zm8 0c-.29 0-.62.02-.97.05A4.22 4.22 0 0 1 17 16.5V19h6v-2.5c0-2.33-4.67-3.5-7-3.5Z";
-const SHIELD_PATH = "M12 1 3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4Z";
+export const LOCK_PATH = LOCK_ICON;
+export const GROUP_PATH = USERS_ICON;
 
-/** App icon color of SecretChat (window headers, buttons in chat) */
-export const SC_COLOR = "green" as const;
+/** Button color of SecretChat – the kit's neutral accent (green stays for "encrypted" marks) */
+export const SC_COLOR = "accent" as const;
 
-export const LockIcon: IconComponent = ({ width = 24, height = 24, className }) => (
-    <svg width={width} height={height} viewBox="0 0 24 24" className={className} fill="currentColor">
-        <path fillRule="evenodd" d={LOCK_PATH} />
+/** Stroke svg for Discord's icon slots (they pass width / height, not a size) */
+const strokeSvg = (path: string, width: number | string, height: number | string, className?: string) => (
+    <svg width={width} height={height} viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+        {path.split("|").map(d => <path key={d} d={d} />)}
     </svg>
 );
 
-const UnlockIcon: IconComponent = ({ width = 24, height = 24, className }) => (
-    <svg width={width} height={height} viewBox="0 0 24 24" className={className} fill="currentColor">
-        <path fillRule="evenodd" d={UNLOCK_PATH} />
-    </svg>
-);
+export const LockIcon: IconComponent = ({ width = 24, height = 24, className }) => strokeSvg(LOCK_ICON, width, height, className);
+
+const UnlockIcon: IconComponent = ({ width = 24, height = 24, className }) => strokeSvg(UNLOCK_ICON, width, height, className);
 
 const userName = (id?: string) => {
     const u = id ? UserStore.getUser(id) : null;
@@ -153,7 +151,7 @@ function KeyRow({ k, selected, onClick }: { k: KeyRecord; selected: boolean; onC
             subtitle={
                 <>
                     <Tooltip text="Safety code – compare it with the others">
-                        {p => <span {...p} className={cl("safety")}><Icon path={SHIELD_PATH} size={11} />{k.safety}</span>}
+                        {p => <span {...p} className={cl("safety")}><Icon path={SHIELD_ICON} size={11} />{k.safety}</span>}
                     </Tooltip>
                     {k.quantumSafe && (
                         <Tooltip text="Made with the hybrid handshake (ECDH P-256 + ML-KEM-768) – safe against quantum computers">
@@ -444,7 +442,7 @@ const sleep = (ms: number) => new Promise(r => setTimeout(r, ms));
 
 /** Line icons (Lucide style) – pathLength 1 lets CSS draw them in */
 const DecisionIcon = ({ accept }: { accept?: boolean; }) => (
-    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
         {accept
             ? <path pathLength={1} d="M20 6 9 17l-5-5" />
             : <><path pathLength={1} d="M18 6 6 18" /><path pathLength={1} d="m6 6 12 12" /></>}
@@ -486,7 +484,7 @@ function DecisionButton({ accept, label, hidden, onStart, onClick, onFinished }:
                     onClick={run}
                 >
                     {phase === "busy"
-                        ? <svg className={cl("decide-spin")} viewBox="0 0 24 24" width="22" height="22" aria-hidden><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" /></svg>
+                        ? <svg className={cl("decide-spin")} viewBox="0 0 24 24" width="22" height="22" aria-hidden><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" /></svg>
                         : <DecisionIcon accept={accept} />}
                 </button>
             )}

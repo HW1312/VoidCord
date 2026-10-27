@@ -14,7 +14,7 @@ import { classes } from "@utils/misc";
 import { useForceUpdater, useIntersection } from "@utils/react";
 import { showToast, useEffect, useState } from "@webpack/common";
 
-import { Button, IconButton, ICONS as UI_ICONS, LinkRow, Progress, Row, Section, Sheet, State, TextField, ToggleRow } from "../_ui";
+import { Button, Icon as KitIcon, IconButton, ICONS as UI_ICONS, LinkRow, Progress, Row, Section, Sheet, State, TextField, ToggleRow } from "../_ui";
 import { clearCache, getEntry, isFresh, isLoading, isSettled, load, subscribe } from "./cache";
 import { ICONS } from "./icons";
 import { settings } from "./index";
@@ -28,9 +28,11 @@ const PROVIDER_IDS: ProviderId[] = PROVIDERS.map(p => p.id);
 
 // ---------------------------------------------------------------- Building blocks
 
+/** Kit icon (thin Lucide strokes); a custom viewBox still draws a filled shape */
 function Icon({ icon, size = 16, className }: { icon: IconDef; size?: number; className?: string; }) {
+    if (!icon.viewBox) return <KitIcon path={icon.path} size={size} className={classes(cl("icon"), className)} />;
     return (
-        <svg viewBox={icon.viewBox ?? "0 0 24 24"} width={size} height={size} className={classes(cl("icon"), className)} aria-hidden>
+        <svg viewBox={icon.viewBox} width={size} height={size} className={classes(cl("icon"), className)} aria-hidden>
             <path fill="currentColor" fillRule="evenodd" d={icon.path} />
         </svg>
     );
@@ -144,7 +146,7 @@ function EmbedMedia({ embed }: { embed: any; }) {
         return (
             <button className={classes(cl("media"), cl("player"))} style={style} onClick={() => setPlaying(true)} aria-label="Play">
                 {poster && <img src={poster} alt="" />}
-                <span className={cl("play")}><Icon icon={ICONS.play} size={56} /></span>
+                <span className={cl("play")}><span className={cl("play-scrim")}><KitIcon path={UI_ICONS.play} size={22} /></span></span>
             </button>
         );
     }
@@ -364,7 +366,7 @@ export const LinkCardsAccessory = ErrorBoundary.wrap(Accessory, { noop: true });
 
 // ---------------------------------------------------------------- Settings
 
-const LINK_PATH = "M3.9 12a3.1 3.1 0 0 1 3.1-3.1h4V7H7a5 5 0 0 0 0 10h4v-1.9H7A3.1 3.1 0 0 1 3.9 12ZM8 13h8v-2H8v2Zm9-6h-4v1.9h4a3.1 3.1 0 0 1 0 6.2h-4V17h4a5 5 0 0 0 0-10Z";
+const LINK_PATH = ICONS.link.path;
 
 function RateLimitInfo() {
     const forceUpdate = useForceUpdater();

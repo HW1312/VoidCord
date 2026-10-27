@@ -11,14 +11,15 @@ import { chooseFile } from "@utils/web";
 import { findStoreLazy } from "@webpack";
 import { ContextMenuApi, Menu, showToast, useEffect, useRef, useState, useStateFromStores } from "@webpack/common";
 
-import { Button, Empty, Field, Glyph, Note, openWindow, Row, Section, Sheet, TextField, ToggleRow, useListener } from "../_ui";
+import { Button, Empty, Field, Glyph, ICONS, Note, openWindow, Row, Section, Sheet, strokeIcon, TextField, ToggleRow, useListener } from "../_ui";
 import { getThumbnail, isStreaming, listeners, refresh, setPicture, settings, uploadNow } from "./index";
 
 const cl = classNameFactory("vc-streamthumb-");
 const ApplicationStreamingStore = findStoreLazy("ApplicationStreamingStore");
 
-const PICTURE = "M21 19V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2ZM8.5 13.5l2.5 3 3.5-4.5 4.5 6H5l3.5-4.5Z";
-const LIVE = "M12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6ZM6.34 6.34a8 8 0 0 0 0 11.32l1.42-1.42a6 6 0 0 1 0-8.48L6.34 6.34Zm11.32 0-1.42 1.42a6 6 0 0 1 0 8.48l1.42 1.42a8 8 0 0 0 0-11.32Z";
+const PICTURE = ICONS.image;
+// Lucide radio
+const LIVE = strokeIcon("M4.9 19.1C1 15.2 1 8.8 4.9 4.9", "M7.8 16.2c-2.3-2.3-2.3-6.1 0-8.5", "M10 12a2 2 0 1 0 4 0a2 2 0 1 0 -4 0", "M16.2 7.8c2.3 2.3 2.3 6.1 0 8.5", "M19.1 4.9C23 8.8 23 15.1 19.1 19");
 const HEADER = { title: "Stream Thumbnail", icon: PICTURE, iconColor: "pink" } as const;
 
 /** With onClose it's a window, without it sits in the plugin's settings */
@@ -83,7 +84,7 @@ const ThumbnailSheet = ErrorBoundary.wrap(({ onClose }: { onClose?(): void; }) =
             <Section footer={streaming ? undefined : "Start a Go Live stream to send the picture right away."}>
                 <ToggleRow
                     icon={PICTURE}
-                    color="pink"
+                    color="gray"
                     title="Use my picture"
                     subtitle="Instead of a screenshot of your stream"
                     checked={enabled}

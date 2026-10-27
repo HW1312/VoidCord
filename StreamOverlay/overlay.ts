@@ -238,11 +238,13 @@ const SCRIPT = String.raw`
     var q = new URLSearchParams(location.search);
     var demo = q.get("demo") === "1";
 
+    // Lucide line icons (mic-off, headphone-off, video), one entry per <path>
     var ICONS = {
-        mic: "M19 11h-1.7c0 .74-.16 1.43-.43 2.05l1.23 1.23c.56-.98.9-2.09.9-3.28zm-4.02.17c0-.06.02-.11.02-.17V5c0-1.66-1.34-3-3-3S9 3.34 9 5v.18l5.98 5.99zM4.27 3 3 4.27l6.01 6.01V11c0 1.66 1.33 3 2.99 3 .22 0 .44-.03.65-.08l1.66 1.66c-.71.33-1.5.52-2.31.52-2.76 0-5.3-2.1-5.3-5.1H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c.91-.13 1.77-.45 2.54-.9L19.73 21 21 19.73 4.27 3z",
-        deaf: "M12 4c3.87 0 7 3.13 7 7v2h-2.92L21 17.92V11c0-4.97-4.03-9-9-9-1.95 0-3.76.62-5.23 1.68l1.44 1.44C9.3 4.41 10.6 4 12 4zM2.27 1.72 1 3l3.33 3.32C3.49 7.68 3 9.29 3 11v7c0 1.1.9 2 2 2h4v-8H5v-1c0-1.17.29-2.26.79-3.22L15 17v3h3.18l2.55 2.55 1.27-1.27L2.27 1.72z",
-        cam: "M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"
+        mic: ["M12 19v3", "M15 9.34V5a3 3 0 0 0-5.68-1.33", "M16.95 16.95A7 7 0 0 1 5 12v-2", "M18.89 13.23A7 7 0 0 0 19 12v-2", "m2 2 20 20", "M9 9v3a3 3 0 0 0 5.12 2.12"],
+        deaf: ["M21 14h-1.343", "M9.128 3.47A9 9 0 0 1 21 12v3.343", "m2 2 20 20", "M20.414 20.414A2 2 0 0 1 19 21h-1a2 2 0 0 1-2-2v-3", "M3 14h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-7a9 9 0 0 1 2.636-6.364"],
+        cam: ["m16 13 5.223 3.482a.5.5 0 0 0 .777-.416V7.87a.5.5 0 0 0-.752-.432L16 10.5", "M4 6h10a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2z"]
     };
+
 
     var usersEl = document.getElementById("users");
     var chatEl = document.getElementById("chat");
@@ -297,8 +299,10 @@ const SCRIPT = String.raw`
         return e;
     }
 
-    function svg(path) {
-        return '<svg viewBox="0 0 24 24"><path fill="currentColor" d="' + path + '"/></svg>';
+    function svg(parts) {
+        var d = "";
+        for (var i = 0; i < parts.length; i++) d += '<path d="' + parts[i] + '"/>';
+        return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + d + "</svg>";
     }
 
     function safeImg(url) {

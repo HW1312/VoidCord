@@ -148,7 +148,7 @@ function createCard(title: string, onCancel: () => void) {
     card.innerHTML = `
         <div class="vc-mediagrab-row">
             <div class="vc-mediagrab-name"></div>
-            <button class="vc-ui-icon-btn vc-mediagrab-x" title="Cancel"><svg viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="${ICONS.close}"/></svg></button>
+            <button class="vc-ui-icon-btn vc-mediagrab-x" title="Cancel"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">${ICONS.close.split("|").map(d => `<path d="${d}"/>`).join("")}</svg></button>
         </div>
         <div class="vc-mediagrab-status"></div>
         <div class="vc-ui-progress vc-mediagrab-bar"><div class="vc-mediagrab-fill"></div></div>`;

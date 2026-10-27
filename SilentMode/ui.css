@@ -11,10 +11,10 @@
     color: var(--vc-ui-title);
 }
 
-/* Silent Mode on: indigo icon + dot so you don't forget it */
+/* Silent Mode on: bright icon + accent dot so you don't forget it */
 .vc-silentmode-btn-active .vc-silentmode-icon,
 .vc-silentmode-btn-active:hover .vc-silentmode-icon {
-    color: var(--vc-ui-indigo);
+    color: var(--vc-ui-title);
 }
 
 .vc-silentmode-btn-active::after {
@@ -25,6 +25,6 @@
     width: 7px;
     height: 7px;
     border-radius: 50%;
-    background: var(--vc-ui-indigo);
+    background: var(--vc-ui-accent);
     pointer-events: none;
 }

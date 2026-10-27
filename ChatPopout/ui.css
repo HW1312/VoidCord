@@ -10,7 +10,7 @@
     flex-direction: column;
     overflow: hidden;
     color: var(--vc-ui-text);
-    background: var(--vc-ui-glass-strong);
+    background: var(--vc-ui-glass);
     font-family: var(--vc-ui-font);
     font-size: 15px;
 }
@@ -24,7 +24,7 @@
     gap: 10px;
     min-height: 48px;
     padding: 0 6px 0 12px;
-    border-bottom: 0.5px solid var(--vc-ui-sep);
+    border-bottom: 1px solid var(--vc-ui-sep);
     background: var(--vc-ui-group);
     user-select: none;
     -webkit-app-region: drag;
@@ -43,10 +43,10 @@
 .vc-chatpopout-title-icon-text {
     display: grid;
     place-items: center;
-    background: var(--vc-ui-blue);
-    color: #fff;
+    background: var(--vc-ui-field);
+    color: var(--vc-ui-title);
     font-size: 13px;
-    font-weight: 700;
+    font-weight: 600;
 }
 
 .vc-chatpopout-title-text {
@@ -57,7 +57,7 @@
 .vc-chatpopout-title-name {
     overflow: hidden;
     font-size: 15px;
-    font-weight: 700;
+    font-weight: 600;
     white-space: nowrap;
     text-overflow: ellipsis;
     color: var(--vc-ui-title);
@@ -78,7 +78,7 @@
 }
 
 .vc-chatpopout-icon-btn-active {
-    color: var(--vc-ui-blue) !important;
+    color: var(--vc-ui-accent) !important;
 }
 
 /* ---------- Call bar ---------- */
@@ -89,8 +89,8 @@
     align-items: center;
     gap: 8px;
     padding: 6px 12px;
-    border-bottom: 0.5px solid var(--vc-ui-sep);
-    background: color-mix(in srgb, var(--vc-ui-green) 8%, var(--vc-ui-glass-strong));
+    border-bottom: 1px solid var(--vc-ui-sep);
+    background: var(--vc-ui-group);
     font-size: 12px;
     position: relative;
     z-index: 30;
@@ -127,7 +127,7 @@
     display: block;
     width: 24px;
     height: 24px;
-    border: 2px solid var(--vc-ui-glass-strong);
+    border: 2px solid var(--vc-ui-group);
     border-radius: 50%;
 }
 
@@ -141,7 +141,7 @@
     height: 14px;
     border-radius: 50%;
     background: var(--vc-ui-red);
-    color: #fff;
+    color: var(--vc-ui-title);
 }
 
 .vc-chatpopout-voice-live {
@@ -149,11 +149,11 @@
     top: -6px;
     left: 50%;
     padding: 0 3px;
-    border-radius: 3px;
+    border-radius: 4px;
     background: var(--vc-ui-red);
-    color: #fff;
+    color: var(--vc-ui-title);
     font-size: 8px;
-    font-weight: 800;
+    font-weight: 600;
     transform: translateX(-50%);
 }
 
@@ -175,15 +175,16 @@
     padding: 4px 10px;
     border: none;
     border-radius: 6px;
-    background: var(--vc-ui-green);
-    color: #fff;
+    background: var(--vc-ui-accent);
+    color: var(--vc-ui-on-accent);
     font-size: 12px;
     font-weight: 600;
     cursor: pointer;
+    transition: background 0.15s var(--vc-ui-ease);
 }
 
 .vc-chatpopout-voice-btn:hover {
-    filter: brightness(1.1);
+    background: var(--vc-ui-accent-hover);
 }
 
 /* ---------- Buttons, messages & input ---------- */
@@ -196,7 +197,7 @@
     height: 28px;
     padding: 0;
     border: none;
-    border-radius: 50%;
+    border-radius: 6px;
     background: transparent;
     color: var(--vc-ui-dim);
     cursor: pointer;
@@ -205,8 +206,7 @@
 }
 
 .vc-chatpopout-icon-btn:hover:not(:disabled) {
-    color: var(--vc-ui-text);
-    background: var(--vc-ui-group-hover);
+    color: var(--vc-ui-title);
 }
 
 .vc-chatpopout-icon-btn:disabled {
@@ -324,8 +324,7 @@
 @keyframes vc-chatpopout-flash {
     0%,
     40% {
-        background: var(--vc-ui-blue);
-        background: color-mix(in srgb, var(--vc-ui-blue) 25%, transparent);
+        background: var(--vc-ui-group-active);
     }
 
     100% {
@@ -357,7 +356,9 @@
 .vc-chatpopout-gutter-time {
     visibility: hidden;
     padding-top: 3px;
-    font-size: 11px;
+    font-family: var(--vc-ui-mono);
+    font-size: 10px;
+    font-variant-numeric: tabular-nums;
     color: var(--vc-ui-dim);
     cursor: pointer;
 }
@@ -390,12 +391,12 @@
 
 .vc-chatpopout-bot-tag {
     padding: 0 4px;
-    border-radius: 3px;
+    border-radius: 4px;
     font-size: 10px;
     font-weight: 600;
     line-height: 15px;
-    color: #fff;
-    background: var(--vc-ui-blue);
+    color: var(--vc-ui-title);
+    background: var(--vc-ui-track);
 }
 
 .vc-chatpopout-time {
@@ -523,7 +524,7 @@
     display: block;
     max-width: 100%;
     height: auto;
-    border-radius: 10px;
+    border-radius: 8px;
     cursor: zoom-in;
     background: var(--vc-ui-sep);
 }
@@ -535,8 +536,8 @@
     max-width: 100%;
     box-sizing: border-box;
     padding: 8px 10px;
-    border-radius: 10px;
-    border: 0.5px solid var(--vc-ui-sep);
+    border-radius: 12px;
+    border: 1px solid var(--vc-ui-sep);
     background: var(--vc-ui-field);
     color: var(--vc-ui-blue);
     text-decoration: none;
@@ -550,7 +551,9 @@
 
 .vc-chatpopout-file-size {
     flex: none;
+    font-family: var(--vc-ui-mono);
     font-size: 12px;
+    font-variant-numeric: tabular-nums;
     color: var(--vc-ui-dim);
 }
 
@@ -563,9 +566,9 @@
     box-sizing: border-box;
     margin-top: 4px;
     padding: 8px 12px;
-    border-radius: 4px;
+    border-radius: 8px;
     border-left: 4px solid var(--vc-ui-sep);
-    background: var(--vc-ui-field);
+    background: var(--vc-ui-group);
 }
 
 .vc-chatpopout-embed-body {
@@ -650,12 +653,13 @@ a.vc-chatpopout-embed-title {
     align-items: center;
     gap: 4px;
     padding: 1px 6px;
-    border-radius: 10px;
-    border: 0.5px solid transparent;
+    border-radius: 8px;
+    border: 1px solid transparent;
     font-size: 13px;
     font-weight: 600;
     color: var(--vc-ui-dim);
-    background: var(--vc-ui-sep);
+    background: var(--vc-ui-field);
+    font-variant-numeric: tabular-nums;
 }
 
 .vc-chatpopout-reaction img {
@@ -670,9 +674,9 @@ a.vc-chatpopout-embed-title {
 }
 
 .vc-chatpopout-reaction-me {
-    border-color: var(--vc-ui-blue);
-    background: color-mix(in srgb, var(--vc-ui-blue) 15%, transparent);
-    color: var(--vc-ui-text);
+    border-color: var(--vc-ui-dim);
+    background: var(--vc-ui-group-active);
+    color: var(--vc-ui-title);
 }
 
 /* New messages pill */
@@ -683,9 +687,9 @@ a.vc-chatpopout-embed-title {
     transform: translateX(-50%);
     padding: 4px 14px;
     border: none;
-    border-radius: 14px;
-    background: var(--vc-ui-blue);
-    color: #fff;
+    border-radius: 8px;
+    background: var(--vc-ui-accent);
+    color: var(--vc-ui-on-accent);
     font-size: 13px;
     font-weight: 600;
     cursor: pointer;
@@ -704,9 +708,9 @@ a.vc-chatpopout-embed-title {
     align-items: flex-end;
     gap: 8px;
     padding: 8px 8px 8px 12px;
-    border-radius: 10px;
+    border-radius: 12px;
     background: var(--vc-ui-field);
-    border: 0.5px solid var(--vc-ui-sep);
+    border: 1px solid var(--vc-ui-sep);
 }
 
 .vc-chatpopout-input-disabled {
@@ -729,16 +733,16 @@ a.vc-chatpopout-embed-title {
 }
 
 .vc-chatpopout-input::placeholder {
-    color: var(--vc-ui-dim);
+    color: var(--vc-ui-faint);
 }
 
 .vc-chatpopout-send {
     flex: none;
     padding: 4px 12px;
     border: none;
-    border-radius: 999px;
-    background: var(--vc-ui-blue);
-    color: #fff;
+    border-radius: 8px;
+    background: var(--vc-ui-accent);
+    color: var(--vc-ui-on-accent);
     font-size: 13px;
     font-weight: 600;
     cursor: pointer;
@@ -750,7 +754,7 @@ a.vc-chatpopout-embed-title {
 }
 
 .vc-chatpopout-send:hover:not(:disabled) {
-    filter: brightness(1.1);
+    background: var(--vc-ui-accent-hover);
 }
 
 .vc-chatpopout-typing {
@@ -771,7 +775,7 @@ a.vc-chatpopout-embed-title {
     overflow: hidden;
     text-overflow: ellipsis;
     pointer-events: none;
-    background: linear-gradient(transparent, var(--vc-ui-glass-strong) 45%);
+    background: var(--vc-ui-glass);
 }
 
 .vc-chatpopout-typing-dots {
@@ -824,7 +828,7 @@ a.vc-chatpopout-embed-title {
     color: var(--vc-ui-dim);
     cursor: pointer;
     opacity: 0;
-    transition: opacity 0.12s, color 0.12s;
+    transition: opacity 0.15s var(--vc-ui-ease), color 0.15s var(--vc-ui-ease);
 }
 
 li:hover .vc-chatpopout-row-btn,
@@ -850,7 +854,7 @@ li:hover .vc-chatpopout-row-btn,
     left: 50%;
     opacity: 0;
     pointer-events: none;
-    transition: opacity 0.1s ease, transform 0.1s ease;
+    transition: opacity 0.15s var(--vc-ui-ease), transform 0.15s var(--vc-ui-ease);
 }
 
 /* Bubble */
@@ -861,17 +865,18 @@ li:hover .vc-chatpopout-row-btn,
     width: max-content;
     padding: 8px 12px;
     box-sizing: border-box;
-    border-radius: 10px;
+    border: 1px solid var(--vc-ui-edge);
+    border-radius: 8px;
     background: var(--vc-ui-glass-strong);
     box-shadow: var(--vc-ui-shadow);
     color: var(--vc-ui-text);
     font-family: var(--vc-ui-font);
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 500;
     line-height: 16px;
     text-align: left;
     white-space: normal;
-    transform: translate(-50%, 4px) scale(0.96);
+    transform: translate(-50%, 4px);
 }
 
 /* Arrow */
@@ -880,7 +885,7 @@ li:hover .vc-chatpopout-row-btn,
     bottom: calc(100% + 3px);
     border: 5px solid transparent;
     border-bottom-width: 0;
-    border-top-color: var(--vc-ui-glass-strong);
+    border-top-color: var(--vc-ui-edge);
     transform: translate(-50%, 4px);
 }
 
@@ -891,7 +896,7 @@ li:hover .vc-chatpopout-row-btn,
 }
 
 .vc-chatpopout-window [data-tip]:hover::after {
-    transform: translate(-50%, 0) scale(1);
+    transform: translate(-50%, 0);
 }
 
 .vc-chatpopout-window [data-tip]:hover::before {
@@ -902,14 +907,14 @@ li:hover .vc-chatpopout-row-btn,
 .vc-chatpopout-window [data-tip-pos="bottom"]::after {
     top: calc(100% + 8px);
     bottom: auto;
-    transform: translate(-50%, -4px) scale(0.96);
+    transform: translate(-50%, -4px);
 }
 
 .vc-chatpopout-window [data-tip-pos="bottom"]::before {
     top: calc(100% + 3px);
     bottom: auto;
     border-width: 0 5px 5px;
-    border-color: transparent transparent var(--vc-ui-glass-strong);
+    border-color: transparent transparent var(--vc-ui-edge);
     transform: translate(-50%, -4px);
 }
 
@@ -917,17 +922,17 @@ li:hover .vc-chatpopout-row-btn,
 .vc-chatpopout-window [data-tip-align="end"]::after {
     left: auto;
     right: -4px;
-    transform: translateY(4px) scale(0.96);
+    transform: translateY(4px);
 }
 
 .vc-chatpopout-window [data-tip-align="start"]::after {
     left: -4px;
-    transform: translateY(4px) scale(0.96);
+    transform: translateY(4px);
 }
 
 .vc-chatpopout-window [data-tip-pos="bottom"][data-tip-align="end"]::after,
 .vc-chatpopout-window [data-tip-pos="bottom"][data-tip-align="start"]::after {
-    transform: translateY(-4px) scale(0.96);
+    transform: translateY(-4px);
 }
 
 .vc-chatpopout-window [data-tip-align="end"]:hover::after,
@@ -967,7 +972,7 @@ li:hover .vc-chatpopout-row-btn,
 
 .vc-chatpopout-window ::-webkit-scrollbar-track {
     border: 4px solid transparent;
-    border-radius: 10px;
+    border-radius: 8px;
     background-color: var(--vc-ui-group);
     background-clip: padding-box;
 }
@@ -975,7 +980,7 @@ li:hover .vc-chatpopout-row-btn,
 .vc-chatpopout-window ::-webkit-scrollbar-thumb {
     min-height: 40px;
     border: 4px solid transparent;
-    border-radius: 10px;
+    border-radius: 8px;
     background-color: var(--vc-ui-track);
     background-clip: padding-box;
 }
@@ -1001,23 +1006,23 @@ li:hover .vc-chatpopout-row-btn,
 }
 
 .vc-chatpopout-input-wrap {
-    transition: box-shadow 0.15s;
+    transition: border-color 0.15s var(--vc-ui-ease);
 }
 
 .vc-chatpopout-input-wrap:focus-within {
-    box-shadow: 0 0 0 0.5px var(--vc-ui-edge);
+    border-color: var(--vc-ui-edge);
 }
 
 .vc-chatpopout-send {
-    transition: background 0.15s, opacity 0.15s;
+    transition: background 0.15s var(--vc-ui-ease), opacity 0.15s var(--vc-ui-ease);
 }
 
 .vc-chatpopout-icon-btn {
-    transition: color 0.12s, background 0.12s;
+    transition: color 0.15s var(--vc-ui-ease);
 }
 
 .vc-chatpopout-message {
-    transition: background 0.1s;
+    transition: background 0.15s var(--vc-ui-ease);
 }
 
 /* ---------- Command suggestions ---------- */
@@ -1032,11 +1037,11 @@ li:hover .vc-chatpopout-row-btn,
     flex-direction: column;
     max-height: min(340px, 55vh);
     overflow: hidden;
-    border: 0.5px solid var(--vc-ui-sep);
-    border-radius: 10px;
-    background: var(--vc-ui-group);
+    border: 1px solid var(--vc-ui-sep);
+    border-radius: 12px;
+    background: var(--vc-ui-glass-strong);
     box-shadow: var(--vc-ui-shadow);
-    animation: vc-chatpopout-rise 0.12s ease-out;
+    animation: vc-chatpopout-rise 0.2s var(--vc-ui-ease);
 }
 
 @keyframes vc-chatpopout-rise {
@@ -1045,9 +1050,9 @@ li:hover .vc-chatpopout-row-btn,
 
 .vc-chatpopout-cmd-popup-head {
     padding: 10px 12px 6px;
-    font-size: 12px;
-    font-weight: 700;
-    letter-spacing: 0.02em;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.16em;
     text-transform: uppercase;
     color: var(--vc-ui-dim);
 }
@@ -1095,10 +1100,10 @@ li:hover .vc-chatpopout-row-btn,
 .vc-chatpopout-cmd-icon-text {
     display: grid;
     place-items: center;
-    background: var(--vc-ui-blue);
-    color: #fff;
+    background: var(--vc-ui-field);
+    color: var(--vc-ui-title);
     font-size: 12px;
-    font-weight: 700;
+    font-weight: 600;
 }
 
 .vc-chatpopout-cmd-text {
@@ -1147,9 +1152,10 @@ li:hover .vc-chatpopout-row-btn,
     flex-direction: column;
     gap: 10px;
     padding: 10px 12px;
-    border-radius: 10px;
-    background: var(--vc-ui-field);
-    animation: vc-chatpopout-rise 0.12s ease-out;
+    border: 1px solid var(--vc-ui-sep);
+    border-radius: 12px;
+    background: var(--vc-ui-group);
+    animation: vc-chatpopout-rise 0.2s var(--vc-ui-ease);
 }
 
 .vc-chatpopout-cmd-form-head {
@@ -1161,7 +1167,7 @@ li:hover .vc-chatpopout-row-btn,
 
 .vc-chatpopout-cmd-form-name {
     flex: none;
-    font-weight: 700;
+    font-weight: 600;
     color: var(--vc-ui-title);
 }
 
@@ -1190,7 +1196,7 @@ li:hover .vc-chatpopout-row-btn,
 
 .vc-chatpopout-cmd-field-label {
     font-size: 12px;
-    font-weight: 700;
+    font-weight: 600;
     color: var(--vc-ui-dim);
 }
 
@@ -1210,24 +1216,25 @@ li:hover .vc-chatpopout-row-btn,
     width: 100%;
     box-sizing: border-box;
     padding: 7px 9px;
-    border: 0.5px solid var(--vc-ui-sep);
-    border-radius: 6px;
+    border: 1px solid var(--vc-ui-sep);
+    border-radius: 8px;
     background: var(--vc-ui-field);
     color: var(--vc-ui-text);
     font: inherit;
     font-size: 14px;
     outline: none;
-    transition: border-color 0.15s;
+    transition: border-color 0.15s var(--vc-ui-ease);
 }
 
 .vc-chatpopout-cmd-input:focus {
-    border-color: var(--vc-ui-blue);
+    border-color: var(--vc-ui-dim);
 }
 
 .vc-chatpopout-cmd-note {
     padding: 8px 10px;
-    border-radius: 6px;
-    background: color-mix(in srgb, var(--vc-ui-orange) 12%, transparent);
+    border: 1px solid color-mix(in srgb, var(--vc-ui-orange) 30%, transparent);
+    border-radius: 8px;
+    background: color-mix(in srgb, var(--vc-ui-orange) 8%, transparent);
     color: var(--vc-ui-orange);
     font-size: 13px;
 }
@@ -1265,7 +1272,7 @@ li:hover .vc-chatpopout-row-btn,
     flex: none;
     flex-direction: column;
     width: 220px;
-    border-right: 0.5px solid var(--vc-ui-sep);
+    border-right: 1px solid var(--vc-ui-sep);
     background: var(--vc-ui-group);
 }
 
@@ -1276,7 +1283,7 @@ li:hover .vc-chatpopout-row-btn,
         inset: 0 auto 0 0;
         z-index: 5;
         width: min(260px, 85%);
-        box-shadow: 4px 0 16px rgb(0 0 0 / 35%);
+        box-shadow: var(--vc-ui-shadow);
     }
 }
 
@@ -1286,7 +1293,7 @@ li:hover .vc-chatpopout-row-btn,
     padding: 12px 14px 8px;
     color: var(--vc-ui-title);
     font-size: 14px;
-    font-weight: 700;
+    font-weight: 600;
     white-space: nowrap;
     text-overflow: ellipsis;
 }
@@ -1324,12 +1331,13 @@ li:hover .vc-chatpopout-row-btn,
     border: none;
     background: none;
     color: var(--vc-ui-dim);
-    font-size: 12px;
-    font-weight: 600;
-    letter-spacing: 0.02em;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.16em;
     text-align: left;
     text-transform: uppercase;
     cursor: pointer;
+    transition: color 0.15s var(--vc-ui-ease);
 }
 
 .vc-chatpopout-side-category span {
@@ -1344,7 +1352,7 @@ li:hover .vc-chatpopout-row-btn,
 
 .vc-chatpopout-side-chevron {
     flex: none;
-    transition: transform 0.15s;
+    transition: transform 0.2s var(--vc-ui-ease);
 }
 
 .vc-chatpopout-side-category-collapsed .vc-chatpopout-side-chevron {
@@ -1361,13 +1369,14 @@ li:hover .vc-chatpopout-row-btn,
     margin: 1px 0;
     padding: 4px 8px;
     border: none;
-    border-radius: 4px;
+    border-radius: 6px;
     background: none;
     color: var(--vc-ui-dim);
     font-size: 15px;
     font-weight: 500;
     text-align: left;
     cursor: pointer;
+    transition: background 0.15s var(--vc-ui-ease), color 0.15s var(--vc-ui-ease);
 }
 
 .vc-chatpopout-side-item:hover {
@@ -1419,18 +1428,22 @@ li:hover .vc-chatpopout-row-btn,
 .vc-chatpopout-side-count {
     flex: none;
     color: var(--vc-ui-dim);
-    font-size: 12px;
+    font-family: var(--vc-ui-mono);
+    font-size: 11px;
+    font-variant-numeric: tabular-nums;
 }
 
 .vc-chatpopout-side-badge {
     flex: none;
     min-width: 16px;
     padding: 0 5px;
-    border-radius: 10px;
+    border-radius: 8px;
     background: var(--vc-ui-red);
-    color: #fff;
-    font-size: 12px;
-    font-weight: 700;
+    color: var(--vc-ui-title);
+    font-family: var(--vc-ui-mono);
+    font-size: 11px;
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
     line-height: 16px;
     text-align: center;
 }
@@ -1461,13 +1474,13 @@ li:hover .vc-chatpopout-row-btn,
     gap: 8px;
     min-height: 34px;
     padding: 0 6px 0 12px;
-    border: 0.5px solid var(--vc-ui-sep);
+    border: 1px solid var(--vc-ui-sep);
     border-bottom: none;
-    border-radius: 10px 8px 0 0;
+    border-radius: 12px 12px 0 0;
     background: var(--vc-ui-group);
     color: var(--vc-ui-dim);
     font-size: 14px;
-    animation: vc-chatpopout-rise 0.12s ease-out;
+    animation: vc-chatpopout-rise 0.2s var(--vc-ui-ease);
 }
 
 .vc-chatpopout-mode-bar b {
@@ -1491,16 +1504,17 @@ li:hover .vc-chatpopout-row-btn,
     flex: none;
     padding: 2px 6px;
     border: none;
-    border-radius: 4px;
+    border-radius: 6px;
     background: none;
     color: var(--vc-ui-dim);
     font-size: 13px;
-    font-weight: 700;
+    font-weight: 600;
     cursor: pointer;
+    transition: color 0.15s var(--vc-ui-ease);
 }
 
 .vc-chatpopout-mode-mention-on {
-    color: var(--vc-ui-blue);
+    color: var(--vc-ui-accent);
 }
 
 .vc-chatpopout-input-box-mode .vc-chatpopout-input-wrap {
@@ -1517,22 +1531,21 @@ li:hover .vc-chatpopout-row-btn,
     flex-direction: column;
     min-width: 188px;
     max-width: 320px;
-    padding: 6px 8px;
+    padding: 6px;
     box-sizing: border-box;
-    border: 0.5px solid var(--vc-ui-edge);
-    border-radius: 18px;
+    border: 1px solid var(--vc-ui-edge);
+    border-radius: 12px;
     background: var(--vc-ui-glass-strong);
-    backdrop-filter: blur(40px) saturate(180%);
     box-shadow: var(--vc-ui-shadow);
     font-family: var(--vc-ui-font);
-    animation: vc-chatpopout-menu-in 0.1s ease-out;
+    animation: vc-chatpopout-menu-in 0.15s var(--vc-ui-ease);
     user-select: none;
 }
 
 @keyframes vc-chatpopout-menu-in {
     from {
         opacity: 0;
-        transform: scale(0.97);
+        transform: translateY(-2px);
     }
 }
 
@@ -1544,7 +1557,7 @@ li:hover .vc-chatpopout-row-btn,
 .vc-chatpopout-menu-section + .vc-chatpopout-menu-section {
     margin-top: 4px;
     padding-top: 4px;
-    border-top: 0.5px solid var(--vc-ui-sep);
+    border-top: 1px solid var(--vc-ui-sep);
 }
 
 .vc-chatpopout-menu-item {
@@ -1553,18 +1566,19 @@ li:hover .vc-chatpopout-row-btn,
     justify-content: space-between;
     gap: 8px;
     min-height: 32px;
-    margin: 2px 0;
+    margin: 1px 0;
     padding: 6px 8px;
     border: none;
-    border-radius: 4px;
+    border-radius: 6px;
     background: none;
-    color: var(--vc-ui-dim);
+    color: var(--vc-ui-text);
     font: inherit;
     font-size: 14px;
     font-weight: 500;
     line-height: 18px;
     text-align: left;
     cursor: pointer;
+    transition: background 0.15s var(--vc-ui-ease), color 0.15s var(--vc-ui-ease);
 }
 
 .vc-chatpopout-menu-label {
@@ -1577,21 +1591,33 @@ li:hover .vc-chatpopout-row-btn,
 
 .vc-chatpopout-menu-icon {
     flex: none;
+    color: var(--vc-ui-dim);
+    transition: color 0.15s var(--vc-ui-ease);
 }
 
 .vc-chatpopout-menu-item-active {
-    background: var(--vc-ui-group-hover);
-    color: #fff;
+    background: var(--vc-ui-group-active);
+    color: var(--vc-ui-title);
 }
 
-.vc-chatpopout-menu-item-danger {
+.vc-chatpopout-menu-item-danger,
+.vc-chatpopout-menu-item-danger .vc-chatpopout-menu-icon {
+    color: var(--vc-ui-red);
+}
+
+.vc-chatpopout-menu-item-active .vc-chatpopout-menu-icon {
+    color: var(--vc-ui-title);
+}
+
+.vc-chatpopout-menu-item-danger.vc-chatpopout-menu-item-active .vc-chatpopout-menu-icon,
+.vc-chatpopout-menu-item-confirm .vc-chatpopout-menu-icon {
     color: var(--vc-ui-red);
 }
 
 .vc-chatpopout-menu-item-danger.vc-chatpopout-menu-item-active,
 .vc-chatpopout-menu-item-confirm {
-    background: var(--vc-ui-red);
-    color: #fff;
+    background: color-mix(in srgb, var(--vc-ui-red) 14%, transparent);
+    color: var(--vc-ui-red);
 }
 
 /* ---------- Media viewer (like the Discord one) ---------- */
@@ -1602,8 +1628,8 @@ li:hover .vc-chatpopout-row-btn,
     z-index: 100;
     display: flex;
     flex-direction: column;
-    background: rgb(0 0 0 / 88%);
-    animation: vc-chatpopout-viewer-in 0.15s ease-out;
+    background: color-mix(in srgb, var(--vc-ui-glass) 96%, transparent);
+    animation: vc-chatpopout-viewer-in 0.2s var(--vc-ui-ease);
 }
 
 @keyframes vc-chatpopout-viewer-in {
@@ -1617,7 +1643,7 @@ li:hover .vc-chatpopout-row-btn,
     gap: 12px;
     min-height: 48px;
     padding: 8px 8px 8px 16px;
-    color: #fff;
+    color: var(--vc-ui-title);
     -webkit-app-region: drag;
 }
 
@@ -1650,7 +1676,7 @@ li:hover .vc-chatpopout-row-btn,
 
 .vc-chatpopout-viewer-sub {
     overflow: hidden;
-    color: rgb(255 255 255 / 60%);
+    color: var(--vc-ui-dim);
     font-size: 12px;
     white-space: nowrap;
     text-overflow: ellipsis;
@@ -1670,16 +1696,15 @@ li:hover .vc-chatpopout-row-btn,
     height: 36px;
     padding: 0;
     border: none;
-    border-radius: 10px;
-    background: rgb(255 255 255 / 8%);
-    color: rgb(255 255 255 / 85%);
+    border-radius: 8px;
+    background: none;
+    color: var(--vc-ui-text);
     cursor: pointer;
-    transition: background 0.12s, color 0.12s;
+    transition: color 0.15s var(--vc-ui-ease);
 }
 
 .vc-chatpopout-viewer-btn:hover {
-    background: rgb(255 255 255 / 16%);
-    color: #fff;
+    color: var(--vc-ui-title);
 }
 
 .vc-chatpopout-viewer-stage {
@@ -1697,12 +1722,8 @@ li:hover .vc-chatpopout-row-btn,
     max-height: 100%;
     border-radius: 4px;
     object-fit: contain;
-    animation: vc-chatpopout-viewer-zoom 0.18s ease-out;
+    animation: vc-chatpopout-viewer-in 0.2s var(--vc-ui-ease);
     cursor: zoom-in;
-}
-
-@keyframes vc-chatpopout-viewer-zoom {
-    from { transform: scale(0.96); }
 }
 
 video.vc-chatpopout-viewer-media {
@@ -1732,17 +1753,18 @@ video.vc-chatpopout-viewer-media {
     width: 40px;
     height: 40px;
     padding: 0;
-    border: none;
+    border: 1px solid var(--vc-ui-edge);
     border-radius: 50%;
-    background: rgb(0 0 0 / 50%);
-    color: #fff;
+    background: var(--vc-ui-glass-strong);
+    color: var(--vc-ui-text);
     cursor: pointer;
     transform: translateY(-50%);
-    transition: background 0.12s;
+    transition: color 0.15s var(--vc-ui-ease), border-color 0.15s var(--vc-ui-ease);
 }
 
 .vc-chatpopout-viewer-nav:hover {
-    background: rgb(0 0 0 / 75%);
+    border-color: var(--vc-ui-dim);
+    color: var(--vc-ui-title);
 }
 
 .vc-chatpopout-viewer-prev {
@@ -1758,11 +1780,14 @@ video.vc-chatpopout-viewer-media {
     bottom: 12px;
     left: 50%;
     padding: 2px 10px;
-    border-radius: 10px;
-    background: rgb(0 0 0 / 60%);
-    color: #fff;
+    border: 1px solid var(--vc-ui-edge);
+    border-radius: 6px;
+    background: var(--vc-ui-glass-strong);
+    color: var(--vc-ui-text);
+    font-family: var(--vc-ui-mono);
     font-size: 12px;
-    font-weight: 600;
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
     transform: translateX(-50%);
 }
 
@@ -1773,7 +1798,7 @@ video.vc-chatpopout-viewer-media {
     display: inline-block;
     max-width: 100%;
     overflow: hidden;
-    border-radius: 10px;
+    border-radius: 8px;
     cursor: pointer;
 }
 
@@ -1787,17 +1812,18 @@ video.vc-chatpopout-viewer-media {
     top: 50%;
     left: 50%;
     padding: 6px 12px;
-    border-radius: 20px;
-    background: rgb(0 0 0 / 60%);
-    color: #fff;
-    font-size: 14px;
-    font-weight: 700;
-    letter-spacing: 0.04em;
+    border: 1px solid var(--vc-ui-edge);
+    border-radius: 8px;
+    background: var(--vc-ui-glass-strong);
+    color: var(--vc-ui-title);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.16em;
     transform: translate(-50%, -50%);
 }
 
 .vc-chatpopout-spoiler:hover .vc-chatpopout-spoiler-label {
-    background: rgb(0 0 0 / 85%);
+    border-color: var(--vc-ui-dim);
 }
 
 /* ---------- Embed details ---------- */
@@ -1877,14 +1903,16 @@ video.vc-chatpopout-viewer-media {
     width: 48px;
     height: 48px;
     border-radius: 50%;
-    background: rgb(0 0 0 / 60%);
-    color: #fff;
+    border: 1px solid var(--vc-ui-edge);
+    background: var(--vc-ui-glass-strong);
+    color: var(--vc-ui-title);
+    transition: border-color 0.15s var(--vc-ui-ease);
     transform: translate(-50%, -50%);
     pointer-events: none;
 }
 
 .vc-chatpopout-embed-video:hover .vc-chatpopout-embed-play {
-    background: rgb(0 0 0 / 80%);
+    border-color: var(--vc-ui-dim);
 }
 
 /* ---------- Bot components (buttons, selects, Components V2) ---------- */
@@ -1915,19 +1943,18 @@ video.vc-chatpopout-viewer-media {
     max-width: 100%;
     padding: 2px 16px;
     box-sizing: border-box;
-    border: none;
-    border-radius: 10px;
-    color: #fff;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    color: var(--vc-ui-title);
     font: inherit;
     font-size: 14px;
     font-weight: 500;
     text-decoration: none;
     cursor: pointer;
-    transition: filter 0.12s;
+    transition: background 0.15s var(--vc-ui-ease), border-color 0.15s var(--vc-ui-ease);
 }
 
 .vc-chatpopout-comp-btn:hover:not(:disabled) {
-    filter: brightness(1.12);
     text-decoration: none;
 }
 
@@ -1939,20 +1966,46 @@ video.vc-chatpopout-viewer-media {
 
 .vc-chatpopout-comp-btn-primary,
 .vc-chatpopout-comp-btn-premium {
-    background: var(--vc-ui-blue);
+    background: var(--vc-ui-accent);
+    color: var(--vc-ui-on-accent);
+}
+
+.vc-chatpopout-comp-btn-primary:hover:not(:disabled),
+.vc-chatpopout-comp-btn-premium:hover:not(:disabled) {
+    background: var(--vc-ui-accent-hover);
 }
 
 .vc-chatpopout-comp-btn-secondary,
 .vc-chatpopout-comp-btn-link {
+    border-color: var(--vc-ui-edge);
     background: var(--vc-ui-field);
 }
 
+.vc-chatpopout-comp-btn-secondary:hover:not(:disabled),
+.vc-chatpopout-comp-btn-link:hover:not(:disabled) {
+    background: var(--vc-ui-group-active);
+}
+
 .vc-chatpopout-comp-btn-success {
-    background: var(--vc-ui-green);
+    border-color: color-mix(in srgb, var(--vc-ui-green) 35%, transparent);
+    background: color-mix(in srgb, var(--vc-ui-green) 10%, transparent);
+    color: var(--vc-ui-green);
+}
+
+.vc-chatpopout-comp-btn-success:hover:not(:disabled) {
+    border-color: color-mix(in srgb, var(--vc-ui-green) 60%, transparent);
+    background: color-mix(in srgb, var(--vc-ui-green) 18%, transparent);
 }
 
 .vc-chatpopout-comp-btn-danger {
-    background: var(--vc-ui-red);
+    border-color: color-mix(in srgb, var(--vc-ui-red) 35%, transparent);
+    background: color-mix(in srgb, var(--vc-ui-red) 10%, transparent);
+    color: var(--vc-ui-red);
+}
+
+.vc-chatpopout-comp-btn-danger:hover:not(:disabled) {
+    border-color: color-mix(in srgb, var(--vc-ui-red) 60%, transparent);
+    background: color-mix(in srgb, var(--vc-ui-red) 18%, transparent);
 }
 
 .vc-chatpopout-comp-btn-disabled {
@@ -1980,8 +2033,8 @@ video.vc-chatpopout-viewer-media {
     min-height: 40px;
     padding: 8px 12px;
     box-sizing: border-box;
-    border: 0.5px solid var(--vc-ui-sep);
-    border-radius: 10px;
+    border: 1px solid var(--vc-ui-sep);
+    border-radius: 8px;
     background: var(--vc-ui-field);
     color: var(--vc-ui-dim);
     font: inherit;
@@ -1997,10 +2050,10 @@ video.vc-chatpopout-viewer-media {
     width: min(520px, 100%);
     padding: 16px;
     box-sizing: border-box;
-    border: 0.5px solid var(--vc-ui-sep);
+    border: 1px solid var(--vc-ui-sep);
     border-left: 4px solid var(--vc-ui-sep);
-    border-radius: 10px;
-    background: var(--vc-ui-field);
+    border-radius: 12px;
+    background: var(--vc-ui-group);
 }
 
 .vc-chatpopout-comp-text {
@@ -2086,12 +2139,11 @@ video.vc-chatpopout-viewer-media {
     width: 300px;
     max-height: calc(100vh - 16px);
     overflow: hidden auto;
-    border: 0.5px solid var(--vc-ui-edge);
-    border-radius: 18px;
+    border: 1px solid var(--vc-ui-edge);
+    border-radius: 16px;
     background: var(--vc-ui-glass-strong);
-    backdrop-filter: blur(40px) saturate(180%);
     box-shadow: var(--vc-ui-shadow);
-    animation: vc-chatpopout-menu-in 0.12s ease-out;
+    animation: vc-chatpopout-menu-in 0.2s var(--vc-ui-ease);
     user-select: text;
 }
 
@@ -2106,13 +2158,13 @@ video.vc-chatpopout-viewer-media {
 }
 
 .vc-chatpopout-profile-avatar.vc-chatpopout-profile-clickable:hover {
-    filter: brightness(0.85);
+    opacity: 0.85;
 }
 
 .vc-chatpopout-profile-badge {
     position: relative;
     display: flex;
-    border-radius: 4px;
+    border-radius: 6px;
 }
 
 .vc-chatpopout-profile-badge.vc-chatpopout-profile-clickable:hover {
@@ -2175,7 +2227,7 @@ video.vc-chatpopout-viewer-media {
     min-width: 0;
     color: var(--vc-ui-title);
     font-size: 20px;
-    font-weight: 700;
+    font-weight: 600;
     line-height: 24px;
 }
 
@@ -2202,8 +2254,9 @@ video.vc-chatpopout-viewer-media {
     gap: 4px;
     padding: 4px 6px;
     align-self: flex-start;
-    border-radius: 10px;
-    background: var(--vc-ui-group-hover);
+    border: 1px solid var(--vc-ui-sep);
+    border-radius: 8px;
+    background: var(--vc-ui-group);
 }
 
 .vc-chatpopout-profile-badges img {
@@ -2219,8 +2272,10 @@ video.vc-chatpopout-viewer-media {
 
 .vc-chatpopout-profile-label {
     color: var(--vc-ui-dim);
-    font-size: 12px;
-    font-weight: 700;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
 }
 
 .vc-chatpopout-profile-bio {
@@ -2270,8 +2325,9 @@ video.vc-chatpopout-viewer-media {
     max-width: 100%;
     padding: 2px 6px;
     box-sizing: border-box;
-    border-radius: 4px;
-    background: var(--vc-ui-group-hover);
+    border-radius: 6px;
+    border: 1px solid var(--vc-ui-sep);
+    background: var(--vc-ui-group);
     font-size: 12px;
     font-weight: 500;
     overflow: hidden;
@@ -2296,24 +2352,30 @@ video.vc-chatpopout-viewer-media {
     flex: 1;
     min-height: 32px;
     padding: 0 10px;
-    border: none;
-    border-radius: 10px;
+    border: 1px solid var(--vc-ui-edge);
+    border-radius: 8px;
     background: var(--vc-ui-field);
-    color: #fff;
+    color: var(--vc-ui-title);
     font: inherit;
     font-size: 13px;
     font-weight: 600;
     white-space: nowrap;
     cursor: pointer;
-    transition: filter 0.12s;
+    transition: background 0.15s var(--vc-ui-ease), color 0.15s var(--vc-ui-ease);
 }
 
 .vc-chatpopout-profile-btn:hover {
-    filter: brightness(1.15);
+    background: var(--vc-ui-group-active);
 }
 
 .vc-chatpopout-profile-btn-primary {
-    background: var(--vc-ui-blue);
+    border-color: transparent;
+    background: var(--vc-ui-accent);
+    color: var(--vc-ui-on-accent);
+}
+
+.vc-chatpopout-profile-btn-primary:hover {
+    background: var(--vc-ui-accent-hover);
 }
 
 .vc-chatpopout-profile-btn-icon {
@@ -2326,7 +2388,7 @@ video.vc-chatpopout-viewer-media {
 }
 
 .vc-chatpopout-profile-btn-icon svg {
-    animation: vc-chatpopout-icon-in 0.2s ease-out;
+    animation: vc-chatpopout-icon-in 0.2s var(--vc-ui-ease);
 }
 
 .vc-chatpopout-profile-btn-copied {
@@ -2334,17 +2396,11 @@ video.vc-chatpopout-viewer-media {
 }
 
 .vc-chatpopout-profile-btn-copied svg {
-    animation: vc-chatpopout-check-pop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    animation: vc-chatpopout-icon-in 0.2s var(--vc-ui-ease);
 }
 
 @keyframes vc-chatpopout-icon-in {
-    from { transform: scale(0.6); opacity: 0; }
-    to { transform: scale(1); opacity: 1; }
-}
-
-@keyframes vc-chatpopout-check-pop {
-    0% { transform: scale(0.3) rotate(-30deg); opacity: 0; }
-    100% { transform: scale(1) rotate(0); opacity: 1; }
+    from { transform: scale(0.8); opacity: 0; }
 }
 
 /* Mentions are clickable like in Discord */
@@ -2358,8 +2414,8 @@ video.vc-chatpopout-viewer-media {
     position: relative;
     z-index: 30;
     flex: none;
-    border-bottom: 0.5px solid var(--vc-ui-sep);
-    background: color-mix(in srgb, var(--vc-ui-green) 8%, var(--vc-ui-glass-strong));
+    border-bottom: 1px solid var(--vc-ui-sep);
+    background: var(--vc-ui-group);
 }
 
 .vc-chatpopout-voice-wrap .vc-chatpopout-voice {
@@ -2373,23 +2429,23 @@ video.vc-chatpopout-viewer-media {
     gap: 2px;
     padding: 2px 6px;
     border: none;
-    border-radius: 4px;
+    border-radius: 6px;
     background: none;
     color: var(--vc-ui-dim);
     font: inherit;
     font-size: 12px;
     font-weight: 600;
     cursor: pointer;
+    transition: color 0.15s var(--vc-ui-ease);
 }
 
 .vc-chatpopout-voice-toggle:hover {
-    background: var(--vc-ui-group-hover);
-    color: var(--vc-ui-text);
+    color: var(--vc-ui-title);
 }
 
 .vc-chatpopout-voice-chevron {
     transform: rotate(-90deg);
-    transition: transform 0.15s;
+    transition: transform 0.2s var(--vc-ui-ease);
 }
 
 .vc-chatpopout-voice-chevron-open {
@@ -2403,7 +2459,7 @@ video.vc-chatpopout-viewer-media {
     max-height: min(220px, 35vh);
     padding: 0 6px 6px 18px;
     overflow: hidden auto;
-    animation: vc-chatpopout-rise 0.12s ease-out;
+    animation: vc-chatpopout-rise 0.2s var(--vc-ui-ease);
 }
 
 .vc-chatpopout-voice-list::-webkit-scrollbar {
@@ -2425,11 +2481,12 @@ video.vc-chatpopout-viewer-media {
     gap: 8px;
     min-height: 30px;
     padding: 2px 8px;
-    border-radius: 4px;
+    border-radius: 6px;
     color: var(--vc-ui-dim);
     font-size: 14px;
     font-weight: 500;
     cursor: pointer;
+    transition: background 0.15s var(--vc-ui-ease), color 0.15s var(--vc-ui-ease);
 }
 
 .vc-chatpopout-voice-row:hover {
@@ -2442,7 +2499,7 @@ video.vc-chatpopout-viewer-media {
     width: 24px;
     height: 24px;
     border-radius: 50%;
-    transition: box-shadow 0.1s;
+    transition: box-shadow 0.15s var(--vc-ui-ease);
 }
 
 .vc-chatpopout-voice-row-avatar img {
@@ -2468,11 +2525,11 @@ video.vc-chatpopout-viewer-media {
 .vc-chatpopout-voice-row-live {
     flex: none;
     padding: 0 5px;
-    border-radius: 10px;
+    border-radius: 4px;
     background: var(--vc-ui-red);
-    color: #fff;
+    color: var(--vc-ui-title);
     font-size: 11px;
-    font-weight: 700;
+    font-weight: 600;
     line-height: 16px;
 }
 
@@ -2497,8 +2554,8 @@ video.vc-chatpopout-viewer-media {
     margin-bottom: 4px;
     padding: 6px 4px;
     border: none;
-    border-bottom: 0.5px solid var(--vc-ui-sep);
-    border-radius: 4px 4px 0 0;
+    border-bottom: 1px solid var(--vc-ui-sep);
+    border-radius: 6px 6px 0 0;
     background: none;
     color: var(--vc-ui-title);
     font: inherit;
@@ -2506,10 +2563,11 @@ video.vc-chatpopout-viewer-media {
     font-weight: 600;
     text-align: left;
     cursor: pointer;
+    transition: color 0.15s var(--vc-ui-ease);
 }
 
 .vc-chatpopout-menu-back:hover {
-    color: #fff;
+    color: var(--vc-ui-accent-hover);
 }
 
 .vc-chatpopout-menu-sub {
@@ -2524,22 +2582,15 @@ video.vc-chatpopout-viewer-media {
     width: 18px;
     height: 18px;
     box-sizing: border-box;
-    border: 2px solid currentcolor;
+    border: 1px solid var(--vc-ui-dim);
     border-radius: 4px;
-    opacity: 0.8;
+    transition: background 0.15s var(--vc-ui-ease), border-color 0.15s var(--vc-ui-ease);
 }
 
 .vc-chatpopout-menu-check-on {
-    border-color: var(--vc-ui-blue);
-    background: var(--vc-ui-blue);
-    color: #fff;
-    opacity: 1;
-}
-
-.vc-chatpopout-menu-item-active .vc-chatpopout-menu-check-on {
-    border-color: #fff;
-    background: #fff;
-    color: var(--vc-ui-blue);
+    border-color: var(--vc-ui-accent);
+    background: var(--vc-ui-accent);
+    color: var(--vc-ui-on-accent);
 }
 
 .vc-chatpopout-menu-custom {
@@ -2558,6 +2609,7 @@ video.vc-chatpopout-viewer-media {
 
 .vc-chatpopout-volume-value {
     color: var(--vc-ui-dim);
+    font-family: var(--vc-ui-mono);
     font-size: 12px;
     font-variant-numeric: tabular-nums;
 }
@@ -2568,12 +2620,11 @@ video.vc-chatpopout-viewer-media {
 
 .vc-chatpopout-live-btn {
     cursor: pointer;
-    transition: filter 0.12s, transform 0.12s;
+    transition: opacity 0.15s var(--vc-ui-ease);
 }
 
 .vc-chatpopout-live-btn:hover {
-    filter: brightness(1.15);
-    transform: scale(1.06);
+    opacity: 0.8;
 }
 
 .vc-chatpopout-stream-dock {
@@ -2582,7 +2633,7 @@ video.vc-chatpopout-viewer-media {
     flex: none;
     flex-direction: column;
     min-width: 280px;
-    border-left: 0.5px solid var(--vc-ui-sep);
+    border-left: 1px solid var(--vc-ui-sep);
     background: #000;
 }
 
@@ -2598,7 +2649,7 @@ video.vc-chatpopout-viewer-media {
 
 .vc-chatpopout-stream-resizer:hover,
 .vc-chatpopout-resizing .vc-chatpopout-stream-resizer {
-    background: linear-gradient(to right, transparent 3px, var(--vc-ui-blue) 3px, var(--vc-ui-blue) 5px, transparent 5px);
+    background: linear-gradient(to right, transparent 3px, var(--vc-ui-dim) 3px, var(--vc-ui-dim) 4px, transparent 4px);
 }
 
 .vc-chatpopout-resizing {
@@ -2620,7 +2671,7 @@ video.vc-chatpopout-viewer-media {
     min-height: 40px;
     padding: 4px 6px 4px 12px;
     background: var(--vc-ui-group);
-    border-bottom: 0.5px solid var(--vc-ui-sep);
+    border-bottom: 1px solid var(--vc-ui-sep);
 }
 
 .vc-chatpopout-stream-avatar {
@@ -2691,9 +2742,10 @@ video.vc-chatpopout-viewer-media {
     align-items: center;
     gap: 10px;
     padding: 8px 14px;
-    border-radius: 10px;
-    background: rgb(0 0 0 / 55%);
-    color: #fff;
+    border: 1px solid var(--vc-ui-edge);
+    border-radius: 8px;
+    background: var(--vc-ui-glass-strong);
+    color: var(--vc-ui-text);
     font-size: 14px;
     font-weight: 500;
 }
@@ -2701,6 +2753,7 @@ video.vc-chatpopout-viewer-media {
 .vc-chatpopout-stream-empty {
     flex: 1;
     justify-content: center;
+    border: none;
     background: none;
     color: var(--vc-ui-dim);
 }
@@ -2758,11 +2811,12 @@ video.vc-chatpopout-viewer-media {
 
 .vc-chatpopout-attach-note {
     padding: 6px 10px;
-    border-radius: 10px;
-    background: color-mix(in srgb, var(--vc-ui-orange) 12%, transparent);
+    border: 1px solid color-mix(in srgb, var(--vc-ui-orange) 30%, transparent);
+    border-radius: 8px;
+    background: color-mix(in srgb, var(--vc-ui-orange) 8%, transparent);
     color: var(--vc-ui-orange);
     font-size: 12px;
-    font-weight: 600;
+    font-weight: 500;
 }
 
 .vc-chatpopout-attach-list {
@@ -2784,8 +2838,8 @@ video.vc-chatpopout-viewer-media {
     height: 120px;
     padding: 8px;
     box-sizing: border-box;
-    border: 0.5px solid var(--vc-ui-sep);
-    border-radius: 10px;
+    border: 1px solid var(--vc-ui-sep);
+    border-radius: 12px;
     background: var(--vc-ui-group);
     color: var(--vc-ui-dim);
 }
@@ -2808,7 +2862,9 @@ video.vc-chatpopout-viewer-media {
 }
 
 .vc-chatpopout-attach-size {
+    font-family: var(--vc-ui-mono);
     font-size: 11px;
+    font-variant-numeric: tabular-nums;
 }
 
 .vc-chatpopout-attach-remove {
@@ -2821,13 +2877,15 @@ video.vc-chatpopout-viewer-media {
     width: 22px;
     height: 22px;
     padding: 0;
-    border: none;
+    border: 1px solid var(--vc-ui-edge);
     border-radius: 6px;
-    background: rgb(0 0 0 / 60%);
-    color: #fff;
+    background: var(--vc-ui-glass-strong);
+    color: var(--vc-ui-text);
     cursor: pointer;
+    transition: color 0.15s var(--vc-ui-ease), border-color 0.15s var(--vc-ui-ease);
 }
 
 .vc-chatpopout-attach-remove:hover {
-    background: var(--vc-ui-red);
+    border-color: color-mix(in srgb, var(--vc-ui-red) 60%, transparent);
+    color: var(--vc-ui-red);
 }

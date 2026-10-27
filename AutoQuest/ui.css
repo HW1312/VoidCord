@@ -4,14 +4,13 @@
     flex: none;
     width: 40px;
     height: 40px;
-    border-radius: 9px;
+    border-radius: 8px;
     object-fit: cover;
-    background: var(--vc-ui-sep);
-    box-shadow: 0 1px 3px rgb(0 0 0 / 20%);
+    background: var(--vc-ui-field);
 }
 
 .vc-autoquest-spin svg {
-    animation: vc-ui-spin 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+    animation: vc-ui-spin 0.7s var(--vc-ui-ease);
 }
 
 /* Reward */
@@ -57,10 +56,6 @@
 .vc-autoquest-tb-btn {
     -webkit-app-region: no-drag;
     position: relative;
-}
-
-.vc-autoquest-tb-btn:hover .vc-autoquest-tb-icon {
-    transform: scale(1.12) rotate(-8deg);
 }
 
 .vc-autoquest-tb-running .vc-autoquest-tb-icon {

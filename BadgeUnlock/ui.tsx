@@ -8,13 +8,14 @@ import "./ui.css";
 import { classNameFactory } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
 
-import { Button, Empty, Note, Section, Sheet, ToggleRow } from "../_ui";
+import { Button, Empty, Note, Section, Sheet, strokeIcon, ToggleRow } from "../_ui";
 import { ALL_BADGES, BadgeDef, GROUPS, iconUrl, ORDER } from "./badges";
 import { settings } from "./index";
 
 const cl = classNameFactory("vc-badgeunlock-");
 
-const BADGE_PATH = "M12 2 4 5v6c0 5.25 3.4 10.15 8 11.5 4.6-1.35 8-6.25 8-11.5V5l-8-3Zm-1.2 14.2-3.5-3.5 1.4-1.4 2.1 2.1 4.9-4.9 1.4 1.4-6.3 6.3Z";
+// Lucide shield-check
+const BADGE_PATH = strokeIcon("M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z", "m9 12 2 2 4-4");
 const HEADER = { title: "Badge Unlock", icon: BADGE_PATH, iconColor: "purple" } as const;
 
 function setShown(ids: Iterable<string>) {

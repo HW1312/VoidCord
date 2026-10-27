@@ -17,6 +17,7 @@ import { Button, Empty, Group, Icon, ICONS, notify, RoundButton, Row, SearchFiel
 import { ChatSidebarProps, ChatWindow } from "../ChatPopout/chat";
 import { Badge, unreadOf } from "./area";
 import { sendEncryptedFiles } from "./files";
+import { SEND_ICON } from "./icons";
 import { SecretLogo } from "./logo";
 import { handshakes, isSendGuarded } from "./messages";
 import { NativeMessageList } from "./nativelist";
@@ -245,7 +246,7 @@ function RoomSidebar({ current, onSelect }: ChatSidebarProps) {
     );
 }
 
-const SEND_PATH = "M3.4 20.4 20.85 12.92a1 1 0 0 0 0-1.84L3.4 3.6a.99.99 0 0 0-1.39.91L2 9.12c0 .5.37.93.87.99L17 12 2.87 13.88c-.5.07-.87.5-.87 1l.01 4.61c0 .71.73 1.2 1.39.91Z";
+const SEND_PATH = SEND_ICON;
 
 /**
  * Small icon button of a room row: Discord tooltip, a hover animation per kind, a press effect – and with
@@ -394,7 +395,7 @@ export function toIconDataUrl(file: File, ICON_SIZE = 256): Promise<string | nul
     });
 }
 
-const IMAGE_PATH = "M5 3a2 2 0 0 0-2 2v14c0 1.1.9 2 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2H5Zm3.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM5 18l3.5-4.5 2.5 3 3.5-4.5L19 18H5Z";
+const IMAGE_PATH = ICONS.image;
 
 function NewRoomPanel({ onDone }: { onDone(): void; }) {
     const [name, setName] = useState("");

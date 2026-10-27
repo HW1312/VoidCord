@@ -14,7 +14,7 @@ import { findComponentByCodeLazy } from "@webpack";
 import { ContextMenuApi, Menu, showToast, Tooltip, useEffect, useRef, useState } from "@webpack/common";
 import type { MouseEvent as ReactMouseEvent, ReactNode } from "react";
 
-import { Badge, Button, confirm, Empty, IconButton, ICONS, Note, openWindow, Row, Section, Segmented, Sheet, startArranging, TextField } from "../_ui";
+import { Badge, Button, confirm, Empty, Icon as UiIcon, IconButton, ICONS, Note, openWindow, Row, Section, Segmented, Sheet, startArranging, strokeIcon, TextField } from "../_ui";
 import { activate, ATTR_ANCHOR, collapsedItemsNear, ItemHit, positionUnderDock, sanitizeSvg, stripUnsafe } from "./dom";
 import { settings } from "./index";
 import {
@@ -27,14 +27,14 @@ const HeaderBarIcon = findComponentByCodeLazy(".HEADER_BAR_BADGE_BOTTOM,", 'posi
 
 // ---------------------------------------------------------------- Icons
 
-const DOTS_PATH = "M4 12a2 2 0 1 1 4 0 2 2 0 0 1-4 0Zm6 0a2 2 0 1 1 4 0 2 2 0 0 1-4 0Zm8-2a2 2 0 1 0 0 4 2 2 0 0 0 0-4Z";
+/** Circle as path data (for Lucide icons drawn with strokeIcon) */
+const circle = (cx: number, cy: number, r: number) => `M${cx - r} ${cy}a${r} ${r} 0 1 0 ${r * 2} 0a${r} ${r} 0 1 0 ${-r * 2} 0`;
+
+// Lucide "ellipsis"
+const DOTS_PATH = strokeIcon(circle(12, 12, 1), circle(19, 12, 1), circle(5, 12, 1));
 
 export function DotsIcon({ size = 20, className }: { size?: number; className?: string; }) {
-    return (
-        <svg viewBox="0 0 24 24" width={size} height={size} className={classes(cl("svg"), className)}>
-            <path fill="currentColor" d={DOTS_PATH} />
-        </svg>
-    );
+    return <UiIcon path={DOTS_PATH} size={size} className={classes(cl("svg"), className)} />;
 }
 
 /** Safely display stored/cloned SVG (without innerHTML) */

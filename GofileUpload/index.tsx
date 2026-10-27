@@ -134,7 +134,7 @@ function createCard(title: string, onCancel: () => void) {
     card.innerHTML = `
         <div class="vc-gofile-row">
             <div class="vc-gofile-name"></div>
-            <button class="vc-gofile-cancel" title="Cancel" aria-label="Cancel"><svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="${ICONS.close}"/></svg></button>
+            <button class="vc-gofile-cancel" title="Cancel" aria-label="Cancel"><svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">${ICONS.close.split("|").map(d => `<path d="${d}"/>`).join("")}</svg></button>
         </div>
         <div class="vc-gofile-status"></div>
         <div class="vc-gofile-bar"><div class="vc-gofile-fill"></div></div>`;

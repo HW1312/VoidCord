@@ -13,7 +13,7 @@ import { OptionType, Plugin } from "@utils/types";
 import { findComponentByCodeLazy } from "@webpack";
 import { useMemo, useState } from "@webpack/common";
 
-import { AppArtwork, appArtwork, Badge, Button, Empty, Icon, IconButton, ICONS, Note, openWindow, Row, SearchField, Section, Segmented, Sheet, Toggle, ToggleRow } from "../_ui";
+import { AppArtwork, appArtwork, Badge, Button, Empty, Icon, IconButton, ICONS, Note, openWindow, Row, SearchField, Section, Segmented, Sheet, strokeIcon, Toggle, ToggleRow } from "../_ui";
 import logo from "file://logo.png?base64";
 import { getOwnPlugins, isEnabled, isNew, isTesting, markTried, needsRestart, setEnabled, settings } from "./index";
 import { hubThemes, ThemesTab } from "./themes";
@@ -22,7 +22,13 @@ const HeaderBarIcon = findComponentByCodeLazy(".HEADER_BAR_BADGE_BOTTOM,", 'posi
 
 // VoidCord emblem, embedded into the build
 const LOGO_SRC = `data:image/png;base64,${logo}`;
-const GRID_PATH = "M4 4h6v6H4V4Zm10 0h6v6h-6V4ZM4 14h6v6H4v-6Zm10 0h6v6h-6v-6Z";
+// Lucide layout-grid
+const GRID_PATH = strokeIcon(
+    "M4 3h5a1 1 0 0 1 1 1v5a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z",
+    "M15 3h5a1 1 0 0 1 1 1v5a1 1 0 0 1-1 1h-5a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z",
+    "M15 14h5a1 1 0 0 1 1 1v5a1 1 0 0 1-1 1h-5a1 1 0 0 1-1-1v-5a1 1 0 0 1 1-1z",
+    "M4 14h5a1 1 0 0 1 1 1v5a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-5a1 1 0 0 1 1-1z"
+);
 
 // ---------------------------------------------------------------- List
 

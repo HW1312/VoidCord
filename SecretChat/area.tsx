@@ -212,7 +212,7 @@ export function RoomCard({ message }: { message: Message; }) {
         else if (msg.authorId === me) text = "Secret room";
         else {
             text = `${userName(msg.authorId)} made this chat a secret room`;
-            button = <Button small color="green" onClick={() => joinRoom(msg.channelId, msg.keyId!)}>Join</Button>;
+            button = <Button small onClick={() => joinRoom(msg.channelId, msg.keyId!)}>Join</Button>;
         }
     } else if (msg.authorId === me) {
         text = s.joins[msg.joinId!] ? "Waiting for a member to let you in …" : "You asked to join";
@@ -220,7 +220,7 @@ export function RoomCard({ message }: { message: Message; }) {
         text = `${userName(msg.authorId)} was let in`;
     } else if (canLetIn(msg)) {
         text = `${userName(msg.authorId)} wants to join`;
-        button = <Button small color="green" onClick={() => letIn(msg, true)}>Let in</Button>;
+        button = <Button small onClick={() => letIn(msg, true)}>Let in</Button>;
     } else {
         text = `${userName(msg.authorId)} asked to join`;
     }

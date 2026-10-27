@@ -1,11 +1,11 @@
 /* MessageSelect – only what's special to it; windows, buttons, lists, fields come from the shared _ui kit.
-   The per-message highlight rules are generated in store.ts (they use --vc-ui-blue). */
+   The per-message highlight rules are generated in store.ts (they use --vc-ui-accent). */
 
 body.vc-msgselect-selecting li[id^="chat-messages-"] {
     cursor: pointer;
 }
 
-/* ---------- Floating action bar (glass capsule above the chat input) ---------- */
+/* ---------- Floating action bar (floating panel above the chat input) ---------- */
 
 .vc-msgselect-bar {
     position: fixed;
@@ -15,23 +15,22 @@ body.vc-msgselect-selecting li[id^="chat-messages-"] {
     gap: 2px;
     max-width: calc(100vw - 32px);
     box-sizing: border-box;
-    padding: 5px 5px 5px 16px;
-    border: 0.5px solid var(--vc-ui-edge);
-    border-radius: 999px;
-    background: var(--vc-ui-glass);
+    padding: 5px 5px 5px 14px;
+    border: 1px solid var(--vc-ui-edge);
+    border-radius: 12px;
+    background: var(--vc-ui-glass-strong);
     box-shadow: var(--vc-ui-shadow);
     color: var(--vc-ui-text);
     font-family: var(--vc-ui-font);
     font-size: 14px;
     transform: translateX(-50%);
-    backdrop-filter: blur(40px) saturate(180%);
-    animation: vc-msgselect-in 0.25s var(--vc-ui-spring);
+    animation: vc-msgselect-in 0.2s var(--vc-ui-ease);
 }
 
 @keyframes vc-msgselect-in {
     from {
         opacity: 0;
-        transform: translate(-50%, 8px) scale(0.97);
+        transform: translate(-50%, 6px);
     }
 
     to {
@@ -47,12 +46,14 @@ body.vc-msgselect-selecting li[id^="chat-messages-"] {
 .vc-msgselect-bar-count {
     padding-right: 6px;
     color: var(--vc-ui-title);
-    font-weight: 600;
+    font-family: var(--vc-ui-mono);
+    font-variant-numeric: tabular-nums;
+    font-weight: 500;
     white-space: nowrap;
 }
 
 .vc-msgselect-bar-sep {
-    width: 0.5px;
+    width: 1px;
     height: 22px;
     margin: 0 4px;
     background: var(--vc-ui-sep);
@@ -101,8 +102,6 @@ body.vc-msgselect-selecting li[id^="chat-messages-"] {
     justify-content: center;
     width: 28px;
     height: 28px;
-    border-radius: 7px;
-    background: var(--vc-ui-field);
     color: var(--vc-ui-dim);
 }
 
@@ -136,10 +135,10 @@ body.vc-msgselect-selecting li[id^="chat-messages-"] {
     justify-content: center;
     max-height: 60vh;
     overflow: auto;
-    border: 0.5px solid var(--vc-ui-edge);
+    border: 1px solid var(--vc-ui-edge);
     border-radius: 12px;
     background: var(--vc-ui-group);
-    transition: opacity 0.12s var(--vc-ui-ease);
+    transition: opacity 0.15s var(--vc-ui-ease);
 }
 
 .vc-msgselect-shot-preview img {

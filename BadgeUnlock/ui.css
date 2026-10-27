@@ -9,8 +9,6 @@
     place-items: center;
     width: 28px;
     height: 28px;
-    border-radius: 7px;
-    background: var(--vc-ui-field);
 }
 
 .vc-badgeunlock-actions {
@@ -24,7 +22,7 @@
     flex-wrap: wrap;
     gap: 4px;
     padding: 12px 14px;
-    border-bottom: 0.5px solid var(--vc-ui-sep);
+    border-bottom: 1px solid var(--vc-ui-sep);
 }
 
 .vc-badgeunlock-preview-badge {
@@ -32,6 +30,4 @@
     place-items: center;
     width: 30px;
     height: 30px;
-    border-radius: 8px;
-    background: var(--vc-ui-field);
 }

@@ -19,11 +19,12 @@ import { PluginNative } from "@utils/types";
 import { Channel, Message } from "@vencord/discord-types";
 import { Constants, MessageActions, PendingReplyStore, RestAPI, SnowflakeUtils, Tooltip, useEffect, UserStore, useState } from "@webpack/common";
 
-import { Button, ICONS, notify } from "../_ui";
+import { Button, Icon, ICONS, notify } from "../_ui";
 import { attachmentOf, formatBytes, sendFiles as sendPlainFiles, uploadLimit, uploadOne } from "../ChatPopout/upload";
 import { uploadForLink } from "../GofileUpload";
 import { decryptFile, encryptFile, encryptMessage, randomBytes, toHex } from "./crypto";
 import { openFileInfo } from "./fileinfo";
+import { LOCK_ICON } from "./icons";
 import { VideoPlayer } from "./player";
 import { createFileProgress, saveDecrypted } from "./save";
 import { settings } from "./settings";
@@ -301,9 +302,6 @@ function box(m: Manifest) {
     return { width: Math.round(m.w * scale), height: Math.round(m.h * scale) };
 }
 
-const FILE_PATH = "M6 2a2 2 0 0 0-2 2v16c0 1.1.9 2 2 2h12a2 2 0 0 0 2-2V8l-6-6H6Zm7 1.5L18.5 9H14a1 1 0 0 1-1-1V3.5Z";
-const LOCK_PATH = "M6 9V7a6 6 0 1 1 12 0v2h1a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-9a2 2 0 0 1 2-2h1Zm2-2a4 4 0 1 1 8 0v2H8V7Z";
-
 export function EncryptedFile({ message }: { message: Message; }) {
     const info = files.get(message.id);
     const kind = info ? kindOf(info.manifest) : "file";
@@ -364,7 +362,7 @@ export function EncryptedFile({ message }: { message: Message; }) {
 
     const badge = (
         <span className={cl("file-badge")} title="Encrypted – only people with the key can see it">
-            <svg width={10} height={10} viewBox="0 0 24 24" fill="currentColor"><path d={LOCK_PATH} /></svg>
+            <Icon path={LOCK_ICON} size={10} />
             Encrypted
         </span>
     );
@@ -378,7 +376,7 @@ export function EncryptedFile({ message }: { message: Message; }) {
                     aria-label="File info"
                     onClick={e => { e.stopPropagation(); openFileInfo(info, fetchBytes, pickFile); }}
                 >
-                    <svg width={16} height={16} viewBox="0 0 24 24" fill="currentColor"><path d={ICONS.info} /></svg>
+                    <Icon path={ICONS.info} size={16} />
                 </button>
             )}
         </Tooltip>
@@ -416,7 +414,7 @@ export function EncryptedFile({ message }: { message: Message; }) {
                     <Tooltip text="Save the decrypted file">
                         {(tip: any) => (
                             <button {...tip} className={cl("file-info")} aria-label="Save" onClick={() => save(url)}>
-                                <svg width={16} height={16} viewBox="0 0 24 24" fill="currentColor"><path d={ICONS.download} /></svg>
+                                <Icon path={ICONS.download} size={16} />
                             </button>
                         )}
                     </Tooltip>
@@ -453,7 +451,7 @@ export function EncryptedFile({ message }: { message: Message; }) {
 
     return (
         <div className={cl("file-card")}>
-            <svg className={cl("file-icon")} width={30} height={30} viewBox="0 0 24 24" fill="currentColor"><path d={FILE_PATH} /></svg>
+            <Icon path={ICONS.file} size={30} className={cl("file-icon")} />
             <div className={cl("file-meta")}>
                 <span className={cl("file-name")}>{m.n}</span>
                 <span className={cl("file-size")}>
@@ -467,12 +465,12 @@ export function EncryptedFile({ message }: { message: Message; }) {
                     <Button small variant="gray" title="Download the .bin there – it can only be opened with the key" onClick={() => VencordNative.native.openExternal(info.url)}>
                         Open Gofile
                     </Button>
-                    <Button small color="green" disabled={busy} title="Pick the .bin you downloaded from Gofile" onClick={url ? () => save(url) : decryptDownloaded}>
+                    <Button small disabled={busy} title="Pick the .bin you downloaded from Gofile" onClick={url ? () => save(url) : decryptDownloaded}>
                         {busy ? phase : url ? "Save" : "Decrypt .bin"}
                     </Button>
                 </>
             ) : (
-                <Button small color="green" disabled={busy} onClick={error ? () => start(undefined, true) : kind === "file" ? download : () => start(undefined, true)}>
+                <Button small disabled={busy} onClick={error ? () => start(undefined, true) : kind === "file" ? download : () => start(undefined, true)}>
                     {busy ? phase : error ? "Retry" : kind === "file" ? "Download" : "Show"}
                 </Button>
             )}

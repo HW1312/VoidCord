@@ -49,7 +49,7 @@
     align-items: center;
     gap: 10px;
     padding: 10px 12px;
-    border: 0.5px solid var(--vc-ui-edge);
+    border: 1px solid var(--vc-ui-sep);
     border-radius: 12px;
     background: var(--vc-ui-group);
     color: var(--vc-ui-text);
@@ -57,7 +57,7 @@
     font-size: 13px;
     text-align: left;
     cursor: pointer;
-    transition: background 0.15s, transform 0.25s var(--vc-ui-spring);
+    transition: background 0.15s var(--vc-ui-ease), border-color 0.15s var(--vc-ui-ease);
 }
 
 .vc-serverdeclutter-suggestion:hover {
@@ -65,15 +65,15 @@
 }
 
 .vc-serverdeclutter-suggestion:active {
-    transform: scale(0.97);
+    background: var(--vc-ui-group-active);
 }
 
 .vc-serverdeclutter-suggestion-count {
-    font-family: var(--vc-ui-font-display);
+    font-family: var(--vc-ui-mono);
     font-size: 22px;
-    font-weight: 700;
+    font-weight: 500;
     font-variant-numeric: tabular-nums;
-    color: var(--vc-ui-blue);
+    color: var(--vc-ui-title);
 }
 
 .vc-serverdeclutter-suggestion-warn .vc-serverdeclutter-suggestion-count {
@@ -85,12 +85,13 @@
 }
 
 .vc-serverdeclutter-suggestion-active {
-    box-shadow: inset 0 0 0 2px var(--vc-ui-blue);
+    border-color: var(--vc-ui-accent);
 }
 
 .vc-serverdeclutter-pill-count {
     margin-left: 6px;
     opacity: 0.6;
+    font-family: var(--vc-ui-mono);
     font-variant-numeric: tabular-nums;
 }
 
@@ -102,13 +103,15 @@
     align-items: center;
     gap: 6px;
     padding: 6px 6px 6px 12px;
+    border: 1px solid var(--vc-ui-sep);
     border-radius: 12px;
     background: var(--vc-ui-group);
-    transition: background 0.15s;
+    transition: background 0.15s var(--vc-ui-ease), border-color 0.15s var(--vc-ui-ease);
 }
 
 .vc-serverdeclutter-bulkbar-active {
-    background: color-mix(in srgb, var(--vc-ui-blue) 14%, transparent);
+    border-color: var(--vc-ui-edge);
+    background: var(--vc-ui-group-active);
 }
 
 .vc-serverdeclutter-bulk-count {
@@ -122,6 +125,7 @@
     flex-direction: column;
     gap: 8px;
     padding: 10px 12px;
+    border: 1px solid var(--vc-ui-sep);
     border-radius: 12px;
     background: var(--vc-ui-group);
     color: var(--vc-ui-title);
@@ -166,6 +170,7 @@
 
 .vc-serverdeclutter-table-wrap {
     overflow: auto;
+    border: 1px solid var(--vc-ui-sep);
     border-radius: 12px;
     background: var(--vc-ui-group);
 }
@@ -185,12 +190,12 @@
     text-align: left;
     font-size: 11px;
     font-weight: 600;
-    letter-spacing: 0.03em;
+    letter-spacing: 0.04em;
     text-transform: uppercase;
     white-space: nowrap;
     color: var(--vc-ui-dim);
-    background: var(--vc-ui-glass);
-    border-bottom: 0.5px solid var(--vc-ui-sep);
+    background: var(--vc-ui-group);
+    border-bottom: 1px solid var(--vc-ui-sep);
     cursor: pointer;
     user-select: none;
 }
@@ -208,14 +213,14 @@
 
 .vc-serverdeclutter-table td {
     padding: 6px 8px;
-    border-bottom: 0.5px solid var(--vc-ui-sep);
+    border-bottom: 1px solid var(--vc-ui-sep);
     white-space: nowrap;
     vertical-align: middle;
 }
 
 .vc-serverdeclutter-table tbody tr {
     cursor: pointer;
-    transition: background 0.12s;
+    transition: background 0.15s var(--vc-ui-ease);
 }
 
 .vc-serverdeclutter-table tbody tr:hover {
@@ -223,11 +228,12 @@
 }
 
 .vc-serverdeclutter-row-selected {
-    background: color-mix(in srgb, var(--vc-ui-blue) 14%, transparent) !important;
+    background: var(--vc-ui-group-active) !important;
 }
 
 .vc-serverdeclutter-table .vc-serverdeclutter-num {
     text-align: right;
+    font-family: var(--vc-ui-mono);
     font-variant-numeric: tabular-nums;
 }
 
@@ -237,7 +243,7 @@
 
 .vc-serverdeclutter-table input[type="checkbox"] {
     cursor: pointer;
-    accent-color: var(--vc-ui-blue);
+    accent-color: var(--vc-ui-accent);
 }
 
 .vc-serverdeclutter-name-cell {
@@ -256,7 +262,7 @@
 
 .vc-serverdeclutter-owner {
     display: inline-flex;
-    color: var(--vc-ui-yellow);
+    color: var(--vc-ui-dim);
 }
 
 .vc-serverdeclutter-icon-link {
@@ -265,11 +271,11 @@
     background: none;
     cursor: pointer;
     border-radius: 25%;
-    transition: transform 0.25s var(--vc-ui-spring);
+    transition: opacity 0.15s var(--vc-ui-ease);
 }
 
 .vc-serverdeclutter-icon-link:hover {
-    transform: scale(1.1);
+    opacity: 0.8;
 }
 
 .vc-serverdeclutter-guild-icon {
@@ -281,7 +287,7 @@
     background: var(--vc-ui-field);
     color: var(--vc-ui-text);
     font-size: 10px;
-    font-weight: 700;
+    font-weight: 600;
     object-fit: cover;
 }
 
@@ -306,7 +312,7 @@
     display: flex;
     gap: 2px;
     opacity: 0.35;
-    transition: opacity 0.15s;
+    transition: opacity 0.15s var(--vc-ui-ease);
 }
 
 .vc-serverdeclutter-table tr:hover .vc-serverdeclutter-row-actions,

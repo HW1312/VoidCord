@@ -30,7 +30,7 @@ const toItem = (d: DmEntry): ConfirmItem => ({ id: d.id, name: d.name, avatar: d
 const GROUP_COLOR: Record<DmGroup, UiColor> = { active: "green", groups: "indigo", quiet: "orange", asleep: "gray", never: "red" };
 
 function DmRow({ dm, selected, onSelect, onOpen }: { dm: DmEntry; selected: boolean; onSelect(v: boolean): void; onOpen(): void; }) {
-    const selectable = !dm.isGroup && !dm.protected;
+    const selectable = !dm.protected;
 
     const leave = () => openConfirm({
         title: "Leave group?",
@@ -56,7 +56,7 @@ function DmRow({ dm, selected, onSelect, onOpen }: { dm: DmEntry; selected: bool
                     checked={selected}
                     disabled={!selectable}
                     onChange={onSelect}
-                    title={dm.isGroup ? "Groups are excluded from bulk actions" : dm.protected ? "Protected" : undefined}
+                    title={dm.protected ? "Protected" : dm.isGroup ? "Selected groups are left, not closed" : undefined}
                 />
                 <Avatar src={dm.avatar} size={36} />
             </>}
@@ -123,9 +123,10 @@ export function DmTab({ onClose }: { onClose(): void; }) {
         );
     }, [dms, filter, query, unreadOnly]);
 
-    // Clean up selection: closed / protected / group DMs are dropped
-    const selectable = useMemo(() => new Map(dms.filter(d => !d.isGroup && !d.protected).map(d => [d.id, d])), [dms]);
+    // Clean up selection: closed / protected DMs are dropped
+    const selectable = useMemo(() => new Map(dms.filter(d => !d.protected).map(d => [d.id, d])), [dms]);
     const selectedEntries = [...selected].map(id => selectable.get(id)).filter(Boolean) as DmEntry[];
+    const selectedGroups = selectedEntries.filter(d => d.isGroup).length;
 
     const setSel = (id: string, v: boolean) => setSelected(s => {
         const n = new Set(s);
@@ -138,36 +139,49 @@ export function DmTab({ onClose }: { onClose(): void; }) {
         onClose();
     };
 
-    function runClose(entries: DmEntry[], what: string) {
-        const list = entries.filter(d => !d.isGroup && !d.protected);
+    /** Closes the 1:1 DMs; groups are only included when withGroups (explicit selection) and are left */
+    function runClose(entries: DmEntry[], what: string, withGroups = false) {
+        const list = entries.filter(d => !d.protected && (withGroups || !d.isGroup));
         if (!list.length) return showToast("Nothing to close", "message");
 
+        const groups = list.filter(d => d.isGroup);
+        const dmCount = list.length - groups.length;
+        const parts = [dmCount && `close ${dmCount} DMs`, groups.length && `leave ${groups.length} groups`].filter(Boolean).join(" and ");
+
         openConfirm({
-            title: `Close ${list.length} DMs?`,
+            title: `${parts[0].toUpperCase()}${parts.slice(1)}?`,
             text: (
                 <>
-                    <div>{what} - the history is kept; the DMs only disappear from your list and reappear when a new message arrives.</div>
-                    <div className={cl("dim")}>Groups, PinDMs pins and protected DMs are excluded. Throttled to ~1/s, takes about {list.length} s.</div>
+                    {groups.length > 0 && (
+                        <Note tone="bad">
+                            You are about to <b>leave {groups.length} {groups.length === 1 ? "group" : "groups"}</b>. For group DMs, closing always
+                            means leaving - you can only come back if someone adds you again.
+                        </Note>
+                    )}
+                    {dmCount > 0 && <div>{what} - the history of the DMs is kept; they only disappear from your list and reappear when a new message arrives.</div>}
+                    <div className={cl("dim")}>PinDMs pins and protected DMs are excluded. Throttled to ~1/s, takes about {list.length} s.</div>
                 </>
             ),
-            items: list.map(toItem),
-            confirmText: `Close ${list.length}`,
+            items: [...groups, ...list.filter(d => !d.isGroup)].map(d => d.isGroup ? { ...toItem(d), detail: "leave group" } : toItem(d)),
+            confirmText: groups.length ? `Close & leave ${list.length}` : `Close ${list.length}`,
             onConfirm: () => job.run(async ({ token, progress, onRateLimit }) => {
                 let ok = 0, failed = 0;
                 for (let i = 0; i < list.length; i++) {
-                    progress(i, list.length, `Closing “${list[i].name}” ...`);
+                    const d = list[i];
+                    progress(i, list.length, `${d.isGroup ? "Leaving" : "Closing"} “${d.name}” ...`);
                     try {
-                        await closeDm(list[i], token, onRateLimit);
+                        if (d.isGroup) await leaveGroup(d.id, token, onRateLimit);
+                        else await closeDm(d, token, onRateLimit);
                         ok++;
-                        setSel(list[i].id, false);
+                        setSel(d.id, false);
                     } catch (e) {
                         if (isCancelled(e)) throw e;
                         failed++;
                     }
                 }
                 progress(list.length, list.length, "Done");
-                if (failed) showToast(`${failed} DMs could not be closed`, "failure");
-                return `Closed ${ok} DMs${failed ? `, ${failed} failed` : ""}.`;
+                if (failed) showToast(`${failed} could not be closed`, "failure");
+                return `Done: ${ok} closed/left${failed ? `, ${failed} failed` : ""}.`;
             })
         });
     }
@@ -223,11 +237,12 @@ export function DmTab({ onClose }: { onClose(): void; }) {
 
             <div className={cl("selbar")}>
                 <span className={cl("dim")}>{selectedEntries.length} selected</span>
-                <Button small variant="plain" onClick={() => setSelected(new Set(visible.filter(d => selectable.has(d.id)).map(d => d.id)))}>Select visible</Button>
+                {/* Groups only get mass-selected when the Groups filter is active - leaving can't be undone */}
+                <Button small variant="plain" onClick={() => setSelected(new Set(visible.filter(d => selectable.has(d.id) && (!d.isGroup || filter === "groups")).map(d => d.id)))}>Select visible</Button>
                 <Button small variant="plain" onClick={() => setSelected(new Set())}>Clear selection</Button>
                 <span className={cl("grow")} />
-                <Button small variant="destructive" icon={ICONS.close} disabled={!selectedEntries.length || job.state.running} onClick={() => runClose(selectedEntries, "The selected DMs")}>
-                    Close selected ({selectedEntries.length})
+                <Button small variant="destructive" icon={ICONS.close} disabled={!selectedEntries.length || job.state.running} onClick={() => runClose(selectedEntries, "The selected DMs", true)}>
+                    {selectedGroups ? "Close / leave" : "Close"} selected ({selectedEntries.length})
                 </Button>
             </div>
 

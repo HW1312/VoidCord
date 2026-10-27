@@ -19,7 +19,7 @@ import {
 } from "@webpack/common";
 import type { CSSProperties, ReactElement, ReactNode } from "react";
 
-import { Avatar, Button, PluginArtwork, Empty, Icon, IconButton, ICONS, Popover, RoundButton, Row, SearchField, Section, Sheet, ToggleRow } from "../_ui";
+import { Avatar, Button, PluginArtwork, Empty, Icon, IconButton, ICONS, Popover, RoundButton, Row, SearchField, Section, Sheet, strokeIcon, ToggleRow } from "../_ui";
 import {
     addFavorite, getDisplayName, getJoinBlocker, getMyVoiceChannelId, getVoiceInfo, joinVoice, moveFavorite,
     removeFavorite, settings, stopFollowing, toggleFollow
@@ -31,23 +31,37 @@ const POPOUT_STYLE: CSSProperties = { maxHeight: "min(640px, calc(100vh - 72px))
 
 // ---------------------------------------------------------------- Icons
 
-const FRIENDS_PATH = "M13 10a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm-8.5 0a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM13 12c-4 0-7 2-7 5v2a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2c0-3-3-5-7-5ZM4.5 12C2 12 0 13.5 0 15.5V17a1 1 0 0 0 1 1h3v-1c0-1.9.8-3.6 2.2-4.8-.5-.1-1.1-.2-1.7-.2Z";
-const FOLLOW_PATH = "M12 2a1 1 0 0 1 1 1v1.07A8 8 0 0 1 19.93 11H21a1 1 0 1 1 0 2h-1.07A8 8 0 0 1 13 19.93V21a1 1 0 1 1-2 0v-1.07A8 8 0 0 1 4.07 13H3a1 1 0 1 1 0-2h1.07A8 8 0 0 1 11 4.07V3a1 1 0 0 1 1-1Zm0 4a6 6 0 1 0 0 12 6 6 0 0 0 0-12Zm0 3a3 3 0 1 1 0 6 3 3 0 0 1 0-6Z";
-const UP_PATH = "M12 7l-6 6h12l-6-6Z";
-const DOWN_PATH = "M12 17l6-6H6l6 6Z";
-const SORT_PATH = "M3 18h6v-2H3v2ZM3 6v2h18V6H3Zm0 7h12v-2H3v2Z";
-const HIDE_PATH = "M12 7a5 5 0 0 1 4.65 6.83l2.92 2.92A11.8 11.8 0 0 0 23 12c-1.73-4.39-6-7.5-11-7.5-1.4 0-2.74.25-3.98.7l2.16 2.16A4.85 4.85 0 0 1 12 7ZM2 4.27l2.28 2.28.46.46A11.8 11.8 0 0 0 1 12c1.73 4.39 6 7.5 11 7.5 1.55 0 3.03-.3 4.38-.84l.42.42L19.73 22 21 20.73 3.27 3 2 4.27ZM7.53 9.8l1.55 1.55A2.82 2.82 0 0 0 9 12a3 3 0 0 0 3 3c.22 0 .44-.03.65-.08l1.55 1.55A5 5 0 0 1 7.53 9.8Zm4.31-.78 3.15 3.15.02-.16a3 3 0 0 0-3-3l-.17.01Z";
+// Lucide users (front person, back person – the logo animates them separately)
+const FRIENDS_FRONT = ["M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2", "M5 7a4 4 0 1 0 8 0a4 4 0 1 0-8 0"];
+const FRIENDS_BACK = ["M22 21v-2a4 4 0 0 0-3-3.87", "M16 3.13a4 4 0 0 1 0 7.75"];
+const FRIENDS_PATH = strokeIcon(...FRIENDS_FRONT, ...FRIENDS_BACK);
+// Lucide footprints, chevron-up / chevron-down, list-filter, eye-off
+const FOLLOW_PATH = strokeIcon(
+    "M4 16v-2.38C4 11.5 2.97 10.5 3 8c.03-2.72 1.49-6 4.5-6C9.37 2 10 3.8 10 5.5c0 3.11-2 5.66-2 8.68V16a2 2 0 1 1-4 0Z",
+    "M20 20v-2.38c0-2.12 1.03-3.12 1-5.62-.03-2.72-1.49-6-4.5-6C14.63 6 14 7.8 14 9.5c0 3.11 2 5.66 2 8.68V20a2 2 0 1 0 4 0Z",
+    "M16 17h4",
+    "M4 13h4"
+);
+const UP_PATH = strokeIcon("m18 15-6-6-6 6");
+const DOWN_PATH = ICONS.chevronDown;
+const SORT_PATH = strokeIcon("M3 6h18", "M7 12h10", "M10 18h4");
+const HIDE_PATH = strokeIcon(
+    "M10.733 5.076a10.744 10.744 0 0 1 11.205 6.575 1 1 0 0 1 0 .696 10.747 10.747 0 0 1-1.444 2.49",
+    "M14.084 14.158a3 3 0 0 1-4.242-4.242",
+    "M17.479 17.499a10.75 10.75 0 0 1-15.417-5.151 1 1 0 0 1 0-.696 10.75 10.75 0 0 1 4.446-5.143",
+    "m2 2 20 20"
+);
 
 /** Line icons (Lucide style) for the card actions – just the glyph, no button box */
 const JoinIcon = () => (
-    <svg viewBox="0 0 24 24" width={18} height={18} fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+    <svg viewBox="0 0 24 24" width={18} height={18} fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
         <path d="M3 14h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-7a9 9 0 0 1 18 0v7a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3" />
     </svg>
 );
 
 /** Footprints – while following, the feet take turns stepping */
 const FollowIcon = () => (
-    <svg viewBox="0 0 24 24" width={18} height={18} fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+    <svg viewBox="0 0 24 24" width={18} height={18} fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
         <g className="vc-frienddock-foot">
             <path d="M4 16v-2.38C4 11.5 2.97 10.5 3 8c.03-2.72 1.49-6 4.5-6C9.37 2 10 3.8 10 5.5c0 3.11-2 5.66-2 8.68V16a2 2 0 1 1-4 0Z" />
             <path d="M4 13h4" />
@@ -140,20 +154,19 @@ function useDockIds(): string[] {
 
 // ---------------------------------------------------------------- Logo
 
-/** Two friends in a teal squircle: the front one nods, the back one waves along; radar rings while following */
+/** Fallback logo (only when the kit has no artwork): the Lucide users icon as thin strokes, no tile.
+ *  The front person nods, the back one waves along; radar rings while following */
 export function DockLogo({ size = 42, following }: { size?: number; following?: boolean; }) {
     return (
         <span className={classes(cl("logo"), following && cl("logo-following"))} style={{ width: size, height: size }}>
             <span className={cl("logo-ring")} />
             <span className={classes(cl("logo-ring"), cl("logo-ring-2"))} />
-            <svg viewBox="0 0 32 32" aria-hidden>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
                 <g className={cl("logo-back")}>
-                    <circle cx="11" cy="12.5" r="3.6" />
-                    <path d="M4.5 24.5c0-4 2.9-6.6 6.5-6.6 1.5 0 2.9.4 4 1.2-1.9 1.5-3 3.6-3 5.4Z" />
+                    {FRIENDS_BACK.map(d => <path key={d} d={d} />)}
                 </g>
                 <g className={cl("logo-front")}>
-                    <circle cx="19.5" cy="12" r="4.4" />
-                    <path d="M11.5 25.5c0-4.6 3.6-7.8 8-7.8s8 3.2 8 7.8Z" />
+                    {FRIENDS_FRONT.map(d => <path key={d} d={d} />)}
                 </g>
             </svg>
         </span>

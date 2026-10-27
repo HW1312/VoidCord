@@ -7,7 +7,8 @@
         "package": "node build.mjs --package",
         "release": "node build.mjs --release",
         "update": "node build.mjs --update",
-        "bench": "node bench/run.mjs"
+        "bench": "node bench/run.mjs",
+        "ui": "npm --prefix ui-playground run dev"
     },
     "dependencies": {
         "@noble/post-quantum": "0.7.1"

@@ -199,10 +199,12 @@ export async function closeDm(entry: DmEntry, token?: CancelToken, onRateLimit?:
     });
 }
 
-/** Leave group - only individually after a red confirmation */
-export async function leaveGroup(channelId: string) {
+/** Leave group - only after a red confirmation that names it */
+export async function leaveGroup(channelId: string, token?: CancelToken, onRateLimit?: (s: number) => void) {
     await api("del", { url: `/channels/${channelId}`, query: { silent: false } }, {
+        token,
         interval: INTERVAL.channel,
+        onRateLimit,
         before: () => markManualRemoval("removeGroup", channelId)
     });
 }

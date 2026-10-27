@@ -18,7 +18,7 @@ useRef, UserProfileStore, UserStore, useState, useStateFromStores
 } from "@webpack/common";
 import type { ReactNode } from "react";
 
-import { Avatar, Button, Empty, Icon, ICONS, Note, openWindow, Pill, Pills, Row, Section, Sheet, TextField, ToggleRow } from "../_ui";
+import { Avatar, Button, Empty, Icon, ICONS, Note, openWindow, Pill, Pills, Row, Section, Sheet, strokeIcon, TextField, ToggleRow } from "../_ui";
 import { Candidate, getPool, markSeen, pickRandom, PoolResult, resetSeen, settings, SkipReason } from "./index";
 
 const cl = classNameFactory("vc-roulette-");
@@ -30,9 +30,10 @@ const RECENT_MAX = 8;
 
 // ---------------------------------------------------------------- Icons
 
-const DICE_PATH = "M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Zm2.5 3a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3Zm9 0a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3Zm-4.5 4.5a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3ZM7.5 15a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3Zm9 0a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3Z";
-const EYE_PATH = "M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5ZM12 17a5 5 0 1 1 0-10 5 5 0 0 1 0 10Zm0-8a3 3 0 1 0 0 6 3 3 0 0 0 0-6Z";
-const MSG_PATH = "M20 2H4a2 2 0 0 0-2 2v18l4-4h14a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2Z";
+// Lucide dice-5, eye, message-square
+const DICE_PATH = strokeIcon("M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z", "M16 8h.01", "M8 8h.01", "M8 16h.01", "M16 16h.01", "M12 12h.01");
+const EYE_PATH = strokeIcon("M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0", "M9 12a3 3 0 1 0 6 0a3 3 0 1 0-6 0");
+const MSG_PATH = strokeIcon("M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z");
 
 // ---------------------------------------------------------------- Helpers
 
@@ -355,7 +356,7 @@ function Roulette({ onClose }: { onClose(): void; }) {
                 )}
             </div>
 
-            <Button wide color="pink" icon={DICE_PATH} disabled={spinning || !poolSize} onClick={spin}>
+            <Button wide icon={DICE_PATH} disabled={spinning || !poolSize} onClick={spin}>
                 {current ? "Next person" : "Find someone"}
             </Button>
 
@@ -426,7 +427,7 @@ export const SettingsPanel = ErrorBoundary.wrap(() => {
                 subtitle: "Meet someone new from your servers",
                 icon: DICE_PATH,
                 iconColor: "pink",
-                actions: <Button color="pink" icon={DICE_PATH} onClick={() => openRouletteModal()}>Open People Roulette</Button>
+                actions: <Button icon={DICE_PATH} onClick={() => openRouletteModal()}>Open People Roulette</Button>
             }}
         >
             <Section title="Filters">

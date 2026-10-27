@@ -22,7 +22,6 @@
     height: 7px;
     border-radius: 50%;
     background: var(--vc-ui-red);
-    box-shadow: 0 0 0 2px color-mix(in srgb, var(--vc-ui-red) 25%, transparent);
     animation: vc-ui-pulse 1.6s ease-in-out infinite;
 }
 
@@ -72,23 +71,23 @@
 .vc-callclips-hotkey {
     min-width: 110px;
     padding: 5px 12px;
-    border: 0.5px solid var(--vc-ui-edge);
-    border-radius: 10px;
+    border: 1px solid var(--vc-ui-edge);
+    border-radius: 8px;
     background: var(--vc-ui-field);
     color: var(--vc-ui-text);
     font-family: var(--vc-ui-mono);
     font-size: 12px;
     cursor: pointer;
-    transition: box-shadow 0.15s, color 0.15s;
+    transition: border-color 0.15s var(--vc-ui-ease), color 0.15s var(--vc-ui-ease);
 }
 
 .vc-callclips-hotkey-listening {
-    box-shadow: 0 0 0 2px var(--vc-ui-blue);
-    color: var(--vc-ui-blue);
+    border-color: var(--vc-ui-accent);
+    color: var(--vc-ui-title);
 }
 
 .vc-callclips-hotkey-bad {
-    box-shadow: 0 0 0 1px var(--vc-ui-red);
+    border-color: var(--vc-ui-red);
 }
 
 /* ---------- Trim ---------- */
@@ -110,7 +109,8 @@
     position: relative;
     height: 112px;
     margin: 0 8px;
-    border-radius: 10px;
+    border: 1px solid var(--vc-ui-sep);
+    border-radius: 8px;
     background: var(--vc-ui-field);
     cursor: pointer;
     touch-action: none;
@@ -142,7 +142,7 @@
 }
 
 .vc-callclips-bars .vc-callclips-bar-played {
-    background: var(--vc-ui-red);
+    background: var(--vc-ui-accent);
     opacity: 1;
 }
 
@@ -151,16 +151,16 @@
     position: absolute;
     top: 0;
     bottom: 0;
-    background: rgb(0 0 0 / 35%);
+    background: color-mix(in srgb, var(--vc-ui-glass) 60%, transparent);
     pointer-events: none;
 }
 
 .vc-callclips-shade-left {
-    border-radius: 10px 0 0 10px;
+    border-radius: 8px 0 0 8px;
 }
 
 .vc-callclips-shade-right {
-    border-radius: 0 10px 10px 0;
+    border-radius: 0 8px 8px 0;
 }
 
 /* Frame around the kept part */
@@ -169,8 +169,8 @@
     top: 0;
     bottom: 0;
     box-sizing: border-box;
-    border-top: 3px solid var(--vc-ui-red);
-    border-bottom: 3px solid var(--vc-ui-red);
+    border-top: 2px solid var(--vc-ui-accent);
+    border-bottom: 2px solid var(--vc-ui-accent);
     pointer-events: none;
 }
 
@@ -181,14 +181,14 @@
     z-index: 2;
     width: 14px;
     margin-left: -7px;
-    border-radius: 5px;
-    background: var(--vc-ui-red);
+    border-radius: 6px;
+    background: var(--vc-ui-accent);
     cursor: ew-resize;
-    transition: transform 0.15s var(--vc-ui-spring);
+    transition: background 0.15s var(--vc-ui-ease);
 }
 
 .vc-callclips-handle:hover {
-    transform: scaleX(1.15);
+    background: var(--vc-ui-accent-hover);
 }
 
 /* Grip lines */
@@ -199,7 +199,8 @@
     width: 2px;
     height: 22px;
     border-radius: 1px;
-    background: rgb(255 255 255 / 85%);
+    background: var(--vc-ui-on-accent);
+    opacity: 0.6;
     transform: translate(-50%, -50%);
 }
 
@@ -212,7 +213,6 @@
     margin-left: -1px;
     border-radius: 1px;
     background: var(--vc-ui-title);
-    box-shadow: 0 0 6px rgb(0 0 0 / 45%);
     pointer-events: none;
 }
 
@@ -221,6 +221,7 @@
     justify-content: space-between;
     margin: 0 8px;
     color: var(--vc-ui-dim);
+    font-family: var(--vc-ui-mono);
     font-size: 11px;
     font-variant-numeric: tabular-nums;
 }
@@ -252,16 +253,21 @@
     width: 36px;
     height: 36px;
     padding: 0;
-    border: none;
+    border: 1px solid var(--vc-ui-edge);
     border-radius: 50%;
-    background: color-mix(in srgb, var(--vc-ui-text) 14%, transparent);
+    background: var(--vc-ui-field);
     color: var(--vc-ui-text);
     cursor: pointer;
-    transition: transform 0.2s var(--vc-ui-spring), opacity 0.15s;
+    transition: background 0.15s var(--vc-ui-ease), color 0.15s var(--vc-ui-ease), opacity 0.15s var(--vc-ui-ease);
 }
 
-.vc-callclips-trim-play:active {
-    transform: scale(0.92);
+.vc-callclips-trim-play:hover:not(:disabled) {
+    background: var(--vc-ui-group-hover);
+    color: var(--vc-ui-title);
+}
+
+.vc-callclips-trim-play:active:not(:disabled) {
+    background: var(--vc-ui-group-active);
 }
 
 .vc-callclips-trim-play:disabled {
@@ -273,7 +279,12 @@
     flex: none;
     min-width: 44px;
     color: var(--vc-ui-title);
+    font-family: var(--vc-ui-mono);
     font-size: 13px;
-    font-weight: 600;
+    font-weight: 500;
     font-variant-numeric: tabular-nums;
+}
+
+.vc-callclips-sound-btn {
+    display: contents;
 }

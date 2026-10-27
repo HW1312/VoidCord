@@ -20,7 +20,7 @@ import {
 import type { ReactNode } from "react";
 
 import {
-    Button, Empty, Field, IconButton, ICONS, Note, openWindow, Pill, Pills, Row, SearchField, Section, Segmented, Sheet, State, TextArea, TextField, ToggleRow, UiColor
+    Button, Empty, Field, IconButton, ICONS, Note, openWindow, Pill, Pills, Row, SearchField, Section, Segmented, Sheet, State, strokeIcon, TextArea, TextField, ToggleRow, UiColor
 } from "../_ui";
 
 import {
@@ -36,16 +36,24 @@ const MarkupClasses = findCssClassesLazy("markup", "codeContainer");
 
 const ICON_COLOR: UiColor = "teal";
 
+/** Lucide star */
+const STAR = "M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z";
+
 const FI = {
-    hub: "M9.4 16.6 4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4Zm5.2 0 4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4Z",
-    insert: "M19 7v4H5.83l3.58-3.59L8 6l-6 6 6 6 1.41-1.41L5.83 13H21V7h-2z",
-    star: "M12 17.27 18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z",
-    starOutline: "M22 9.24l-7.19-.62L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21 12 17.27 18.18 21l-1.63-7.03L22 9.24zM12 15.4l-3.76 2.27 1-4.28-3.32-2.88 4.38-.38L12 6.1l1.71 4.04 4.38.38-3.32 2.88 1 4.28L12 15.4z"
+    // Lucide code
+    hub: strokeIcon("m16 18 6-6-6-6", "m8 6-6 6 6 6"),
+    // Lucide corner-down-left
+    insert: strokeIcon("M20 4v7a4 4 0 0 1-4 4H4", "m9 10-5 5 5 5"),
+    // Favorite = the same star filled (a different string, so the kit draws it filled instead of as a stroke)
+    star: STAR.replace(/z$/, "Z"),
+    starOutline: strokeIcon(STAR)
 };
 
 export const FormatHubIcon: IconComponent = ({ height = 20, width = 20, className }) => (
     <svg viewBox="0 0 24 24" width={width} height={height} className={className} aria-hidden>
-        <path fill="currentColor" d={FI.hub} />
+        <g fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round">
+            {FI.hub.split("|").map(d => <path key={d} d={d} />)}
+        </g>
     </svg>
 );
 

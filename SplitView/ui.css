@@ -19,7 +19,7 @@ body.vc-splitview-resizing * {
 }
 
 .vc-splitview-btn-active .vc-ui-tb-icon {
-    color: var(--vc-ui-indigo);
+    color: var(--vc-ui-title);
 }
 
 .vc-splitview-btn-active::after {
@@ -27,10 +27,10 @@ body.vc-splitview-resizing * {
     position: absolute;
     right: 4px;
     bottom: 4px;
-    width: 7px;
-    height: 7px;
+    width: 5px;
+    height: 5px;
     border-radius: 50%;
-    background: var(--vc-ui-indigo);
+    background: var(--vc-ui-accent);
     pointer-events: none;
 }
 
@@ -54,7 +54,7 @@ body.vc-splitview-resizing * {
     min-width: 0;
     height: 100%;
     box-sizing: border-box;
-    border-left: 0.5px solid var(--vc-ui-sep);
+    border-left: 1px solid var(--vc-ui-sep);
 }
 
 .vc-splitview-divider {
@@ -63,11 +63,11 @@ body.vc-splitview-resizing * {
     width: 6px;
     z-index: 2;
     cursor: col-resize;
-    transition: background 0.15s;
+    transition: background 0.15s var(--vc-ui-ease);
 }
 
 .vc-splitview-divider:hover {
-    background: color-mix(in srgb, var(--vc-ui-indigo) 60%, transparent);
+    background: var(--vc-ui-edge);
 }
 
 /* ---------- Header ---------- */
@@ -80,7 +80,7 @@ body.vc-splitview-resizing * {
     height: 48px;
     padding: 0 8px 0 12px;
     box-sizing: border-box;
-    border-bottom: 0.5px solid var(--vc-ui-sep);
+    border-bottom: 1px solid var(--vc-ui-sep);
     font-family: var(--vc-ui-font);
 }
 
@@ -95,7 +95,7 @@ body.vc-splitview-resizing * {
 .vc-splitview-header-icon-text {
     display: grid;
     place-items: center;
-    font-weight: 700;
+    font-weight: 600;
     font-size: 13px;
     color: var(--vc-ui-title);
     background: var(--vc-ui-field);
@@ -184,7 +184,7 @@ body.vc-splitview-resizing * {
 .vc-splitview-day::after {
     content: "";
     flex: 1;
-    height: 0.5px;
+    height: 1px;
     background: var(--vc-ui-sep);
 }
 
@@ -229,7 +229,7 @@ body.vc-splitview-resizing * {
 @keyframes vc-splitview-flash {
     0%,
     40% {
-        background: color-mix(in srgb, var(--vc-ui-indigo) 25%, transparent);
+        background: var(--vc-ui-group-active);
     }
 
     100% {
@@ -261,7 +261,9 @@ body.vc-splitview-resizing * {
 .vc-splitview-gutter-time {
     visibility: hidden;
     padding-top: 3px;
-    font-size: 11px;
+    font-family: var(--vc-ui-mono);
+    font-size: 10px;
+    font-variant-numeric: tabular-nums;
     cursor: pointer;
 }
 
@@ -294,16 +296,18 @@ body.vc-splitview-resizing * {
 
 .vc-splitview-bot-tag {
     padding: 0 5px;
+    border: 1px solid var(--vc-ui-edge);
     border-radius: 4px;
     font-size: 10px;
-    font-weight: 600;
-    line-height: 15px;
-    color: #fff;
-    background: var(--vc-ui-indigo);
+    font-weight: 500;
+    line-height: 14px;
+    color: var(--vc-ui-text);
+    background: var(--vc-ui-field);
 }
 
 .vc-splitview-time {
     font-size: 12px;
+    font-variant-numeric: tabular-nums;
     color: var(--vc-ui-dim);
     cursor: pointer;
 }
@@ -363,8 +367,8 @@ body.vc-splitview-resizing * {
     top: 50%;
     width: 28px;
     height: 10px;
-    border-top: 2px solid var(--vc-ui-track);
-    border-left: 2px solid var(--vc-ui-track);
+    border-top: 1px solid var(--vc-ui-edge);
+    border-left: 1px solid var(--vc-ui-edge);
     border-top-left-radius: 6px;
     box-sizing: border-box;
 }
@@ -392,7 +396,8 @@ body.vc-splitview-resizing * {
 }
 
 .vc-splitview-command {
-    color: var(--vc-ui-blue);
+    color: var(--vc-ui-title);
+    font-weight: 500;
 }
 
 /* Attachments */
@@ -408,7 +413,7 @@ body.vc-splitview-resizing * {
     display: block;
     max-width: 100%;
     height: auto;
-    border-radius: 12px;
+    border-radius: 8px;
     cursor: zoom-in;
     background: var(--vc-ui-group);
 }
@@ -421,10 +426,15 @@ body.vc-splitview-resizing * {
     box-sizing: border-box;
     padding: 8px 12px;
     border-radius: 12px;
-    border: 0.5px solid var(--vc-ui-edge);
+    border: 1px solid var(--vc-ui-edge);
     background: var(--vc-ui-group);
-    color: var(--vc-ui-blue);
+    color: var(--vc-ui-title);
     text-decoration: none;
+    transition: background 0.15s var(--vc-ui-ease);
+}
+
+.vc-splitview-file:hover {
+    background: var(--vc-ui-group-hover);
 }
 
 .vc-splitview-file-icon {
@@ -440,7 +450,9 @@ body.vc-splitview-resizing * {
 
 .vc-splitview-file-size {
     flex: none;
-    font-size: 12px;
+    font-family: var(--vc-ui-mono);
+    font-size: 11px;
+    font-variant-numeric: tabular-nums;
     color: var(--vc-ui-dim);
 }
 
@@ -452,8 +464,9 @@ body.vc-splitview-resizing * {
     box-sizing: border-box;
     margin-top: 4px;
     padding: 8px 12px;
+    border: 1px solid var(--vc-ui-sep);
     border-radius: 12px;
-    border-left: 4px solid var(--vc-ui-track);
+    border-left: 3px solid var(--vc-ui-track);
     background: var(--vc-ui-group);
 }
 
@@ -472,7 +485,7 @@ body.vc-splitview-resizing * {
 
 .vc-splitview-embed-author {
     font-size: 12px;
-    font-weight: 600;
+    font-weight: 500;
     color: var(--vc-ui-text);
 }
 
@@ -482,7 +495,7 @@ body.vc-splitview-resizing * {
 }
 
 a.vc-splitview-embed-title {
-    color: var(--vc-ui-blue);
+    color: var(--vc-ui-title);
 }
 
 .vc-splitview-embed-desc {
@@ -493,7 +506,7 @@ a.vc-splitview-embed-title {
 .vc-splitview-embed-image {
     max-width: 100%;
     height: auto;
-    border-radius: 10px;
+    border-radius: 8px;
 }
 
 .vc-splitview-embed-thumb {
@@ -501,7 +514,7 @@ a.vc-splitview-embed-title {
     width: 64px;
     height: 64px;
     object-fit: cover;
-    border-radius: 10px;
+    border-radius: 8px;
 }
 
 /* Stickers & reactions */
@@ -526,11 +539,12 @@ a.vc-splitview-embed-title {
     display: inline-flex;
     align-items: center;
     gap: 4px;
-    padding: 1px 8px;
-    border-radius: 999px;
-    border: 0.5px solid transparent;
+    padding: 1px 7px;
+    border-radius: 6px;
+    border: 1px solid var(--vc-ui-sep);
     font-size: 13px;
-    font-weight: 600;
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
     color: var(--vc-ui-dim);
     background: var(--vc-ui-field);
 }
@@ -547,9 +561,9 @@ a.vc-splitview-embed-title {
 }
 
 .vc-splitview-reaction-me {
-    border-color: var(--vc-ui-blue);
-    background: color-mix(in srgb, var(--vc-ui-blue) 15%, transparent);
-    color: var(--vc-ui-text);
+    border-color: var(--vc-ui-dim);
+    background: var(--vc-ui-group-active);
+    color: var(--vc-ui-title);
 }
 
 /* New messages pill */
@@ -558,7 +572,8 @@ a.vc-splitview-embed-title {
     bottom: 10px;
     left: 50%;
     transform: translateX(-50%);
-    filter: drop-shadow(0 4px 10px rgb(0 0 0 / 25%));
+    border-radius: 8px;
+    box-shadow: var(--vc-ui-shadow);
 }
 
 /* ---------- Input ---------- */
@@ -572,10 +587,15 @@ a.vc-splitview-embed-title {
     display: flex;
     align-items: flex-end;
     gap: 8px;
-    padding: 8px 8px 8px 14px;
-    border-radius: 20px;
+    padding: 8px 8px 8px 12px;
+    border-radius: 12px;
     background: var(--vc-ui-field);
-    border: 0.5px solid var(--vc-ui-edge);
+    border: 1px solid var(--vc-ui-edge);
+    transition: border-color 0.15s var(--vc-ui-ease);
+}
+
+.vc-splitview-input-wrap:focus-within {
+    border-color: var(--vc-ui-dim);
 }
 
 .vc-splitview-input-disabled {
@@ -659,14 +679,13 @@ a.vc-splitview-embed-title {
     justify-content: center;
     gap: 6px;
     box-sizing: border-box;
-    border: 2px dashed var(--vc-ui-indigo);
-    border-radius: 22px;
+    border: 1px dashed var(--vc-ui-edge);
+    border-radius: 16px;
     background: var(--vc-ui-glass);
-    backdrop-filter: blur(30px) saturate(1.8);
     color: var(--vc-ui-title);
     font-family: var(--vc-ui-font);
     box-shadow: var(--vc-ui-shadow);
-    transition: background 0.2s var(--vc-ui-ease);
+    transition: background 0.2s var(--vc-ui-ease), border-color 0.2s var(--vc-ui-ease);
 }
 
 .vc-splitview-dropzone * {
@@ -674,13 +693,14 @@ a.vc-splitview-embed-title {
 }
 
 .vc-splitview-dropzone-over {
-    background: color-mix(in srgb, var(--vc-ui-indigo) 25%, var(--vc-ui-glass));
+    border-color: var(--vc-ui-accent);
+    background: var(--vc-ui-group-hover);
 }
 
 .vc-splitview-dropzone-title {
     margin-top: 6px;
     font-size: 16px;
-    font-weight: 700;
+    font-weight: 600;
 }
 
 .vc-splitview-dropzone-sub {

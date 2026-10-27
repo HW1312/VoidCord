@@ -16,7 +16,7 @@ import { findComponentByCodeLazy } from "@webpack";
 import { Popout, showToast, Tooltip, useEffect, useRef, useState } from "@webpack/common";
 import type { CSSProperties } from "react";
 
-import { Button, Empty, PluginArtwork, IconButton, ICONS, openWindow, Popover, RoundButton, Section, Sheet, ToggleRow, useListener } from "../_ui";
+import { Button, Empty, Icon, IconButton, ICONS, openWindow, PluginArtwork, Popover, RoundButton, Section, Sheet, strokeIcon, ToggleRow, useListener } from "../_ui";
 import { grab, needsRestart as mediaGrabNeedsRestart } from "../MediaGrab/grab";
 import { settings } from "./index";
 import { PlatformIcon, PLATFORMS } from "./platforms";
@@ -26,7 +26,13 @@ const cl = classNameFactory("vc-songradar-");
 const HeaderBarIcon = findComponentByCodeLazy(".HEADER_BAR_BADGE_BOTTOM,", 'position:"bottom"');
 const POPOUT_STYLE: CSSProperties = { maxHeight: "min(760px, calc(100vh - 72px))" };
 
-const WAVE_PATH = "M12 3a1 1 0 0 1 1 1v16a1 1 0 1 1-2 0V4a1 1 0 0 1 1-1ZM8 7a1 1 0 0 1 1 1v8a1 1 0 1 1-2 0V8a1 1 0 0 1 1-1Zm8 0a1 1 0 0 1 1 1v8a1 1 0 1 1-2 0V8a1 1 0 0 1 1-1ZM4 10a1 1 0 0 1 1 1v2a1 1 0 1 1-2 0v-2a1 1 0 0 1 1-1Zm16 0a1 1 0 0 1 1 1v2a1 1 0 1 1-2 0v-2a1 1 0 0 1 1-1Z";
+// Lucide audio-lines
+const WAVE_PATH = strokeIcon("M2 10v3", "M6 6v11", "M10 3v18", "M14 8v7", "M18 5v13", "M22 10v3");
+// Lucide volume-x / volume-1 / volume-2
+const SPEAKER = "M11 4.702a.705.705 0 0 0-1.203-.498L6.413 7.587A1.4 1.4 0 0 1 5.416 8H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2.416a1.4 1.4 0 0 1 .997.413l3.383 3.384A.705.705 0 0 0 11 19.298z";
+const VOLUME_OFF = strokeIcon(SPEAKER, "m22 9-6 6", "m16 9 6 6");
+const VOLUME_LOW = strokeIcon(SPEAKER, "M16 9a5 5 0 0 1 0 6");
+const VOLUME_HIGH = strokeIcon(SPEAKER, "M16 9a5 5 0 0 1 0 6", "M19.364 18.364a9 9 0 0 0 0-12.728");
 
 // ---------------------------------------------------------------- Icons
 
@@ -41,9 +47,7 @@ function Bars({ active, size = 20 }: { active?: boolean; size?: number; }) {
 
 export function RadarMenuIcon() {
     return (
-        <svg viewBox="0 0 24 24" width={18} height={18} fill="currentColor" aria-hidden>
-            <path d={WAVE_PATH} />
-        </svg>
+        <Icon path={WAVE_PATH} size={18} />
     );
 }
 
@@ -193,7 +197,7 @@ function Cover({ song, size = 96 }: { song: Song; size?: number; }) {
                 <Tooltip text={playing ? "Stop preview" : "Play a 30 s preview"}>
                     {(tip: any) => (
                         <button {...tip} type="button" className={classes(cl("cover-play"), playing && cl("cover-playing"))} onClick={toggle} aria-label="Preview">
-                            {playing ? <Bars active size={18} /> : <svg viewBox="0 0 24 24" width={20} height={20} fill="currentColor"><path d={ICONS.play} /></svg>}
+                            {playing ? <Bars active size={18} /> : <Icon path={ICONS.play} size={20} />}
                         </button>
                     )}
                 </Tooltip>
@@ -288,9 +292,7 @@ function VolumeControl() {
     const { previewVolume } = settings.use(["previewVolume"]);
     const last = useRef(previewVolume || 0.4);
     const v = Number(previewVolume) || 0;
-    const icon = v === 0
-        ? "M11 5 6 9H3v6h3l5 4V5Zm11 4-6 6m0-6 6 6"
-        : v < 0.5 ? "M11 5 6 9H3v6h3l5 4V5Zm4.5 3.5a5 5 0 0 1 0 7" : "M11 5 6 9H3v6h3l5 4V5Zm4.5 3.5a5 5 0 0 1 0 7m3-10a9 9 0 0 1 0 13";
+    const icon = v === 0 ? VOLUME_OFF : v < 0.5 ? VOLUME_LOW : VOLUME_HIGH;
     return (
         <div className={cl("volume")}>
             <Tooltip text={v === 0 ? "Unmute preview" : "Mute preview"}>
@@ -305,7 +307,7 @@ function VolumeControl() {
                             else settings.store.previewVolume = last.current || 0.4;
                         }}
                     >
-                        <svg viewBox="0 0 24 24" width={16} height={16} fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d={icon} /></svg>
+                        <Icon path={icon} size={16} />
                     </button>
                 )}
             </Tooltip>

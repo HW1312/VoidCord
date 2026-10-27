@@ -15,10 +15,9 @@
 .vc-gofile-card {
     pointer-events: auto;
     padding: 11px 14px;
-    border: 0.5px solid var(--vc-ui-edge);
-    border-radius: 18px;
+    border: 1px solid var(--vc-ui-edge);
+    border-radius: 12px;
     background: var(--vc-ui-glass-strong);
-    backdrop-filter: blur(30px) saturate(1.8);
     box-shadow: var(--vc-ui-shadow);
     color: var(--vc-ui-text);
     font-family: var(--vc-ui-font);
@@ -38,7 +37,7 @@
     text-overflow: ellipsis;
     white-space: nowrap;
     color: var(--vc-ui-title);
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 500;
 }
 
@@ -50,15 +49,14 @@
     height: 20px;
     padding: 0;
     border: none;
-    border-radius: 50%;
-    background: var(--vc-ui-field);
+    border-radius: 6px;
+    background: none;
     color: var(--vc-ui-dim);
     cursor: pointer;
-    transition: color 0.15s, background 0.15s;
+    transition: color 0.15s var(--vc-ui-ease);
 }
 
 .vc-gofile-cancel:hover {
-    background: var(--vc-ui-group-active);
     color: var(--vc-ui-title);
 }
 
@@ -66,6 +64,7 @@
     margin-top: 3px;
     color: var(--vc-ui-dim);
     font-size: 12px;
+    font-variant-numeric: tabular-nums;
 }
 
 .vc-gofile-bar {
@@ -80,7 +79,7 @@
     width: 0;
     height: 100%;
     border-radius: 2px;
-    background: var(--vc-ui-blue);
+    background: var(--vc-ui-accent);
     transition: width 0.2s linear;
 }
 

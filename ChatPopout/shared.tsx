@@ -8,45 +8,81 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Logger } from "@utils/Logger";
 import { GuildMemberStore, IconUtils, Parser, useEffect, useLayoutEffect, useMemo, UserStore, useState } from "@webpack/common";
 
+import { ICONS, Icon as UiIcon, strokeIcon } from "../_ui";
+
 export const cl = classNameFactory("vc-chatpopout-");
 export const log = new Logger("ChatPopout");
 
 // ---------------------------------------------------------------- Icons
 
-export const POPOUT_PATH = "M14 3a1 1 0 1 0 0 2h3.6l-7.3 7.3a1 1 0 0 0 1.4 1.4L19 6.4V10a1 1 0 1 0 2 0V4a1 1 0 0 0-1-1h-6ZM5 5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-5a1 1 0 1 0-2 0v5H5V7h5a1 1 0 1 0 0-2H5Z";
-export const CLOSE_PATH = "M18.3 5.7a1 1 0 0 0-1.4 0L12 10.6 7.1 5.7a1 1 0 0 0-1.4 1.4l4.9 4.9-4.9 4.9a1 1 0 1 0 1.4 1.4l4.9-4.9 4.9 4.9a1 1 0 0 0 1.4-1.4L13.4 12l4.9-4.9a1 1 0 0 0 0-1.4Z";
-export const MIN_PATH = "M5 12a1 1 0 0 1 1-1h12a1 1 0 1 1 0 2H6a1 1 0 0 1-1-1Z";
-export const MAX_PATH = "M6 4h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Zm0 2v12h12V6H6Z";
-export const PIN_PATH = "M16 3a1 1 0 0 1 .7 1.7L16 5.4v4.2l2.7 2.7a1 1 0 0 1-.7 1.7h-5v6a1 1 0 1 1-2 0v-6H6a1 1 0 0 1-.7-1.7L8 9.6V5.4l-.7-.7A1 1 0 0 1 8 3h8Z";
-export const MAIN_PATH = "M4 4h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Zm0 4v10h5V8H4Zm7 0v10h9V8h-9Z";
-export const CALL_PATH = "M4 5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-5v2h3a1 1 0 1 1 0 2H8a1 1 0 1 1 0-2h3v-2H6a2 2 0 0 1-2-2V5Zm7.2 3.1a.6.6 0 0 0-.9.5v3.8a.6.6 0 0 0 .9.5l3-1.9a.6.6 0 0 0 0-1l-3-1.9Z";
-export const FILE_PATH = "M6 2a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8.4a2 2 0 0 0-.6-1.4l-4.4-4.4A2 2 0 0 0 13.6 2H6Zm7 1.8L18.2 9H14a1 1 0 0 1-1-1V3.8Z";
-export const MUTE_PATH = "M3.3 3.3a1 1 0 0 1 1.4 0l16 16a1 1 0 0 1-1.4 1.4l-3.4-3.4A7 7 0 0 1 13 18.9V21a1 1 0 1 1-2 0v-2.1A7 7 0 0 1 5 12a1 1 0 1 1 2 0 5 5 0 0 0 7.5 4.3l-1.6-1.6A3 3 0 0 1 9 12V10.4L3.3 4.7a1 1 0 0 1 0-1.4ZM12 2a3 3 0 0 1 3 3v5.2l-6-6A3 3 0 0 1 12 2Zm6.6 12.4-1.6-1.6c.1-.3.1-.5.1-.8a1 1 0 1 1 2 0c0 .8-.2 1.6-.5 2.4Z";
-export const SIDEBAR_PATH = "M3 5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5Zm6 0v14h10V5H9Zm-2 0H5v14h2V5Z";
-export const HASH_PATH = "M10.99 3.16A1 1 0 1 0 9 2.84L8.15 8H4a1 1 0 0 0 0 2h3.82l-.67 4H3a1 1 0 1 0 0 2h3.82l-.8 4.84a1 1 0 0 0 1.97.32L8.85 16h4.97l-.8 4.84a1 1 0 0 0 1.97.32l.86-5.16H20a1 1 0 1 0 0-2h-3.82l.67-4H21a1 1 0 1 0 0-2h-3.82l.8-4.84a1 1 0 1 0-1.97-.32L15.15 8h-4.97l.8-4.84ZM14.15 14l.67-4H9.85l-.67 4h4.97Z";
-export const SPEAKER_PATH = "M12 3a1 1 0 0 0-1-1h-.06a1 1 0 0 0-.74.32L5.92 7H3a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h2.92l4.28 4.68a1 1 0 0 0 .74.32H11a1 1 0 0 0 1-1V3ZM15.1 20.75c-.58.14-1.1-.33-1.1-.92v-.03c0-.5.37-.92.85-1.05a7 7 0 0 0 0-13.5A1.11 1.11 0 0 1 14 4.2v-.03c0-.6.52-1.06 1.1-.92a9 9 0 0 1 0 17.5ZM15.16 16.51c-.57.28-1.16-.2-1.16-.83v-.14c0-.43.28-.8.63-1.02a3 3 0 0 0 0-5.04c-.35-.23-.63-.6-.63-1.02v-.14c0-.63.59-1.1 1.16-.83a5 5 0 0 1 0 9.02Z";
-export const ANNOUNCE_PATH = "M19.56 2a3 3 0 0 0-2.46 1.28 3.85 3.85 0 0 1-1.86 1.42l-8.9 3.18a.5.5 0 0 0-.34.47v10.09a3 3 0 0 0 2.27 2.9l.62.16c1.57.4 3.15-.56 3.55-2.12l.92-3.68a.5.5 0 0 1 .65-.35l2.7.96a3.85 3.85 0 0 1 1.86 1.42 3 3 0 0 0 5.43-1.75V5A3 3 0 0 0 19.56 2ZM4 9a1 1 0 0 0-1 1v5a1 1 0 0 0 1 1h.5a.5.5 0 0 0 .5-.5v-6a.5.5 0 0 0-.5-.5H4Z";
-export const CHEVRON_PATH = "M5.3 9.3a1 1 0 0 1 1.4 0l5.3 5.29 5.3-5.3a1 1 0 1 1 1.4 1.42l-6 6a1 1 0 0 1-1.4 0l-6-6a1 1 0 0 1 0-1.42Z";
-export const DEAF_PATH = "M3.3 3.3a1 1 0 0 1 1.4 0l16 16a1 1 0 0 1-1.4 1.4l-1.5-1.5A2 2 0 0 1 17 20h-1a2 2 0 0 1-2-2v-3.6L6.5 6.9A7 7 0 0 0 5 11v1h2a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2H6a3 3 0 0 1-3-3v-8c0-1.8.6-3.5 1.6-4.9l-1.3-1.4a1 1 0 0 1 0-1.4ZM12 3a9 9 0 0 1 9 9v5.2l-2-2V12a7 7 0 0 0-11.6-5.3L6 5.3A9 9 0 0 1 12 3Z";
-export const DOWNLOAD_PATH = "M12 2a1 1 0 0 1 1 1v10.59l3.3-3.3a1 1 0 1 1 1.4 1.42l-5 5a1 1 0 0 1-1.4 0l-5-5a1 1 0 1 1 1.4-1.42l3.3 3.3V3a1 1 0 0 1 1-1ZM3 20a1 1 0 0 1 1-1h16a1 1 0 1 1 0 2H4a1 1 0 0 1-1-1Z";
-export const COPY_PATH = "M3 16a1 1 0 0 1-1-1V5a3 3 0 0 1 3-3h10a1 1 0 1 1 0 2H5a1 1 0 0 0-1 1v10a1 1 0 0 1-1 1Zm6-10h10a3 3 0 0 1 3 3v10a3 3 0 0 1-3 3H9a3 3 0 0 1-3-3V9a3 3 0 0 1 3-3Zm0 2a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V9a1 1 0 0 0-1-1H9Z";
-export const LINK_PATH = "M16.32 14.72a1 1 0 0 1 0-1.41l2.51-2.51a3.98 3.98 0 0 0-5.62-5.63l-2.52 2.51a1 1 0 0 1-1.41-1.41l2.52-2.52a5.98 5.98 0 0 1 8.45 8.46l-2.52 2.51a1 1 0 0 1-1.41 0ZM7.68 9.3a1 1 0 0 1 0 1.41l-2.52 2.51a3.98 3.98 0 1 0 5.63 5.63l2.51-2.52a1 1 0 0 1 1.42 1.42l-2.52 2.51a5.98 5.98 0 0 1-8.45-8.45l2.51-2.51a1 1 0 0 1 1.42 0Zm1.6 5.42a1 1 0 0 0 1.42 0l4.03-4.02a1 1 0 0 0-1.42-1.42L9.29 13.3a1 1 0 0 0 0 1.42Z";
-export const REPLY_PATH = "M2.3 7.3a1 1 0 0 0 0 1.4l5 5a1 1 0 0 0 1.4-1.4L5.42 9H11a7 7 0 0 1 7 7v4a1 1 0 1 0 2 0v-4a9 9 0 0 0-9-9H5.41l3.3-3.3a1 1 0 0 0-1.42-1.4l-5 5Z";
-export const EDIT_PATH = "M14.06 4.94a1.5 1.5 0 0 1 2.12 0l2.88 2.88a1.5 1.5 0 0 1 0 2.12L9.4 19.6a2 2 0 0 1-.95.53l-4.2 1.05a1 1 0 0 1-1.22-1.21l1.05-4.2a2 2 0 0 1 .53-.95l9.45-9.88Z";
-export const TRASH_PATH = "M14.25 1c.41 0 .75.34.75.75V3h5.25c.41 0 .75.34.75.75v.5c0 .41-.34.75-.75.75H3.75A.75.75 0 0 1 3 4.25v-.5c0-.41.34-.75.75-.75H9V1.75c0-.41.34-.75.75-.75h4.5ZM5.06 7a1 1 0 0 0-1 1.06l.76 12.13a3 3 0 0 0 3 2.81h8.36a3 3 0 0 0 3-2.81l.75-12.13a1 1 0 0 0-1-1.06H5.07Z";
-export const ID_PATH = "M3 5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5Zm4 3v8h2V8H7Zm4 0v8h3a4 4 0 0 0 0-8h-3Zm2 2h1a2 2 0 1 1 0 4h-1v-4Z";
-export const ZOOM_PATH = "M10 3a7 7 0 1 0 4.2 12.6l5.1 5.1a1 1 0 0 0 1.4-1.4l-5.1-5.1A7 7 0 0 0 10 3Zm-5 7a5 5 0 1 1 10 0 5 5 0 0 1-10 0Zm5-3a1 1 0 0 1 1 1v1h1a1 1 0 1 1 0 2h-1v1a1 1 0 1 1-2 0v-1H8a1 1 0 1 1 0-2h1V8a1 1 0 0 1 1-1Z";
-export const LEFT_PATH = "M15.7 5.3a1 1 0 0 1 0 1.4L10.42 12l5.3 5.3a1 1 0 0 1-1.42 1.4l-6-6a1 1 0 0 1 0-1.4l6-6a1 1 0 0 1 1.42 0Z";
-export const RIGHT_PATH = "M8.3 18.7a1 1 0 0 1 0-1.4l5.29-5.3-5.3-5.3a1 1 0 0 1 1.42-1.4l6 6a1 1 0 0 1 0 1.4l-6 6a1 1 0 0 1-1.42 0Z";
-export const PLAY_PATH = "M8 5.14v13.72a1 1 0 0 0 1.5.86l11.04-6.86a1 1 0 0 0 0-1.72L9.5 4.28A1 1 0 0 0 8 5.14Z";
-export const USER_PATH = "M12 12a5 5 0 1 0 0-10 5 5 0 0 0 0 10Zm-9 9a8 8 0 0 1 8-8h2a8 8 0 0 1 8 8 1 1 0 0 1-1 1H4a1 1 0 0 1-1-1Z";
+/** Circle as path data, so every icon part is a path */
+const circle = (cx: number, cy: number, r: number) => `M${cx - r} ${cy}a${r} ${r} 0 1 0 ${r * 2} 0a${r} ${r} 0 1 0 ${-r * 2} 0`;
 
+// Thin stroke icons (Lucide). Kit icons where the kit has the meaning, the rest built with strokeIcon.
+export const POPOUT_PATH = ICONS.external;
+export const CLOSE_PATH = ICONS.close;
+// minus
+export const MIN_PATH = strokeIcon("M5 12h14");
+// square
+export const MAX_PATH = strokeIcon("M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z");
+// pin
+export const PIN_PATH = strokeIcon("M12 17v5", "M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H8a2 2 0 0 0 0 4 1 1 0 0 1 1 1z");
+// app-window
+export const MAIN_PATH = strokeIcon("M4 4h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z", "M10 4v4", "M2 8h20", "M6 4v4");
+// monitor-play
+export const CALL_PATH = strokeIcon(
+    "M10 7.75a.75.75 0 0 1 1.142-.638l3.664 2.249a.75.75 0 0 1 0 1.278l-3.664 2.25a.75.75 0 0 1-1.142-.64z",
+    "M12 17v4",
+    "M8 21h8",
+    "M4 3h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"
+);
+export const FILE_PATH = ICONS.file;
+// mic-off
+export const MUTE_PATH = strokeIcon("M12 19v3", "M15 9.34V5a3 3 0 0 0-5.68-1.33", "M16.95 16.95A7 7 0 0 1 5 12v-2", "M18.89 13.23A7 7 0 0 0 19 12v-2", "m2 2 20 20", "M9 9v3a3 3 0 0 0 5.12 2.12");
+// panel-left
+export const SIDEBAR_PATH = strokeIcon("M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z", "M9 3v18");
+export const HASH_PATH = ICONS.hash;
+// volume-2
+export const SPEAKER_PATH = strokeIcon(
+    "M11 4.702a.705.705 0 0 0-1.203-.498L6.413 7.587A1.4 1.4 0 0 1 5.416 8H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2.416a1.4 1.4 0 0 1 .997.413l3.383 3.384A.705.705 0 0 0 11 19.298z",
+    "M16 9a5 5 0 0 1 0 6",
+    "M19.364 18.364a9 9 0 0 0 0-12.728"
+);
+// megaphone
+export const ANNOUNCE_PATH = strokeIcon(
+    "M11 6a13 13 0 0 0 8.4-2.8A1 1 0 0 1 21 4v12a1 1 0 0 1-1.6.8A13 13 0 0 0 11 14H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2z",
+    "M6 14a12 12 0 0 0 2.4 7.2 2 2 0 0 0 3.2-2.4A8 8 0 0 1 10 14",
+    "M8 6v8"
+);
+export const CHEVRON_PATH = ICONS.chevronDown;
+// headphone-off
+export const DEAF_PATH = strokeIcon(
+    "M21 14h-1.343",
+    "M9.128 3.47A9 9 0 0 1 21 12v3.343",
+    "m2 2 20 20",
+    "M20.414 20.414A2 2 0 0 1 19 21h-1a2 2 0 0 1-2-2v-3",
+    "M3 14h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-7a9 9 0 0 1 2.636-6.364"
+);
+export const DOWNLOAD_PATH = ICONS.download;
+export const COPY_PATH = ICONS.copy;
+// link
+export const LINK_PATH = strokeIcon("M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71", "M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71");
+// reply
+export const REPLY_PATH = strokeIcon("M20 18v-2a4 4 0 0 0-4-4H4", "m9 17-5-5 5-5");
+export const EDIT_PATH = ICONS.edit;
+export const TRASH_PATH = ICONS.trash;
+// id-card
+export const ID_PATH = strokeIcon("M16 10h2", "M16 14h2", "M6.17 15a3 3 0 0 1 5.66 0", circle(9, 11, 2), "M4 5h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2z");
+// zoom-in
+export const ZOOM_PATH = strokeIcon(circle(11, 11, 8), "m21 21-4.35-4.35", "M11 8v6", "M8 11h6");
+export const LEFT_PATH = ICONS.back;
+export const RIGHT_PATH = ICONS.chevron;
+export const PLAY_PATH = ICONS.play;
+export const USER_PATH = ICONS.user;
+
+/** Icon in the plugin's default size – drawn by the kit (stroke icons for strokeIcon paths) */
 export function Icon({ path, size = 18, className }: { path: string; size?: number; className?: string; }) {
-    return (
-        <svg viewBox="0 0 24 24" width={size} height={size} className={className} aria-hidden>
-            <path fill="currentColor" d={path} />
-        </svg>
-    );
+    return <UiIcon path={path} size={size} className={className} />;
 }
 
 /**

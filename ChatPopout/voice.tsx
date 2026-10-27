@@ -8,7 +8,7 @@ import { classes } from "@utils/misc";
 import { findByPropsLazy, findStoreLazy } from "@webpack";
 import { GuildChannelStore, MediaEngineStore, PermissionsBits, PermissionStore, RestAPI, SelectedChannelStore, showToast, UserStore, useState, useStateFromStores, VoiceStateStore } from "@webpack/common";
 
-import { Slider } from "../_ui";
+import { Slider, strokeIcon } from "../_ui";
 import { isInCall, openCallPopout, settings } from "./index";
 import { MenuItem } from "./menu";
 import { CALL_PATH, CHEVRON_PATH, cl, DEAF_PATH, displayName, Icon, log, MUTE_PATH, SPEAKER_PATH, tip, userAvatar } from "./shared";
@@ -18,7 +18,8 @@ const ChannelActions = findByPropsLazy("selectVoiceChannel", "selectChannel");
 const SpeakingStore = findStoreLazy("SpeakingStore");
 
 const VOICE_TYPES = new Set([2, 13]);
-const SCREEN_PATH = "M4 4h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2h-6v2h3a1 1 0 1 1 0 2H7a1 1 0 1 1 0-2h3v-2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Zm0 2v10h16V6H4Z";
+// monitor
+const SCREEN_PATH = strokeIcon("M4 3h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z", "M8 21h8", "M12 17v4");
 
 interface Person {
     id: string;

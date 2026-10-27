@@ -21,6 +21,7 @@
     border-radius: 50%;
     overflow: hidden;
     background: var(--vc-ui-field);
+    border: 1px solid var(--vc-ui-edge);
     animation: vc-roulette-pulse 0.35s var(--vc-ui-ease) infinite alternate;
 }
 
@@ -31,8 +32,8 @@
 }
 
 @keyframes vc-roulette-pulse {
-    from { transform: scale(0.94); }
-    to { transform: scale(1.04); }
+    from { opacity: 0.7; }
+    to { opacity: 1; }
 }
 
 /* ---------- Person card ---------- */
@@ -42,18 +43,18 @@
     overflow: hidden;
     border-radius: 12px;
     background: var(--vc-ui-group);
-    border: 0.5px solid var(--vc-ui-edge);
-    animation: vc-roulette-pop 0.3s var(--vc-ui-spring);
+    border: 1px solid var(--vc-ui-edge);
+    animation: vc-roulette-pop 0.25s var(--vc-ui-ease);
 }
 
 @keyframes vc-roulette-pop {
-    from { transform: scale(0.94); opacity: 0; }
-    to { transform: scale(1); opacity: 1; }
+    from { transform: translateY(6px); opacity: 0; }
+    to { transform: none; opacity: 1; }
 }
 
 .vc-roulette-banner {
     height: 110px;
-    background-color: var(--vc-ui-pink);
+    background-color: var(--vc-ui-field);
     background-size: cover;
     background-position: center;
 }
@@ -79,13 +80,13 @@
     height: 96px;
     border-radius: 50%;
     object-fit: cover;
-    border: 5px solid var(--vc-ui-glass);
-    background: var(--vc-ui-glass);
-    transition: transform 0.2s var(--vc-ui-spring);
+    border: 5px solid var(--vc-ui-group);
+    background: var(--vc-ui-group);
+    transition: opacity 0.15s var(--vc-ui-ease);
 }
 
 .vc-roulette-avatar-wrap:hover .vc-roulette-avatar {
-    transform: scale(1.04);
+    opacity: 0.85;
 }
 
 .vc-roulette-status {
@@ -95,18 +96,18 @@
     width: 18px;
     height: 18px;
     border-radius: 50%;
-    border: 4px solid var(--vc-ui-glass);
+    border: 4px solid var(--vc-ui-group);
     background: var(--vc-ui-gray);
 }
 
 .vc-roulette-status-online { background: var(--vc-ui-green); }
-.vc-roulette-status-idle { background: var(--vc-ui-yellow); }
+.vc-roulette-status-idle { background: var(--vc-ui-orange); }
 .vc-roulette-status-dnd { background: var(--vc-ui-red); }
 
 .vc-roulette-name {
-    font-family: var(--vc-ui-font-display);
+    font-family: var(--vc-ui-font);
     font-size: 20px;
-    font-weight: 700;
+    font-weight: 600;
     color: var(--vc-ui-title);
 }
 
@@ -125,7 +126,7 @@
 
 .vc-roulette-activity {
     padding: 4px 10px;
-    border-radius: 999px;
+    border-radius: 8px;
     background: var(--vc-ui-field);
     color: var(--vc-ui-text);
     font-size: 12px;
@@ -134,6 +135,7 @@
 .vc-roulette-label {
     font-size: 12px;
     font-weight: 500;
+    letter-spacing: 0.04em;
     text-transform: uppercase;
     color: var(--vc-ui-dim);
 }
@@ -158,7 +160,7 @@
 .vc-roulette-bio {
     width: 100%;
     padding: 10px 12px;
-    border-radius: 10px;
+    border-radius: 8px;
     background: var(--vc-ui-field);
     color: var(--vc-ui-text);
     font-size: 13px;
@@ -176,7 +178,7 @@
     padding: 0;
     border: none;
     background: none;
-    color: var(--vc-ui-blue);
+    color: var(--vc-ui-title);
     font-size: 12px;
     font-weight: 500;
     cursor: pointer;
@@ -203,15 +205,14 @@
     height: 18px;
     padding: 0;
     border: none;
-    border-radius: 5px;
     background: none;
     color: var(--vc-ui-dim);
     cursor: pointer;
+    transition: color 0.15s var(--vc-ui-ease);
 }
 
 .vc-roulette-link-copy:hover {
-    background: var(--vc-ui-group-hover);
-    color: var(--vc-ui-text);
+    color: var(--vc-ui-title);
 }
 
 .vc-roulette-link-copy .vc-roulette-icon {
@@ -224,17 +225,12 @@
 }
 
 .vc-roulette-link-copied .vc-roulette-icon {
-    animation: vc-roulette-check-pop 0.35s var(--vc-ui-spring);
+    animation: vc-roulette-icon-in 0.2s var(--vc-ui-ease);
 }
 
 @keyframes vc-roulette-icon-in {
-    from { transform: scale(0.6); opacity: 0; }
-    to { transform: scale(1); opacity: 1; }
-}
-
-@keyframes vc-roulette-check-pop {
-    0% { transform: scale(0.3) rotate(-30deg); opacity: 0; }
-    100% { transform: scale(1) rotate(0); opacity: 1; }
+    from { opacity: 0; }
+    to { opacity: 1; }
 }
 
 /* ---------- Pool line ---------- */
@@ -253,12 +249,13 @@
 }
 
 .vc-roulette-pool-why {
-    color: var(--vc-ui-blue);
+    color: var(--vc-ui-title);
     font-weight: 500;
 }
 
 .vc-roulette-count {
     color: var(--vc-ui-dim);
+    font-family: var(--vc-ui-mono);
     font-variant-numeric: tabular-nums;
 }
 
@@ -283,17 +280,16 @@
     object-fit: cover;
     cursor: pointer;
     opacity: 0.6;
-    transition: opacity 0.15s var(--vc-ui-ease), transform 0.2s var(--vc-ui-spring);
+    transition: opacity 0.15s var(--vc-ui-ease);
 }
 
 .vc-roulette-recent-avatar:hover {
     opacity: 1;
-    transform: scale(1.08);
 }
 
 .vc-roulette-recent-active {
     opacity: 1;
-    box-shadow: 0 0 0 2px var(--vc-ui-pink);
+    box-shadow: 0 0 0 2px var(--vc-ui-accent);
 }
 
 /* ---------- Settings ---------- */

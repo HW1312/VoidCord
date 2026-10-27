@@ -8,7 +8,7 @@ import "./ui.css";
 import { classNameFactory } from "@api/Styles";
 import { useEffect, useRef, useState } from "@webpack/common";
 
-import { ICONS as UI_ICONS, TextField } from "../_ui";
+import { ICONS as UI_ICONS, strokeIcon, TextField } from "../_ui";
 import { BulkProgress, CancelToken, createToken, releaseToken } from "./actions";
 
 export const cl = classNameFactory("vc-serverdeclutter-");
@@ -19,13 +19,16 @@ export const ICON_COLOR = "teal";
 
 export const ICONS = {
     ...UI_ICONS,
-    broom: "M19.36 2.72 20.78 4.14 15.06 9.85C16.13 11.39 16.28 13.24 15.38 14.44L9.06 8.12C10.26 7.22 12.11 7.37 13.65 8.44L19.36 2.72M5.93 17.57C3.92 15.56 2.69 13.16 2.35 10.92L7.23 8.83L14.67 16.27L12.58 21.15C10.34 20.81 7.94 19.58 5.93 17.57Z",
-    bellOff: "M20 18.69 7.84 6.14 5.27 3.49 4 4.76l2.8 2.8v.01c-.52.99-.8 2.16-.8 3.42v5l-2 2v1h13.73l2 2L21 19.72l-1-1.03zM12 22c1.11 0 2-.89 2-2h-4c0 1.11.89 2 2 2zm6-7.32V11c0-3.08-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68c-.15.03-.29.08-.42.12-.1.03-.2.07-.3.11h-.01c-.01 0-.01 0-.02.01-.23.09-.46.2-.68.31 0 0-.01 0-.01.01L18 14.68z",
-    leave: "M10.09 15.59 11.5 17l5-5-5-5-1.41 1.41L12.67 11H3v2h9.67l-2.58 2.59zM19 3H5a2 2 0 0 0-2 2v4h2V5h14v14H5v-4H3v4a2 2 0 0 0 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z",
-    stop: "M6 6h12v12H6z",
-    crown: "M5 16 3 5l5.5 5L12 4l3.5 6L21 5l-2 11H5zm14 3c0 .6-.4 1-1 1H6c-.6 0-1-.4-1-1v-1h14v1z",
-    arrowUp: "M7 14l5-5 5 5z",
-    arrowDown: "M7 10l5 5 5-5z"
+    // Lucide brush-cleaning
+    broom: strokeIcon("m16 22-1-4", "M19 13.99a1 1 0 0 0 1-1V12a2 2 0 0 0-2-2h-3a1 1 0 0 1-1-1V4a2 2 0 0 0-4 0v5a1 1 0 0 1-1 1H6a2 2 0 0 0-2 2v.99a1 1 0 0 0 1 1", "M5 14h14l1.973 6.767A1 1 0 0 1 20 22H4a1 1 0 0 1-.973-1.233z", "m8 22 1-4"),
+    bellOff: strokeIcon("M10.268 21a2 2 0 0 0 3.464 0", "M17 17H4a1 1 0 0 1-.74-1.673C4.59 13.956 6 12.499 6 8a6 6 0 0 1 .258-1.742", "m2 2 20 20", "M8.668 3.01A6 6 0 0 1 18 8c0 2.687.77 4.653 1.707 6.05"),
+    leave: UI_ICONS.leave,
+    // Lucide square
+    stop: strokeIcon("M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"),
+    crown: strokeIcon("M11.562 3.266a.5.5 0 0 1 .876 0L15.39 8.87a1 1 0 0 0 1.516.294L21.183 5.5a.5.5 0 0 1 .798.519l-2.834 10.246a1 1 0 0 1-.956.734H5.81a1 1 0 0 1-.957-.734L2.02 6.02a.5.5 0 0 1 .798-.519l4.276 3.664a1 1 0 0 0 1.516-.294z", "M5 21h14"),
+    // sort direction (Lucide chevron-up / chevron-down)
+    arrowUp: strokeIcon("m18 15-6-6-6 6"),
+    arrowDown: UI_ICONS.chevronDown
 };
 
 // ---------------------------------------------------------------- Building blocks

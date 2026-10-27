@@ -14,7 +14,7 @@ import { Channel } from "@vencord/discord-types";
 import { NavigationRouter, useCallback, useEffect, useMemo, useRef, UserStore, useState } from "@webpack/common";
 import type { MouseEvent as ReactMouseEvent, ReactNode } from "react";
 
-import { Avatar, Button, confirm, Empty, Icon, IconButton, ICONS, LinkRow, Note, openWindow, Pill, Pills, Popover, Progress, Row, RoundButton, SearchField, Section, Segmented, Sheet, Spinner, TextField, ToggleRow } from "../_ui";
+import { Avatar, Button, confirm, Empty, Icon, IconButton, ICONS, LinkRow, Note, openWindow, Pill, Pills, Popover, Progress, Row, RoundButton, SearchField, Section, Segmented, Sheet, Spinner, strokeIcon, TextField, ToggleRow } from "../_ui";
 import { downloadSingle, downloadZip, formatDate, formatNumber, formatSize, ZipJob, ZipProgress } from "./download";
 import { settings } from "./index";
 import { Author, ChannelIndex, getIndex, loadPages, MediaItem, MediaKind, resetIndex, subscribe } from "./store";
@@ -23,17 +23,23 @@ const cl = classNameFactory("vc-mediagallery-");
 
 // ---------------------------------------------------------------- Icons
 
+/** Circle as path data (for Lucide icons drawn with strokeIcon) */
+const circle = (cx: number, cy: number, r: number) => `M${cx - r} ${cy}a${r} ${r} 0 1 0 ${r * 2} 0a${r} ${r} 0 1 0 ${-r * 2} 0`;
+
+/** Thin Lucide strokes like the kit; shared meanings come from the kit's ICONS (they have their own button animations) */
+const GALLERY_PARTS = ["M18 22H4a2 2 0 0 1-2-2V6", "m22 13-1.296-1.296a2.41 2.41 0 0 0-3.408 0L11 18", circle(12, 8, 2), "M8 2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z"];
+
 const PATHS = {
-    gallery: "M4 3a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2H4Zm3 3.5a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM4 15l3.5-4.5 2.5 3 3.5-4.5L16 13v2H4Zm16-8v10a4 4 0 0 1-4 4H6a2 2 0 0 0 2 2h8a6 6 0 0 0 6-6V9a2 2 0 0 0-2-2Z",
-    file: "M6 2a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6H6Zm7 1.5L18.5 9H14a1 1 0 0 1-1-1V3.5Z",
-    audio: "M20 3v12.5a3.5 3.5 0 1 1-2-3.16V7l-8 1.6v8.9A3.5 3.5 0 1 1 8 14.34V5l12-2Z",
-    jump: "M10 3a1 1 0 0 1 1 1v6.59l7.3-7.3a1 1 0 1 1 1.4 1.42L12.42 12H19a1 1 0 1 1 0 2h-9a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1ZM4 14a1 1 0 0 1 1 1v4h4a1 1 0 1 1 0 2H4a1 1 0 0 1-1-1v-5a1 1 0 0 1 1-1Z",
-    sender: "M16 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm-8 0a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5C15 14.17 10.33 13 8 13Zm8 0c-.29 0-.62.02-.97.05A4.22 4.22 0 0 1 17 16.5V19h6v-2.5c0-2.33-4.67-3.5-7-3.5Z"
+    gallery: strokeIcon(...GALLERY_PARTS),
+    file: ICONS.file,
+    audio: ICONS.music,
+    jump: ICONS.arrowRight,
+    sender: strokeIcon("M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2", circle(9, 7, 4), "M22 21v-2a4 4 0 0 0-3-3.87", "M16 3.13a4 4 0 0 1 0 7.75")
 };
 
 export const GalleryIcon: IconComponent = ({ width = 20, height = 20, className }) => (
-    <svg viewBox="0 0 24 24" width={width} height={height} className={className}>
-        <path fill="currentColor" d={PATHS.gallery} />
+    <svg viewBox="0 0 24 24" width={width} height={height} className={className} fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round">
+        {GALLERY_PARTS.map(d => <path key={d} d={d} />)}
     </svg>
 );
 

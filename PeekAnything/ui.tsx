@@ -13,7 +13,7 @@ import {
 } from "@webpack/common";
 import type { Root } from "react-dom/client";
 
-import { Button, classes, Icon, IconButton, Row, Section, Segmented, Sheet, Spinner, TextField, ToggleRow } from "../_ui";
+import { Button, classes, Icon, IconButton, ICONS, Row, Section, Segmented, Sheet, Spinner, strokeIcon, TextField, ToggleRow } from "../_ui";
 import { ChatPreview } from "./chat";
 import { closePeek, getState, PeekState, setCallIndex, subscribe, switchTo } from "./controller";
 import { cl, logger, settings } from "./index";
@@ -24,17 +24,22 @@ const ChannelActions = findByPropsLazy("selectVoiceChannel", "selectChannel");
 
 // ---------------------------------------------------------------- Icons
 
-const PIN_PATH = "M19.4 8.6 15.4 4.6a1 1 0 0 0-1.5.1l-.6.8a3 3 0 0 0-.4 2.6l-2.3 2.3a4 4 0 0 0-3.9 1l-.4.4a1 1 0 0 0 0 1.4l2.4 2.4-4.4 4.4a1 1 0 1 0 1.4 1.4l4.4-4.4 2.4 2.4a1 1 0 0 0 1.4 0l.4-.4a4 4 0 0 0 1-3.9l2.3-2.3a3 3 0 0 0 2.6-.4l.8-.6a1 1 0 0 0 .1-1.5Z";
-const OPEN_PATH = "M14 3a1 1 0 1 0 0 2h3.6l-7.3 7.3a1 1 0 0 0 1.4 1.4L19 6.4V10a1 1 0 1 0 2 0V4a1 1 0 0 0-1-1h-6ZM5 5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-5a1 1 0 1 0-2 0v5H5V7h5a1 1 0 1 0 0-2H5Z";
-const SPEAKER_PATH = "M12 3a1 1 0 0 0-1.7-.7L6.6 6H4a2 2 0 0 0-2 2v8c0 1.1.9 2 2 2h2.6l3.7 3.7A1 1 0 0 0 12 21V3Zm3.1 5.3a1 1 0 0 1 1.4 0 5 5 0 0 1 0 7.4 1 1 0 1 1-1.4-1.4 3 3 0 0 0 0-4.6 1 1 0 0 1 0-1.4Z";
-const MUTED_PATH = "M12 3a1 1 0 0 0-1.7-.7L6.6 6H4a2 2 0 0 0-2 2v8c0 1.1.9 2 2 2h2.6l3.7 3.7A1 1 0 0 0 12 21V3Zm4.3 5.3a1 1 0 0 1 1.4 0L19 9.6l1.3-1.3a1 1 0 1 1 1.4 1.4L20.4 11l1.3 1.3a1 1 0 0 1-1.4 1.4L19 12.4l-1.3 1.3a1 1 0 0 1-1.4-1.4l1.3-1.3-1.3-1.3a1 1 0 0 1 0-1.4Z";
-const MIC_OFF_PATH = "M3.3 3.3a1 1 0 0 1 1.4 0l16 16a1 1 0 0 1-1.4 1.4l-3.3-3.3A7 7 0 0 1 13 18.9V21h2a1 1 0 1 1 0 2H9a1 1 0 1 1 0-2h2v-2.1A7 7 0 0 1 5 12a1 1 0 1 1 2 0 5 5 0 0 0 7.6 4.3l-1.5-1.5A3 3 0 0 1 9 12v-1.6L3.3 4.7a1 1 0 0 1 0-1.4ZM15 11.2 9.3 5.5A3 3 0 0 1 15 6v5.2Zm2.9 2.9-1.5-1.5c.1-.2.1-.4.1-.6a1 1 0 1 1 2 0c0 .7-.2 1.4-.6 2.1Z";
-const DEAF_PATH = "M3.3 3.3a1 1 0 0 1 1.4 0l16 16a1 1 0 0 1-1.4 1.4l-1.5-1.5A3 3 0 0 1 16 20h-1a2 2 0 0 1-2-2v-4c0-.5.2-1 .5-1.4L5.4 4.7 4.7 6A8.9 8.9 0 0 0 4 9.6V12h3a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2H6a3 3 0 0 1-3-3V9.6c0-1.6.4-3.1 1.2-4.5l-.9-.4a1 1 0 0 1 0-1.4ZM12 2.6a9 9 0 0 1 9 9V17l-2-2v-3h.1v-.4a7 7 0 0 0-11.5-5.3L6.2 4.9A9 9 0 0 1 12 2.6Z";
-const VIDEO_PATH = "M4 5a3 3 0 0 0-3 3v8a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3v-1.4l3.4 2.3A1 1 0 0 0 22 16V8a1 1 0 0 0-1.6-.8L17 9.4V8a3 3 0 0 0-3-3H4Z";
-const HASH_PATH = "M10.9 3.1a1 1 0 0 0-2 .3L9.5 7H6a1 1 0 0 0 0 2h3.2l-.7 6H5a1 1 0 1 0 0 2h3.3l-.5 3.9a1 1 0 0 0 2 .2l.5-4.1h6l-.5 3.9a1 1 0 0 0 2 .2l.5-4.1H21a1 1 0 1 0 0-2h-2.5l.7-6H22a1 1 0 1 0 0-2h-3.1l.5-3.9a1 1 0 0 0-2-.2l-.5 4.1h-6l.5-3.9ZM16.5 15h-6l.7-6h6l-.7 6Z";
+/** Circle as path data (for Lucide icons drawn with strokeIcon) */
+const circle = (cx: number, cy: number, r: number) => `M${cx - r} ${cy}a${r} ${r} 0 1 0 ${r * 2} 0a${r} ${r} 0 1 0 ${-r * 2} 0`;
+const SPEAKER = "M11 4.702a.705.705 0 0 0-1.203-.498L6.413 7.587A1.4 1.4 0 0 1 5.416 8H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2.416a1.4 1.4 0 0 1 .997.413l3.383 3.384A.705.705 0 0 0 11 19.298z";
+
+// Thin Lucide strokes like the kit; shared meanings come from the kit's ICONS (they have their own button animations)
+const PIN_PATH = strokeIcon("M12 17v5", "M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H8a2 2 0 0 0 0 4 1 1 0 0 1 1 1z");
+const OPEN_PATH = ICONS.external;
+const SPEAKER_PATH = strokeIcon(SPEAKER, "M16 9a5 5 0 0 1 0 6");
+const MUTED_PATH = strokeIcon(SPEAKER, "m22 9-6 6", "m16 9 6 6");
+const MIC_OFF_PATH = strokeIcon("M12 19v3", "M15 9.34V5a3 3 0 0 0-5.68-1.33", "M16.95 16.95A7 7 0 0 1 5 12v-2", "M18.89 13.23A7 7 0 0 0 19 12v-2", "m2 2 20 20", "M9 9v3a3 3 0 0 0 5.12 2.12");
+const DEAF_PATH = strokeIcon("M21 14h-1.343", "M9.128 3.47A9 9 0 0 1 21 12v3.343", "m2 2 20 20", "M20.414 20.414A2 2 0 0 1 19 21h-1a2 2 0 0 1-2-2v-3", "M3 14h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-7a9 9 0 0 1 2.636-6.364");
+const VIDEO_PATH = strokeIcon("m16 13 5.223 3.482a.5.5 0 0 0 .777-.416V7.87a.5.5 0 0 0-.752-.432L16 10.5", "M4 6h10a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2z");
+const HASH_PATH = ICONS.hash;
 
 export const ICON_COLOR = "indigo";
-const EYE_PATH = "M12 5C6.5 5 2.7 8.7 1.2 11.4a1.3 1.3 0 0 0 0 1.2C2.7 15.3 6.5 19 12 19s9.3-3.7 10.8-6.4a1.3 1.3 0 0 0 0-1.2C21.3 8.7 17.5 5 12 5Zm0 11a4 4 0 1 1 0-8 4 4 0 0 1 0 8Zm0-2a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z";
+const EYE_PATH = strokeIcon("M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0", circle(12, 12, 3));
 
 function HeadButton({ path, label, onClick, active }: { path: string; label: string; onClick(): void; active?: boolean; }) {
     return <IconButton icon={path} label={label} onClick={onClick} active={active} />;

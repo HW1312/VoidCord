@@ -13,7 +13,7 @@ import { classes } from "@utils/misc";
 import { useEffect, useLayoutEffect, useRef, useState } from "@webpack/common";
 import type { PointerEvent as ReactPointerEvent } from "react";
 
-import { confirm, openWindow, Sheet, TextField } from "../_ui";
+import { confirm, Icon, ICONS, openWindow, Sheet, strokeIcon, TextField } from "../_ui";
 import { OPSEC_COLOR, opsecNotify, Tip } from "./ui";
 
 const cl = classNameFactory("vc-opsec-");
@@ -39,17 +39,17 @@ type Op =
 type Tool = "crop" | "pixelate" | "blur" | "box" | "pen" | "arrow" | "text";
 
 const TOOLS: { id: Tool; label: string; icon: string; }[] = [
-    { id: "crop", label: "Crop", icon: "M17 15h2V7c0-1.1-.9-2-2-2H9v2h8v8zM7 17V1H5v4H1v2h4v10c0 1.1.9 2 2 2h10v4h2v-4h4v-2H7z" },
-    { id: "box", label: "Redact", icon: "M3 5h18v14H3z" },
-    { id: "pixelate", label: "Pixelate", icon: "M3 3h6v6H3zm6 6h6v6H9zm6-6h6v6h-6zM3 15h6v6H3zm12 0h6v6h-6z" },
-    { id: "blur", label: "Blur", icon: "M12 2.7S5 10.2 5 14.5a7 7 0 0 0 14 0C19 10.2 12 2.7 12 2.7z" },
-    { id: "pen", label: "Pen", icon: "M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" },
-    { id: "arrow", label: "Arrow", icon: "M5 19 17.6 6.4V13h2V3h-10v2h6.6L3.6 17.6z" },
-    { id: "text", label: "Text", icon: "M5 4v3h5.5v12h3V7H19V4z" }
+    { id: "crop", label: "Crop", icon: strokeIcon("M6 2v14a2 2 0 0 0 2 2h14", "M18 22V8a2 2 0 0 0-2-2H2") },
+    { id: "box", label: "Redact", icon: strokeIcon("M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z") },
+    { id: "pixelate", label: "Pixelate", icon: strokeIcon("M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z", "M3 9h18", "M3 15h18", "M9 3v18", "M15 3v18") },
+    { id: "blur", label: "Blur", icon: strokeIcon("M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z") },
+    { id: "pen", label: "Pen", icon: ICONS.edit },
+    { id: "arrow", label: "Arrow", icon: strokeIcon("M7 7h10v10", "M7 17 17 7") },
+    { id: "text", label: "Text", icon: strokeIcon("M12 4v16", "M4 7V4h16v3", "M9 20h6") }
 ];
 
 /** Header / prompt icon (brush) */
-const ERASER_ICON = "M7 14c-1.66 0-3 1.34-3 3 0 1.31-1.16 2-2 2 .92 1.22 2.49 2 4 2 2.21 0 4-1.79 4-4 0-1.66-1.34-3-3-3zm13.71-9.37-1.34-1.34a.996.996 0 0 0-1.41 0L9 12.25 11.75 15l8.96-8.96a.996.996 0 0 0 0-1.41z";
+const ERASER_ICON = strokeIcon("m11 10 3 3", "M6.5 21A3.5 3.5 0 1 0 3 17.5a2.62 2.62 0 0 1-.708 1.792A1 1 0 0 0 3 21z", "M9.969 17.031 21.378 5.624a1 1 0 0 0-3.002-3.002L6.967 14.031");
 
 const COLORS = ["#ff3b30", "#ffcc00", "#34c759", "#0a84ff", "#ffffff", "#000000"];
 
@@ -194,11 +194,11 @@ function render(source: ImageBitmap, ops: Op[]): HTMLCanvasElement {
 // ---------------------------------------------------------------- Interface
 
 function ToolIcon({ d }: { d: string; }) {
-    return <svg viewBox="0 0 24 24" width={18} height={18} aria-hidden><path fill="currentColor" d={d} /></svg>;
+    return <Icon path={d} size={18} />;
 }
 
-const UNDO = "M12.5 8c-2.65 0-5.05 1-6.9 2.6L2 7v9h9l-3.62-3.62A7.95 7.95 0 0 1 12.5 10c3.54 0 6.55 2.31 7.6 5.5l2.37-.78C21.08 10.53 17.15 8 12.5 8z";
-const REDO = "M18.4 10.6C16.55 9 14.15 8 11.5 8c-4.65 0-8.58 3.03-9.96 7.22L3.9 16a8 8 0 0 1 7.6-5.5c1.95 0 3.73.72 5.12 1.88L13 16h9V7l-3.6 3.6z";
+const UNDO = strokeIcon("M9 14 4 9l5-5", "M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5a5.5 5.5 0 0 1-5.5 5.5H11");
+const REDO = strokeIcon("m15 14 5-5-5-5", "M20 9H9.5A5.5 5.5 0 0 0 4 14.5A5.5 5.5 0 0 0 9.5 20H13");
 
 interface EditorProps {
     source: ImageBitmap;
@@ -267,7 +267,7 @@ function EditorCanvas({ source, ops, setOps, redo, setRedo }: EditorProps) {
                 ctx.rect(draft.x, draft.y, draft.w, draft.h);
                 ctx.fill("evenodd");
             } else {
-                ctx.fillStyle = draft.t === "box" ? "rgb(0 0 0 / 85%)" : "rgb(139 123 255 / 25%)";
+                ctx.fillStyle = draft.t === "box" ? "rgb(0 0 0 / 85%)" : "rgb(244 245 246 / 18%)";
                 ctx.fillRect(draft.x, draft.y, draft.w, draft.h);
             }
             ctx.setLineDash([6 / scale, 4 / scale]);

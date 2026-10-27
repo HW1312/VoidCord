@@ -18,18 +18,17 @@
     width: 360px;
     max-height: 420px;
     overflow: hidden;
-    border-radius: 18px;
-    border: 0.5px solid var(--vc-ui-edge);
+    border-radius: 16px;
+    border: 1px solid var(--vc-ui-edge);
     background: var(--vc-ui-glass-strong);
-    box-shadow: 0 18px 50px rgb(0 0 0 / 40%), inset 0 0.5px 0 rgb(255 255 255 / 8%);
-    backdrop-filter: blur(40px) saturate(180%);
+    box-shadow: var(--vc-ui-shadow);
     color: var(--vc-ui-text);
     font-family: var(--vc-ui-font);
     font-size: 13px;
     line-height: 1.35;
     pointer-events: auto;
     user-select: text;
-    animation: vc-peek-in 0.22s var(--vc-ui-spring);
+    animation: vc-peek-in 0.2s var(--vc-ui-ease);
     transform-origin: top left;
 }
 
@@ -44,19 +43,18 @@
 }
 
 .vc-peek-card-pinned {
-    border-color: var(--vc-ui-blue);
-    box-shadow: 0 18px 50px rgb(0 0 0 / 40%), 0 0 0 1px var(--vc-ui-blue);
+    border-color: var(--vc-ui-dim);
 }
 
 @keyframes vc-peek-in {
     from {
         opacity: 0;
-        transform: scale(0.97);
+        transform: translateY(4px);
     }
 
     to {
         opacity: 1;
-        transform: scale(1);
+        transform: none;
     }
 }
 
@@ -75,7 +73,7 @@
     gap: 6px;
     min-height: 32px;
     padding: 4px 6px 4px 12px;
-    border-bottom: 0.5px solid var(--vc-ui-sep);
+    border-bottom: 1px solid var(--vc-ui-sep);
     font-size: 12px;
 }
 
@@ -94,7 +92,7 @@
 
 .vc-peek-head-name {
     overflow: hidden;
-    font-weight: 600;
+    font-weight: 500;
     color: var(--vc-ui-title);
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -119,26 +117,21 @@
 .vc-peek-pin {
     display: inline-flex;
     flex: none;
-    color: var(--vc-ui-blue);
+    color: var(--vc-ui-title);
 }
-
-
-
 
 .vc-peek-live {
     flex: none;
-    padding: 0 4px;
-    border-radius: 5px;
-    background: var(--vc-ui-red);
-    color: #fff;
+    padding: 0 5px;
+    border: 1px solid color-mix(in srgb, var(--vc-ui-red) 45%, transparent);
+    border-radius: 6px;
+    background: color-mix(in srgb, var(--vc-ui-red) 14%, transparent);
+    color: var(--vc-ui-red);
     font-size: 10px;
-    font-weight: 700;
-    line-height: 16px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    line-height: 14px;
 }
-
-
-
-
 
 /* ---------- Chat ---------- */
 
@@ -169,8 +162,8 @@
 
 .vc-peek-highlight,
 .vc-peek-highlight:hover {
-    background: color-mix(in srgb, var(--vc-ui-yellow) 12%, transparent);
-    box-shadow: inset 2px 0 0 var(--vc-ui-yellow);
+    background: var(--vc-ui-group-active);
+    box-shadow: inset 2px 0 0 var(--vc-ui-accent);
 }
 
 .vc-peek-msg-row {
@@ -210,18 +203,21 @@
 }
 
 .vc-peek-tag {
-    padding: 0 3px;
+    padding: 0 4px;
+    border: 1px solid var(--vc-ui-edge);
     border-radius: 4px;
-    background: var(--vc-ui-blue);
-    color: #fff;
+    background: var(--vc-ui-field);
+    color: var(--vc-ui-text);
     font-size: 9px;
-    font-weight: 600;
+    font-weight: 500;
 }
 
 .vc-peek-time {
     flex: none;
     color: var(--vc-ui-dim);
+    font-family: var(--vc-ui-mono);
     font-size: 11px;
+    font-variant-numeric: tabular-nums;
 }
 
 .vc-peek-content {
@@ -230,6 +226,7 @@
 }
 
 .vc-peek-content code {
+    font-family: var(--vc-ui-mono);
     font-size: 12px;
 }
 
@@ -273,7 +270,7 @@
     max-width: 220px;
     max-height: 140px;
     margin-top: 4px;
-    border-radius: 10px;
+    border-radius: 8px;
     object-fit: contain;
 }
 
@@ -289,6 +286,7 @@
 .vc-peek-embed {
     margin-top: 4px;
     padding: 4px 8px;
+    border: 1px solid var(--vc-ui-sep);
     border-left: 3px solid var(--vc-ui-gray);
     border-radius: 6px;
     background: var(--vc-ui-group);
@@ -321,9 +319,11 @@
     align-items: center;
     gap: 3px;
     padding: 0 5px;
-    border-radius: 999px;
+    border: 1px solid var(--vc-ui-sep);
+    border-radius: 6px;
     background: var(--vc-ui-field);
     font-size: 11px;
+    font-variant-numeric: tabular-nums;
 }
 
 .vc-peek-reaction img {
@@ -342,8 +342,6 @@
     text-align: center;
 }
 
-
-
 /* ---------- Stream ---------- */
 
 .vc-peek-video {
@@ -352,7 +350,8 @@
     width: 100%;
     aspect-ratio: 16 / 9;
     overflow: hidden;
-    background: #000;
+    border-bottom: 1px solid var(--vc-ui-sep);
+    background: var(--vc-ui-glass);
 }
 
 .vc-peek-video > :not(.vc-peek-preview, .vc-peek-overlay) {
@@ -385,8 +384,8 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgb(0 0 0 / 35%);
-    color: #fff;
+    background: rgb(17 18 21 / 60%);
+    color: var(--vc-ui-title);
     font-size: 12px;
 }
 
@@ -405,6 +404,11 @@
     border-radius: 50%;
     background: var(--vc-ui-track);
     cursor: pointer;
+    transition: background 0.15s var(--vc-ui-ease);
+}
+
+.vc-peek-dot:hover {
+    background: var(--vc-ui-dim);
 }
 
 .vc-peek-dot-active {
@@ -426,6 +430,7 @@
     gap: 6px;
     padding: 2px 8px;
     font-size: 12px;
+    transition: background 0.15s var(--vc-ui-ease);
 }
 
 .vc-peek-voice-row-live {
@@ -456,25 +461,11 @@
     color: var(--vc-ui-dim);
 }
 
-
-
-
 .vc-peek-option-right {
     display: inline-flex;
     align-items: center;
     gap: 6px;
 }
-
-
-
-
-
-
-
-
-
-
-
 
 /* ---------- Movable & resizable call stream preview ---------- */
 
@@ -504,12 +495,24 @@
     height: 14px;
     cursor: nwse-resize;
     z-index: 2;
-    background: linear-gradient(135deg, transparent 50%, var(--vc-ui-dim) 50%, var(--vc-ui-dim) 60%, transparent 60%, transparent 70%, var(--vc-ui-dim) 70%, var(--vc-ui-dim) 80%, transparent 80%);
-    opacity: 0.6;
 }
 
-.vc-peek-resize:hover {
-    opacity: 1;
+/* Corner grip: two hairlines, like the kit's dividers */
+.vc-peek-resize::after {
+    content: "";
+    position: absolute;
+    right: 4px;
+    bottom: 4px;
+    width: 6px;
+    height: 6px;
+    border-right: 1px solid var(--vc-ui-dim);
+    border-bottom: 1px solid var(--vc-ui-dim);
+    border-bottom-right-radius: 2px;
+    transition: border-color 0.15s var(--vc-ui-ease);
+}
+
+.vc-peek-resize:hover::after {
+    border-color: var(--vc-ui-title);
 }
 
 /* ---------- Embeds & bot components ---------- */
@@ -537,7 +540,7 @@
 }
 
 .vc-peek-embed-title a {
-    color: var(--vc-ui-blue);
+    color: var(--vc-ui-title);
     text-decoration: none;
 }
 
@@ -559,7 +562,7 @@
 }
 
 .vc-peek-embed-field-name {
-    font-weight: 600;
+    font-weight: 500;
     color: var(--vc-ui-title);
 }
 
@@ -586,4 +589,6 @@
 /* Number fields in the settings */
 .vc-peek-number {
     width: 80px;
+    font-family: var(--vc-ui-mono);
+    font-variant-numeric: tabular-nums;
 }

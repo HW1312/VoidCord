@@ -11,7 +11,7 @@ import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
 import { ChannelStore, Menu, showToast } from "@webpack/common";
 
-import { titleBarSlot } from "../_ui";
+import { Icon, titleBarSlot } from "../_ui";
 import { emitChannelEvent } from "./messages";
 import { activate, mountFallbackRoot, renderTitleBarButton, setDragInfo, SettingsPanel, SPLIT_PATH, unmountAll } from "./ui";
 
@@ -175,11 +175,7 @@ function menuItem(channelId: string | undefined, guildId?: string | null) {
             id="vc-splitview-open"
             key="vc-splitview-open"
             label={open ? "Close in SplitView" : "Open in SplitView"}
-            icon={() => (
-                <svg viewBox="0 0 24 24" width={18} height={18}>
-                    <path fill="currentColor" d={SPLIT_PATH} />
-                </svg>
-            )}
+            icon={() => <Icon path={SPLIT_PATH} size={18} />}
             action={() => open ? closePanel(channelId!) : openPanel(channelId, guildId)}
         />
     );

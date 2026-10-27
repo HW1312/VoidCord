@@ -51,7 +51,7 @@
 .vc-modkit-excerpt {
     padding: 6px 10px;
     border-left: 3px solid var(--vc-ui-sep);
-    border-radius: 0 10px 10px 0;
+    border-radius: 0 8px 8px 0;
     background: var(--vc-ui-field);
     color: var(--vc-ui-dim);
     font-size: 13px;
@@ -102,7 +102,7 @@
     place-items: center;
     width: 28px;
     height: 28px;
-    color: var(--vc-ui-blue);
+    color: var(--vc-ui-text);
 }
 
 .vc-modkit-step-options {
@@ -119,9 +119,9 @@
 
 .vc-modkit-reply-preview {
     padding: 6px 10px;
-    border-left: 2px solid var(--vc-ui-blue);
+    border-left: 2px solid var(--vc-ui-edge);
     border-radius: 0 8px 8px 0;
-    background: color-mix(in srgb, var(--vc-ui-blue) 8%, transparent);
+    background: var(--vc-ui-field);
     color: var(--vc-ui-text);
     font-size: 13px;
     white-space: pre-wrap;
@@ -162,8 +162,9 @@
     flex-direction: column;
     gap: 8px;
     padding: 10px;
+    border: 1px solid var(--vc-ui-sep);
     border-radius: 12px;
-    background: var(--vc-ui-field);
+    background: var(--vc-ui-group);
 }
 
 .vc-modkit-step-num {
@@ -171,11 +172,14 @@
     place-items: center;
     width: 22px;
     height: 22px;
+    border: 1px solid var(--vc-ui-edge);
     border-radius: 50%;
-    background: var(--vc-ui-indigo);
-    color: #fff;
+    background: var(--vc-ui-field);
+    color: var(--vc-ui-title);
+    font-family: var(--vc-ui-mono);
     font-size: 12px;
-    font-weight: 700;
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
 }
 
 .vc-modkit-step-fields {
@@ -193,16 +197,17 @@
     height: 16px;
     margin-left: 4px;
     padding: 0 6px;
-    border-radius: 999px;
+    border-radius: 6px;
     font-family: var(--vc-ui-font);
     font-size: 11px;
-    font-weight: 700;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
     line-height: 16px;
-    color: #fff;
+    color: var(--vc-ui-on-accent);
     background: var(--vc-ui-orange);
     vertical-align: middle;
     cursor: pointer;
-    transition: transform 0.15s var(--vc-ui-spring);
+    transition: opacity 0.15s var(--vc-ui-ease);
 }
 
 .vc-modkit-badge-hot {
@@ -210,7 +215,7 @@
 }
 
 .vc-modkit-badge:hover {
-    transform: scale(1.08);
+    opacity: 0.85;
 }
 
 /* Scam notice under a message */
@@ -223,9 +228,9 @@
     max-width: 620px;
     margin-top: 4px;
     padding: 8px 12px;
+    border: 1px solid color-mix(in srgb, var(--vc-ui-red) 45%, transparent);
     border-radius: 12px;
-    border: 0.5px solid color-mix(in srgb, var(--vc-ui-red) 45%, transparent);
-    background: color-mix(in srgb, var(--vc-ui-red) 12%, transparent);
+    background: color-mix(in srgb, var(--vc-ui-red) 8%, var(--vc-ui-group));
     font-family: var(--vc-ui-font);
     color: var(--vc-ui-text);
 }
@@ -235,9 +240,7 @@
     place-items: center;
     width: 26px;
     height: 26px;
-    border-radius: 7px;
-    background: var(--vc-ui-red);
-    color: #fff;
+    color: var(--vc-ui-red);
 }
 
 .vc-modkit-scam-text {
@@ -271,7 +274,7 @@ li[id^="chat-messages-"]:has(.vc-modkit-card) [id^="message-content-"] {
     max-width: 560px;
     margin-top: 2px;
     padding: 10px 12px;
-    border: 0.5px solid var(--vc-ui-sep);
+    border: 1px solid var(--vc-ui-sep);
     border-left: 3px solid var(--modkit-type);
     border-radius: 6px 12px 12px 6px;
     background: var(--vc-ui-group);
@@ -316,7 +319,7 @@ li[id^="chat-messages-"]:has(.vc-modkit-card) [id^="message-content-"] {
 .vc-modkit-card-quote .vc-modkit-label {
     font-size: 11px;
     text-transform: uppercase;
-    letter-spacing: 0.3px;
+    letter-spacing: 0.04em;
 }
 
 

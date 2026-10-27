@@ -322,11 +322,10 @@ function Changelog({ release, ready }: { release: Release | null; ready: boolean
     );
 }
 
-/** The VoidCord logo with a light running around its ring and a glow – faster and violet when an update is ready */
+/** The VoidCord logo with a light running around its ring – faster when an update is ready */
 function VoidLogo({ size = 64, active }: { size?: number; active?: boolean; }) {
     return (
         <span className={classes(cl("logo"), active && cl("logo-active"))} style={{ width: size, height: size }}>
-            <span className={cl("logo-glow")} />
             <img src={LOGO} width={size} height={size} alt="" draggable={false} />
             <svg className={cl("logo-orbit")} viewBox="0 0 100 100" aria-hidden>
                 <ellipse cx="50" cy="52" rx="46" ry="17" transform="rotate(-12 50 52)" pathLength={100} />
@@ -367,14 +366,14 @@ function Panel({ ready, preview }: { ready: boolean; preview: boolean; }) {
                         <Button variant="gray" wide icon={busy() ? undefined : ICONS.refresh} disabled={busy() || ready} onClick={() => check()}>
                             {busy() && <Spinner />}{busy() ? "Checking …" : "Check for updates"}
                         </Button>
-                        {ready && <Button wide color="purple" icon={ICONS.download} onClick={() => !preview && restart()}>Restart now</Button>}
+                        {ready && <Button wide icon={ICONS.download} onClick={() => !preview && restart()}>Restart now</Button>}
                     </div>
                 }
             >
                 <div className={classes(cl("hero"), ready && cl("hero-ready"))}>
                     <VoidLogo active={ready || busy()} />
                     <div className={cl("hero-name")}>VoidCord</div>
-                    <Badge color="purple" title="All releases on GitHub" onClick={() => window.open(`https://github.com/${REPO}/releases`, "_blank")}>{gitHash}</Badge>
+                    <Badge color="gray" title="All releases on GitHub" onClick={() => window.open(`https://github.com/${REPO}/releases`, "_blank")}>{gitHash}</Badge>
                     <div className={classes(cl("status"), cl(`status-${tone}`))}>
                         <span className={classes(cl("dot"), cl(`dot-${tone}`), ready && cl("dot-ready"), busy() && cl("dot-busy"))} />
                         {status}

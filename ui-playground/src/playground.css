@@ -1,0 +1,97 @@
+/* Playground chrome only – everything else comes from _ui/ui.css */
+
+html,
+body {
+    margin: 0;
+    min-height: 100%;
+    /* Discord's dark app background behind the windows */
+    background: #1a1a1e;
+    color: #dbdee1;
+}
+
+.pg {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));
+    align-items: start;
+    gap: 24px;
+    max-width: 1500px;
+    margin: 0 auto;
+    padding: 32px 24px 80px;
+}
+
+.pg-head {
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.pg-head h1 {
+    flex: 1;
+    margin: 0;
+    color: var(--vc-ui-title);
+    font-family: var(--vc-ui-font);
+    font-size: 20px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+}
+
+.pg-wide {
+    grid-column: 1 / -1;
+}
+
+/* An always-open window in the page (same root as a real modal) */
+.pg-inline {
+    position: relative;
+    display: flex;
+}
+
+.pg-inline .vc-ui-sheet {
+    max-height: none;
+}
+
+.pg-inline > .pg-modal-root {
+    width: 100% !important;
+    min-height: 0 !important;
+}
+
+/* ---- Discord modal stand-in */
+
+.pg-modals {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    pointer-events: none;
+}
+
+.pg-modal-layer {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgb(0 0 0 / 70%);
+    pointer-events: auto;
+}
+
+.pg-modal-root {
+    display: flex;
+    flex-direction: column;
+    max-height: calc(100vh - 80px);
+    overflow: hidden;
+    border-radius: 8px;
+    background: #313338;
+}
+
+.pg-tooltip {
+    position: fixed;
+    z-index: 2000;
+    padding: 5px 8px;
+    border-radius: 6px;
+    background: #111214;
+    color: #fff;
+    font: 500 12px/1.3 system-ui, sans-serif;
+    white-space: nowrap;
+    pointer-events: none;
+    transform: translate(-50%, -100%);
+}

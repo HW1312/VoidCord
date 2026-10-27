@@ -33,6 +33,7 @@
     align-items: center;
     justify-content: center;
     color: var(--vc-ui-text);
+    transition: color 0.15s var(--vc-ui-ease);
 }
 
 .vc-toolbarmanager-icon svg {
@@ -41,10 +42,9 @@
 }
 
 .vc-toolbarmanager-icon-letter {
-    border-radius: 6px;
+    font-family: var(--vc-ui-mono);
     font-size: 12px;
-    font-weight: 700;
-    background: var(--vc-ui-field);
+    font-weight: 600;
 }
 
 /* One zone = label on the left, row of tiles on the right */
@@ -70,8 +70,8 @@
     min-height: 44px;
     padding: 4px 6px;
     box-sizing: border-box;
-    border-radius: 10px;
-    border: 0.5px dashed transparent;
+    border-radius: 8px;
+    border: 1px dashed transparent;
     background: var(--vc-ui-field);
     transition: border-color 0.15s var(--vc-ui-ease), background 0.15s var(--vc-ui-ease);
 }
@@ -83,7 +83,7 @@
 }
 
 .vc-toolbarmanager-zone-row-over {
-    border: 1px dashed var(--vc-ui-blue);
+    border: 1px dashed var(--vc-ui-accent);
     background: var(--vc-ui-group-hover);
 }
 
@@ -103,18 +103,18 @@
     align-items: center;
     justify-content: center;
     border: none;
-    border-radius: 9px;
+    border-radius: 6px;
     background: transparent;
     cursor: grab;
-    transition: background 0.15s var(--vc-ui-ease);
+    transition: color 0.15s var(--vc-ui-ease);
 }
 
-.vc-toolbarmanager-tile:hover,
 .vc-toolbarmanager-tile:focus-visible {
-    background: var(--vc-ui-group-hover);
+    outline: 1px solid var(--vc-ui-edge);
 }
 
-.vc-toolbarmanager-tile:hover .vc-toolbarmanager-icon {
+.vc-toolbarmanager-tile:hover .vc-toolbarmanager-icon,
+.vc-toolbarmanager-tile:focus-visible .vc-toolbarmanager-icon {
     color: var(--vc-ui-title);
 }
 
@@ -133,7 +133,7 @@
     left: 6px;
     right: 6px;
     top: 50%;
-    height: 2px;
+    height: 1.5px;
     border-radius: 1px;
     transform: rotate(-45deg);
     background: var(--vc-ui-red);
@@ -159,7 +159,7 @@
     bottom: 3px;
     width: 2px;
     border-radius: 1px;
-    background: var(--vc-ui-blue);
+    background: var(--vc-ui-accent);
     pointer-events: none;
 }
 
@@ -175,6 +175,7 @@
     display: flex;
     flex-direction: column;
     gap: 2px;
+    font-family: var(--vc-ui-font);
 }
 
 .vc-toolbarmanager-tooltip-name {
@@ -194,7 +195,7 @@
     gap: 6px;
     flex-wrap: wrap;
     padding: 10px 12px;
-    border-bottom: 0.5px solid var(--vc-ui-sep);
+    border-bottom: 1px solid var(--vc-ui-sep);
 }
 
 .vc-toolbarmanager-segmented {

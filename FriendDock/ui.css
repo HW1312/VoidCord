@@ -11,10 +11,10 @@
     position: relative;
 }
 
-/* Following: teal icon + pulsing dot so it's obvious you're tied to someone */
+/* Following: bright icon + pulsing dot so it's obvious you're tied to someone */
 .vc-frienddock-titlebtn-active .vc-ui-tb-icon,
 .vc-frienddock-titlebtn-active:hover .vc-ui-tb-icon {
-    color: var(--vc-ui-teal);
+    color: var(--vc-ui-title);
 }
 
 .vc-frienddock-titlebtn-active::after {
@@ -25,7 +25,7 @@
     width: 7px;
     height: 7px;
     border-radius: 50%;
-    background: var(--vc-ui-teal);
+    background: var(--vc-ui-green);
     box-shadow: 0 0 0 2px var(--vc-ui-glass);
     animation: vc-frienddock-ping 1.8s ease-out infinite;
 }
@@ -38,8 +38,7 @@
     display: grid;
     place-items: center;
     border-radius: 28%;
-    background: linear-gradient(145deg, #5ee3f0 0%, #1fb5d6 45%, #2a7fff 100%);
-    box-shadow: inset 0 1px 0 rgb(255 255 255 / 40%), 0 2px 8px rgb(31 181 214 / 22%);
+    color: var(--vc-ui-title);
 }
 
 .vc-frienddock-logo svg {
@@ -51,15 +50,13 @@
 }
 
 .vc-frienddock-logo-back {
-    fill: rgb(255 255 255 / 62%);
-    transform-origin: 11px 24px;
+    color: var(--vc-ui-dim);
+    transform-origin: 19px 21px;
     animation: vc-frienddock-wave 3.2s var(--vc-ui-ease) infinite;
 }
 
 .vc-frienddock-logo-front {
-    fill: #fff;
-    filter: drop-shadow(0 1px 1.5px rgb(0 50 100 / 35%));
-    transform-origin: 19.5px 25px;
+    transform-origin: 9px 21px;
     animation: vc-frienddock-nod 3.2s var(--vc-ui-ease) infinite;
 }
 
@@ -68,7 +65,7 @@
     position: absolute;
     inset: 0;
     border-radius: inherit;
-    border: 1.5px solid var(--vc-ui-teal);
+    border: 1px solid var(--vc-ui-edge);
     opacity: 0;
     pointer-events: none;
 }
@@ -100,7 +97,7 @@
 }
 
 @keyframes vc-frienddock-ping {
-    0% { box-shadow: 0 0 0 2px var(--vc-ui-glass), 0 0 0 2px color-mix(in srgb, var(--vc-ui-teal) 70%, transparent); }
+    0% { box-shadow: 0 0 0 2px var(--vc-ui-glass), 0 0 0 2px color-mix(in srgb, var(--vc-ui-green) 60%, transparent); }
     100% { box-shadow: 0 0 0 2px var(--vc-ui-glass), 0 0 0 9px transparent; }
 }
 
@@ -113,12 +110,10 @@
     gap: 12px;
     padding: 10px 12px;
     overflow: hidden;
-    border: 0.5px solid color-mix(in srgb, var(--vc-ui-teal) 30%, transparent);
-    border-radius: 16px;
-    background:
-        radial-gradient(120% 140% at 0% 50%, color-mix(in srgb, var(--vc-ui-teal) 14%, transparent), transparent 70%),
-        var(--vc-ui-group);
-    animation: vc-frienddock-in 0.35s var(--vc-ui-spring);
+    border: 1px solid var(--vc-ui-edge);
+    border-radius: 12px;
+    background: var(--vc-ui-group);
+    animation: vc-frienddock-in 0.25s var(--vc-ui-ease);
 }
 
 .vc-frienddock-banner-avatar {
@@ -132,7 +127,7 @@
     position: absolute;
     inset: 0;
     border-radius: 50%;
-    border: 2px solid var(--vc-ui-teal);
+    border: 1px solid var(--vc-ui-green);
     animation: vc-frienddock-radar 1.8s ease-out infinite;
 }
 
@@ -175,17 +170,19 @@
     padding: 0 4px;
     color: var(--vc-ui-dim);
     font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.05em;
+    font-weight: 600;
+    letter-spacing: 0.04em;
     text-transform: uppercase;
 }
 
 .vc-frienddock-group-title span {
     padding: 0 6px;
-    border-radius: 999px;
+    border-radius: 6px;
     background: var(--vc-ui-field);
     color: var(--vc-ui-text);
+    font-family: var(--vc-ui-mono);
     font-size: 10px;
+    font-variant-numeric: tabular-nums;
     letter-spacing: 0;
 }
 
@@ -196,24 +193,21 @@
     align-items: flex-start;
     gap: 12px;
     padding: 10px 10px 10px 12px;
-    border: 0.5px solid var(--vc-ui-sep);
-    border-radius: 16px;
+    border: 1px solid var(--vc-ui-sep);
+    border-radius: 12px;
     background: var(--vc-ui-group);
-    transition: background-color 0.2s var(--vc-ui-ease), border-color 0.2s var(--vc-ui-ease), transform 0.25s var(--vc-ui-spring);
-    animation: vc-frienddock-in 0.35s var(--vc-ui-spring) both;
+    transition: background-color 0.2s var(--vc-ui-ease), border-color 0.2s var(--vc-ui-ease);
+    animation: vc-frienddock-in 0.25s var(--vc-ui-ease) both;
 }
 
 .vc-frienddock-card:hover {
     border-color: var(--vc-ui-edge);
     background: var(--vc-ui-group-hover);
-    transform: translateY(-1px);
 }
 
 .vc-frienddock-card-following {
-    border-color: color-mix(in srgb, var(--vc-ui-teal) 35%, transparent);
-    background:
-        linear-gradient(90deg, color-mix(in srgb, var(--vc-ui-teal) 8%, transparent), transparent 60%),
-        var(--vc-ui-group);
+    border-color: var(--vc-ui-faint);
+    background: var(--vc-ui-group-active);
 }
 
 .vc-frienddock-card-offline .vc-frienddock-avatar,
@@ -222,7 +216,7 @@
 }
 
 @keyframes vc-frienddock-in {
-    from { opacity: 0; transform: translateY(4px) scale(0.98); }
+    from { opacity: 0; transform: translateY(4px); }
     to { opacity: 1; transform: none; }
 }
 
@@ -232,15 +226,11 @@
     flex: none;
     border-radius: 50%;
     cursor: pointer;
-    transition: transform 0.25s var(--vc-ui-spring);
+    transition: opacity 0.15s var(--vc-ui-ease);
 }
 
 .vc-frienddock-avatar:hover {
-    transform: scale(1.06);
-}
-
-.vc-frienddock-avatar:active {
-    transform: scale(0.94);
+    opacity: 0.85;
 }
 
 /* Soft ring in the status color */
@@ -249,12 +239,12 @@
     position: absolute;
     inset: -3px;
     border-radius: 50%;
-    border: 1.5px solid var(--vc-frienddock-status, transparent);
+    border: 1px solid var(--vc-frienddock-status, transparent);
     opacity: 0.35;
 }
 
 .vc-frienddock-avatar-online { --vc-frienddock-status: var(--vc-ui-green); }
-.vc-frienddock-avatar-idle { --vc-frienddock-status: var(--vc-ui-yellow); }
+.vc-frienddock-avatar-idle { --vc-frienddock-status: var(--vc-ui-orange); }
 .vc-frienddock-avatar-dnd { --vc-frienddock-status: var(--vc-ui-red); }
 .vc-frienddock-avatar-streaming { --vc-frienddock-status: var(--vc-ui-purple); }
 
@@ -265,12 +255,12 @@
     width: 13px;
     height: 13px;
     box-sizing: border-box;
-    border: 2.5px solid var(--vc-ui-glass-strong);
+    border: 2.5px solid var(--vc-ui-group);
     border-radius: 50%;
 }
 
 .vc-frienddock-dot-online { background: var(--vc-ui-green); }
-.vc-frienddock-dot-idle { background: var(--vc-ui-yellow); }
+.vc-frienddock-dot-idle { background: var(--vc-ui-orange); }
 .vc-frienddock-dot-dnd { background: var(--vc-ui-red); }
 .vc-frienddock-dot-offline { background: var(--vc-ui-gray); }
 .vc-frienddock-dot-streaming { background: var(--vc-ui-purple); }
@@ -294,7 +284,7 @@
 .vc-frienddock-name {
     overflow: hidden;
     color: var(--vc-ui-title);
-    font-family: var(--vc-ui-font-display);
+    font-family: var(--vc-ui-font);
     font-size: 14px;
     font-weight: 600;
     text-overflow: ellipsis;
@@ -314,7 +304,7 @@
 }
 
 .vc-frienddock-status-online { color: var(--vc-ui-green); }
-.vc-frienddock-status-idle { color: var(--vc-ui-yellow); }
+.vc-frienddock-status-idle { color: var(--vc-ui-orange); }
 .vc-frienddock-status-dnd { color: var(--vc-ui-red); }
 .vc-frienddock-status-streaming { color: var(--vc-ui-purple); }
 .vc-frienddock-status-offline { color: var(--vc-ui-dim); }
@@ -329,7 +319,7 @@
 }
 
 .vc-frienddock-waiting {
-    color: var(--vc-ui-teal);
+    color: var(--vc-ui-title);
 }
 
 /* ---------- Voice chip ---------- */
@@ -343,14 +333,15 @@
     margin-top: 4px;
     padding: 5px 8px 5px 10px;
     box-sizing: border-box;
-    border-radius: 10px;
-    background: color-mix(in srgb, var(--vc-ui-green) 13%, transparent);
+    border: 1px solid var(--vc-ui-sep);
+    border-radius: 8px;
+    background: var(--vc-ui-field);
     color: var(--vc-ui-green);
     font-size: 12px;
 }
 
 .vc-frienddock-chip-together {
-    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--vc-ui-green) 45%, transparent);
+    border-color: color-mix(in srgb, var(--vc-ui-green) 45%, var(--vc-ui-sep));
 }
 
 .vc-frienddock-chip-text {
@@ -380,8 +371,8 @@
     flex: none;
     margin-left: auto;
     padding: 0 6px;
-    border-radius: 999px;
-    background: color-mix(in srgb, var(--vc-ui-green) 22%, transparent);
+    border-radius: 6px;
+    background: color-mix(in srgb, var(--vc-ui-green) 16%, transparent);
     color: var(--vc-ui-green);
     font-size: 10px;
     font-weight: 600;
@@ -406,7 +397,7 @@
     width: 18px;
     height: 18px;
     margin-left: -5px;
-    border: 1.5px solid var(--vc-ui-glass-strong);
+    border: 1.5px solid var(--vc-ui-field);
     border-radius: 50%;
 }
 
@@ -456,16 +447,15 @@
     background: none;
     color: var(--vc-ui-dim);
     cursor: pointer;
-    transition: color 0.2s var(--vc-ui-ease), transform 0.25s var(--vc-ui-spring);
+    transition: color 0.15s var(--vc-ui-ease);
 }
 
 .vc-frienddock-act:hover:not([aria-disabled="true"]) {
     color: var(--vc-ui-title);
-    transform: scale(1.12);
 }
 
 .vc-frienddock-act:active:not([aria-disabled="true"]) {
-    transform: scale(0.88);
+    color: var(--vc-ui-text);
 }
 
 .vc-frienddock-act[aria-disabled="true"] {
@@ -479,7 +469,7 @@
 
 .vc-frienddock-act-on,
 .vc-frienddock-act-on:hover:not([aria-disabled="true"]) {
-    color: var(--vc-ui-teal);
+    color: var(--vc-ui-title);
 }
 
 /* Following: the feet take turns stepping */

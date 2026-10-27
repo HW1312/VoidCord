@@ -67,7 +67,7 @@
     flex-direction: column;
     gap: 8px;
     padding: 10px 14px 12px 52px;
-    border-top: 0.5px solid var(--vc-ui-sep);
+    border-top: 1px solid var(--vc-ui-sep);
 }
 
 .vc-opsec-meter {
@@ -96,7 +96,7 @@
     color: var(--vc-ui-title);
     font-family: var(--vc-ui-font-display);
     font-size: 16px;
-    font-weight: 700;
+    font-weight: 600;
 }
 
 .vc-opsec-hero-text > div {
@@ -140,13 +140,14 @@
     align-items: baseline;
     justify-content: center;
     padding-top: calc(50% - 14px);
+    font-family: var(--vc-ui-mono);
     font-variant-numeric: tabular-nums;
 }
 
 .vc-opsec-ring-num {
     color: var(--vc-ui-title);
     font-size: 22px;
-    font-weight: 700;
+    font-weight: 600;
     line-height: 1;
 }
 
@@ -169,22 +170,23 @@
     align-items: center;
     gap: 10px;
     padding: 10px 12px;
-    border: none;
+    border: 1px solid var(--vc-ui-sep);
     border-radius: 12px;
     background: var(--vc-ui-group);
     color: inherit;
     font: inherit;
     text-align: left;
     cursor: pointer;
-    transition: background 0.15s, transform 0.25s var(--vc-ui-spring);
+    transition: background 0.15s var(--vc-ui-ease), border-color 0.15s var(--vc-ui-ease);
 }
 
 .vc-opsec-tile:hover {
     background: var(--vc-ui-group-hover);
+    border-color: var(--vc-ui-edge);
 }
 
 .vc-opsec-tile:active {
-    transform: scale(0.97);
+    background: var(--vc-ui-group-active);
 }
 
 .vc-opsec-tile-text {
@@ -223,14 +225,13 @@
 .vc-opsec-kbd {
     min-width: 12px;
     padding: 2px 6px;
-    border: 0.5px solid var(--vc-ui-edge);
+    border: 1px solid var(--vc-ui-edge);
     border-radius: 6px;
     background: var(--vc-ui-field);
-    box-shadow: 0 1px 0 var(--vc-ui-sep);
     color: var(--vc-ui-title);
     font-family: var(--vc-ui-mono);
     font-size: 11px;
-    font-weight: 600;
+    font-weight: 500;
     text-align: center;
 }
 
@@ -252,26 +253,30 @@
     gap: 10px;
     min-height: 36px;
     padding: 6px 10px;
-    border: none;
-    border-radius: 10px;
+    border: 1px solid var(--vc-ui-edge);
+    border-radius: 8px;
     background: var(--vc-ui-field);
     color: var(--vc-ui-text);
     font: inherit;
     cursor: pointer;
-    transition: box-shadow 0.15s;
+    transition: border-color 0.15s var(--vc-ui-ease);
+}
+
+.vc-opsec-keybind-box:hover {
+    border-color: var(--vc-ui-faint);
 }
 
 .vc-opsec-keybind-rec {
-    box-shadow: 0 0 0 2px var(--vc-ui-blue);
+    border-color: var(--vc-ui-accent);
     animation: vc-opsec-rec 1.4s ease-in-out infinite;
 }
 
 @keyframes vc-opsec-rec {
-    50% { box-shadow: 0 0 0 2px transparent; }
+    50% { border-color: var(--vc-ui-edge); }
 }
 
 .vc-opsec-keybind-prompt {
-    color: var(--vc-ui-blue);
+    color: var(--vc-ui-title);
     font-size: 13px;
     font-weight: 600;
 }
@@ -286,7 +291,7 @@
 }
 
 @keyframes vc-opsec-flash {
-    0% { color: var(--vc-ui-green); box-shadow: 0 0 0 1px var(--vc-ui-green); }
+    0% { color: var(--vc-ui-green); border-color: var(--vc-ui-green); }
 }
 
 /* ---------- Streaming protection: server picker ---------- */
@@ -296,7 +301,7 @@
     flex-direction: column;
     gap: 8px;
     padding: 10px 14px 12px 52px;
-    border-top: 0.5px solid var(--vc-ui-sep);
+    border-top: 1px solid var(--vc-ui-sep);
 }
 
 .vc-opsec-picker-head {
@@ -313,6 +318,7 @@
 
 .vc-opsec-value {
     color: var(--vc-ui-dim);
+    font-family: var(--vc-ui-mono);
     font-size: 12px;
     font-variant-numeric: tabular-nums;
 }
@@ -326,7 +332,7 @@
 .vc-opsec-guild-list {
     max-height: 300px;
     overflow-y: auto;
-    background: var(--vc-ui-field);
+    background: var(--vc-ui-group);
     scrollbar-width: thin;
     scrollbar-color: var(--vc-ui-track) transparent;
 }
@@ -341,7 +347,7 @@
     background: var(--vc-ui-track);
     color: var(--vc-ui-title);
     font-size: 10px;
-    font-weight: 700;
+    font-weight: 600;
     object-fit: cover;
 }
 
@@ -381,7 +387,7 @@
     position: relative;
     aspect-ratio: 16 / 9;
     overflow: hidden;
-    border: 0.5px solid var(--vc-ui-edge);
+    border: 1px solid var(--vc-ui-edge);
     border-radius: 12px;
     background: var(--vc-ui-group);
 }
@@ -415,7 +421,7 @@
 
 .vc-opsec-mock-servers i:first-child {
     border-radius: 30%;
-    background: var(--vc-ui-blue);
+    background: var(--vc-ui-dim);
 }
 
 .vc-opsec-mock-channels {
@@ -425,7 +431,7 @@
     width: 24%;
     padding: 5% 3%;
     box-sizing: border-box;
-    border-right: 0.5px solid var(--vc-ui-sep);
+    border-right: 1px solid var(--vc-ui-sep);
 }
 
 .vc-opsec-mock-channels i,
@@ -486,7 +492,7 @@
     align-items: center;
     gap: 6px;
     padding: 6px 4px 8px;
-    border: none;
+    border: 1px solid var(--vc-ui-sep);
     border-radius: 12px;
     background: var(--vc-ui-group);
     color: var(--vc-ui-dim);
@@ -495,7 +501,7 @@
     font-weight: 500;
     white-space: nowrap;
     cursor: pointer;
-    transition: background 0.15s, color 0.15s, box-shadow 0.15s;
+    transition: background 0.15s var(--vc-ui-ease), color 0.15s var(--vc-ui-ease), border-color 0.15s var(--vc-ui-ease);
 }
 
 .vc-opsec-style:hover {
@@ -505,7 +511,7 @@
 
 .vc-opsec-style-active,
 .vc-opsec-style-active:hover {
-    box-shadow: 0 0 0 2px var(--vc-ui-blue);
+    border-color: var(--vc-ui-accent);
     color: var(--vc-ui-title);
 }
 
@@ -527,17 +533,18 @@
     padding: 0;
     border: none;
     border-radius: 50%;
-    box-shadow: inset 0 0 0 0.5px var(--vc-ui-edge);
+    box-shadow: inset 0 0 0 1px var(--vc-ui-edge);
     cursor: pointer;
-    transition: transform 0.2s var(--vc-ui-spring);
+    transition: box-shadow 0.15s var(--vc-ui-ease);
 }
 
 .vc-opsec-swatch:hover {
-    transform: scale(1.1);
+    box-shadow: inset 0 0 0 1px var(--vc-ui-edge), 0 0 0 2px var(--vc-ui-glass), 0 0 0 3px var(--vc-ui-faint);
 }
 
-.vc-opsec-swatch-active {
-    box-shadow: 0 0 0 2px var(--vc-ui-glass), 0 0 0 4px var(--vc-ui-blue);
+.vc-opsec-swatch-active,
+.vc-opsec-swatch-active:hover {
+    box-shadow: 0 0 0 2px var(--vc-ui-glass), 0 0 0 3px var(--vc-ui-accent);
 }
 
 .vc-opsec-swatch-custom {
@@ -569,12 +576,12 @@
     place-items: center;
     aspect-ratio: 1;
     padding: 0;
-    border: none;
-    border-radius: 10px;
-    background: var(--vc-ui-field);
+    border: 1px solid transparent;
+    border-radius: 8px;
+    background: none;
     color: var(--vc-ui-dim);
     cursor: pointer;
-    transition: color 0.15s, background 0.15s;
+    transition: color 0.15s var(--vc-ui-ease), border-color 0.15s var(--vc-ui-ease);
 }
 
 .vc-opsec-icon-pick:hover {
@@ -583,13 +590,13 @@
 
 .vc-opsec-icon-pick-active,
 .vc-opsec-icon-pick-active:hover {
-    background: var(--vc-ui-blue);
-    color: #fff;
+    border-color: var(--vc-ui-edge);
+    color: var(--vc-ui-title);
 }
 
 .vc-opsec-icon-pick-custom {
     font-size: 12px;
-    font-weight: 700;
+    font-weight: 600;
 }
 
 /* ---------- Link warning / prompts (body of the kit alert) ---------- */
@@ -619,12 +626,13 @@
     max-width: 100%;
     padding: 4px 10px;
     overflow-wrap: anywhere;
-    border-radius: 10px;
+    border: 1px solid var(--vc-ui-sep);
+    border-radius: 8px;
     background: var(--vc-ui-field);
     color: var(--vc-ui-title);
     font-family: var(--vc-ui-mono);
     font-size: 13px;
-    font-weight: 600;
+    font-weight: 500;
 }
 
 .vc-opsec-link-url {
@@ -664,8 +672,9 @@
     flex-wrap: wrap;
     gap: 2px;
     padding: 2px;
-    border-radius: 10px;
-    background: var(--vc-ui-track);
+    border: 1px solid var(--vc-ui-sep);
+    border-radius: 8px;
+    background: var(--vc-ui-field);
 }
 
 .vc-opsec-editor-tool {
@@ -674,22 +683,18 @@
     gap: 6px;
     padding: 5px 10px;
     border: none;
-    border-radius: 8px;
+    border-radius: 6px;
     background: none;
-    color: var(--vc-ui-text);
+    color: var(--vc-ui-dim);
     font: inherit;
     font-size: 13px;
     font-weight: 500;
     cursor: pointer;
-    transition: color 0.2s, background 0.2s, transform 0.3s var(--vc-ui-spring);
+    transition: color 0.15s var(--vc-ui-ease), background 0.15s var(--vc-ui-ease);
 }
 
 .vc-opsec-editor-tool:hover:not(:disabled) {
     color: var(--vc-ui-title);
-}
-
-.vc-opsec-editor-tool:active:not(:disabled) {
-    transform: scale(0.94);
 }
 
 .vc-opsec-editor-tool:disabled {
@@ -701,7 +706,6 @@
 .vc-opsec-editor-tool-active:hover:not(:disabled) {
     background: var(--vc-ui-thumb);
     color: var(--vc-ui-title);
-    box-shadow: 0 1px 3px rgb(0 0 0 / 20%);
 }
 
 .vc-opsec-editor-options {
@@ -730,6 +734,7 @@
     place-items: center;
     height: min(62vh, 640px);
     overflow: hidden;
+    border: 1px solid var(--vc-ui-sep);
     border-radius: 12px;
     background:
         repeating-conic-gradient(var(--vc-ui-group) 0 25%, transparent 0 50%) 0 0 / 20px 20px,
@@ -738,7 +743,7 @@
 
 .vc-opsec-editor-canvas {
     display: block;
-    box-shadow: 0 6px 24px rgb(0 0 0 / 40%);
+    outline: 1px solid var(--vc-ui-edge);
     cursor: crosshair;
     touch-action: none;
 }
@@ -750,6 +755,7 @@
 .vc-opsec-editor-size {
     align-self: flex-end;
     color: var(--vc-ui-dim);
+    font-family: var(--vc-ui-mono);
     font-size: 11px;
     font-variant-numeric: tabular-nums;
 }

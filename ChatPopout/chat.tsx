@@ -16,7 +16,7 @@ import {
 } from "@webpack/common";
 import type { ComponentType, ReactNode } from "react";
 
-import { Button, Empty, Spinner } from "../_ui";
+import { Button, Empty, ICONS, Spinner } from "../_ui";
 import { getCommands, matchCommands, OptionType, PopoutCommand } from "./commands";
 import { collectComponentMedia, IS_COMPONENTS_V2, MessageComponents } from "./components";
 import { logger, settings } from "./index";
@@ -1095,7 +1095,7 @@ function Composer({ channel, name, ctx }: { channel: any; name: string; ctx: Win
     );
 }
 
-const PLUS_PATH = "M13 5a1 1 0 1 0-2 0v6H5a1 1 0 1 0 0 2h6v6a1 1 0 1 0 2 0v-6h6a1 1 0 1 0 0-2h-6V5Z";
+const PLUS_PATH = ICONS.plus;
 
 /** A file waiting to be sent: thumbnail for images, else a file icon – with name and size */
 function AttachmentChip({ file, onRemove }: { file: File; onRemove(): void; }) {

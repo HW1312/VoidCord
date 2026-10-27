@@ -7,7 +7,9 @@
     width: 100%;
     aspect-ratio: 16 / 9;
     object-fit: cover;
+    border: 1px solid var(--vc-ui-sep);
     border-radius: 8px;
+    box-sizing: border-box;
     background: var(--vc-ui-field);
 }
 

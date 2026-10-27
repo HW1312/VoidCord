@@ -21,7 +21,7 @@ import { findByCodeLazy, findComponentByCodeLazy, findStoreLazy } from "@webpack
 import { ChannelStore, FluxDispatcher, GuildChannelStore, NavigationRouter, RestAPI, Tooltip, useState, useStateFromStores } from "@webpack/common";
 import type { ReactNode } from "react";
 
-import { AppIcon, Button, Empty, Icon, ICONS, notify as showNotification, NotifyKind, openWindow, Progress, RoundButton, Row as UiRow, Section, Segmented, Sheet, State as StateLabel, Stats, titleBarSlot, Toggle, ToggleRow, UiColor, useListener } from "../_ui";
+import { AppIcon, Button, Empty, Icon, ICONS, notify as showNotification, NotifyKind, openWindow, Progress, RoundButton, Row as UiRow, Section, Segmented, Sheet, State as StateLabel, Stats, strokeIcon, titleBarSlot, Toggle, ToggleRow, UiColor, useListener } from "../_ui";
 
 const cl = classNameFactory("vc-autoquest-");
 const logger = new Logger("AutoQuest");
@@ -553,12 +553,14 @@ const TASK_TEXT: Record<TaskName, string> = {
 
 const KIND_PATH: Record<Lane, string> = {
     video: ICONS.play,
-    game: "M6 7h12a5 5 0 0 1 4.8 6.4l-1 3.4a2.5 2.5 0 0 1-4.3.9L15.6 15H8.4l-1.9 2.7a2.5 2.5 0 0 1-4.3-.9l-1-3.4A5 5 0 0 1 6 7Zm1 3v1.5H5.5v1.5H7v1.5h1.5V13H10v-1.5H8.5V10H7Zm9.5 0a1 1 0 1 0 0 2 1 1 0 0 0 0-2Zm-2 2a1 1 0 1 0 0 2 1 1 0 0 0 0-2Z",
-    stream: "M4 4h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2h-6v2h3a1 1 0 1 1 0 2H7a1 1 0 1 1 0-2h3v-2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Zm6 4v6l5-3-5-3Z",
-    activity: "M12 2c3 2 5 5.5 5 9.5 0 1-.1 2-.4 3l2.4 2.5v3l-3.5-1.5-.5 1h-6l-.5-1L5 20v-3l2.4-2.5c-.3-1-.4-2-.4-3C7 7.5 9 4 12 2Zm0 6.5a2 2 0 1 0 0 4 2 2 0 0 0 0-4Z"
+    // Lucide gamepad-2, monitor-play, rocket
+    game: strokeIcon("M6 11h4", "M8 9v4", "M15 12h.01", "M18 10h.01", "M17.32 5H6.68a4 4 0 0 0-3.978 3.59c-.006.052-.01.101-.017.152C2.604 9.416 2 14.456 2 16a3 3 0 0 0 3 3c1 0 1.5-.5 2-1l1.414-1.414A2 2 0 0 1 9.828 16h4.344a2 2 0 0 1 1.414.586L17 18c.5.5 1 1 2 1a3 3 0 0 0 3-3c0-1.545-.604-6.584-.685-7.258-.007-.05-.011-.1-.017-.151A4 4 0 0 0 17.32 5z"),
+    stream: strokeIcon("M10 7.75a.75.75 0 0 1 1.142-.638l3.664 2.249a.75.75 0 0 1 0 1.278l-3.664 2.25a.75.75 0 0 1-1.142-.64z", "M12 17v4", "M8 21h8", "M4 3h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"),
+    activity: strokeIcon("M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z", "m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z", "M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0", "M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5")
 };
-const GIFT_PATH = "M20 7h-2.2A3 3 0 0 0 12 3.8 3 3 0 0 0 6.2 7H4a2 2 0 0 0-2 2v2a1 1 0 0 0 1 1h8V7h2v5h8a1 1 0 0 0 1-1V9a2 2 0 0 0-2-2ZM9 7a1 1 0 1 1 1-1v1H9Zm6 0h-1V6a1 1 0 1 1 1 1ZM4 14v5a2 2 0 0 0 2 2h5v-7H4Zm9 7h5a2 2 0 0 0 2-2v-5h-7v7Z";
-const QUEST_PATH = "M7.5 2h9A1.5 1.5 0 0 1 18 3.5V5h2.5A1.5 1.5 0 0 1 22 6.5V8a5 5 0 0 1-4.6 5 6 6 0 0 1-4.4 3.9V19h3a1 1 0 0 1 1 1v1a1 1 0 0 1-1 1H8a1 1 0 0 1-1-1v-1a1 1 0 0 1 1-1h3v-2.1A6 6 0 0 1 6.6 13 5 5 0 0 1 2 8V6.5A1.5 1.5 0 0 1 3.5 5H6V3.5A1.5 1.5 0 0 1 7.5 2ZM6 7H4v1a3 3 0 0 0 2.1 2.9A6 6 0 0 1 6 10V7Zm12 0v3l-.1.9A3 3 0 0 0 20 8V7h-2Z";
+// Lucide gift, trophy
+const GIFT_PATH = strokeIcon("M4 8h16a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z", "M12 8v13", "M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7", "M7.5 8a2.5 2.5 0 0 1 0-5A4.8 8 0 0 1 12 8a4.8 8 0 0 1 4.5-5 2.5 2.5 0 0 1 0 5");
+const QUEST_PATH = strokeIcon("M6 9H4.5a2.5 2.5 0 0 1 0-5H6", "M18 9h1.5a2.5 2.5 0 0 0 0-5H18", "M4 22h16", "M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22", "M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22", "M18 2H6v7a6 6 0 0 0 12 0V2Z");
 
 /** Discord's own Orbs icon (OrbsIcon in Discord's icon set) */
 const ORB_SPARK = "M11.75 7.57a5.12 5.12 0 0 1-3.86 3.87.42.42 0 0 0 0 .82 5.1 5.1 0 0 1 3.86 3.86.42.42 0 0 0 .81 0 5.12 5.12 0 0 1 3.87-3.86.42.42 0 0 0 0-.82 5.15 5.15 0 0 1-3.87-3.86.42.42 0 0 0-.81-.01Z";

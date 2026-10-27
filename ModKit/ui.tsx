@@ -11,7 +11,7 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { classes } from "@utils/misc";
 import { ChannelStore, GuildMemberStore, GuildStore, NavigationRouter, PermissionsBits, PermissionStore, SelectedGuildStore, showToast, useEffect, useMemo, useRef, UserStore, useState, useStateFromStores } from "@webpack/common";
 
-import { Avatar, Badge, Button, confirm, Empty, Glyph, Group, Icon, IconButton, ICONS, LinkRow, Note as UiNote, openWindow, Pill, Pills, Row, Section, Segmented, Select, Sheet, Spinner, TextArea, TextField, Toggle, ToggleRow, UiColor, WindowAction } from "../_ui";
+import { Avatar, Badge, Button, confirm, Empty, Glyph, Group, Icon, IconButton, ICONS, LinkRow, Note as UiNote, openWindow, Pill, Pills, Row, Section, Segmented, Select, Sheet, Spinner, strokeIcon, TextArea, TextField, Toggle, ToggleRow, UiColor, WindowAction } from "../_ui";
 import { BadgeMode, settings, unsetNotesChannel } from "./index";
 import { BAN_DELETE_OPTIONS, describeStep, getMacros, getScamMacro, hierarchyProblem, Macro, makePresets, messageLink, needsConfirm, RunHandle, runMacro, Step, STEP_LABELS, STEP_TYPES, stepProblem, StepStatus, StepType, Target, targetFromMessage, TIMEOUT_OPTIONS, uid } from "./macros";
 import { cancelLoad, canDeleteNote, canWriteNotes, deleteNote, describeError, ensureLoaded, formatDuration, getCounts, getLoadState, getNotesChannelId, getNotesForUser, getVersion, isNotesChannel, Note, NOTE_LABELS, NOTE_TYPES, NoteType, parseNote, resync, subscribe, writeNote } from "./notes";
@@ -24,15 +24,19 @@ const APP_COLOR: UiColor = "indigo";
 
 // ---------------------------------------------------------------- Icons
 
-const GAVEL_PATH = "M1 21h12v2H1v-2ZM5.245 8.07l2.83-2.827 14.14 14.142-2.828 2.828L5.245 8.07Zm7.072-7.07 5.657 5.656-2.83 2.83-5.654-5.66L12.317 1ZM3.825 9.485l5.657 5.657-2.828 2.828-5.657-5.657 2.828-2.828Z";
-const WARN_PATH = "M1 21h22L12 2 1 21Zm12-3h-2v-2h2v2Zm0-4h-2v-4h2v4Z";
-const UP_PATH = "M7.4 15.4 12 10.8l4.6 4.6L18 14l-6-6-6 6 1.4 1.4Z";
-const DOWN_PATH = "M7.4 8.6 12 13.2l4.6-4.6L18 10l-6 6-6-6 1.4-1.4Z";
+// Lucide gavel
+const GAVEL_PATH = strokeIcon("m14.5 12.5-8 8a2.119 2.119 0 1 1-3-3l8-8", "m16 16 6-6", "m8 8 6-6", "m9 7 8 8", "m21 11-8-8");
+const WARN_PATH = ICONS.warning;
+// Lucide chevron-up / chevron-down
+const UP_PATH = strokeIcon("m18 15-6-6-6 6");
+const DOWN_PATH = ICONS.chevronDown;
 
 export function ModKitIcon({ height = 20, width = 20, className }: { height?: number | string; width?: number | string; className?: string; }) {
     return (
         <svg viewBox="0 0 24 24" width={width} height={height} className={className} aria-hidden>
-            <path fill="currentColor" d={GAVEL_PATH} />
+            <g fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round">
+                {GAVEL_PATH.split("|").map(d => <path key={d} d={d} />)}
+            </g>
         </svg>
     );
 }
@@ -41,8 +45,8 @@ const TYPE_COLOR: Record<NoteType, UiColor> = { note: "blue", warn: "yellow", ti
 const TYPE_ICON: Record<NoteType, string> = {
     note: ICONS.edit,
     warn: WARN_PATH,
-    timeout: "M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm1 5v4.59l3.2 3.2-1.4 1.42L11 12.41V7h2Z",
-    kick: "M10 17v-3H3v-4h7V7l5 5-5 5Zm2-14h7a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-7v-2h7V5h-7V3Z",
+    timeout: ICONS.clock,
+    kick: ICONS.leave,
     ban: GAVEL_PATH,
     unban: ICONS.check
 };
@@ -416,9 +420,10 @@ export function openMacroModal(macro: Macro, target: Target, back?: Back) {
     ));
 }
 
-const CLOCK_PATH = "M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm1 5v4.59l3.2 3.2-1.4 1.42L11 12.41V7h2Z";
-const KICK_PATH = "M10 17v-3H3v-4h7V7l5 5-5 5Zm2-14h7a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-7v-2h7V5h-7V3Z";
-const REPLY_PATH = "M5 4h14a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H9l-5 4V6a2 2 0 0 1 1-2Z";
+const CLOCK_PATH = ICONS.clock;
+const KICK_PATH = ICONS.leave;
+// Lucide message-square
+const REPLY_PATH = strokeIcon("M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z");
 
 const STEP_GLYPH: Record<StepType, { path: string; color: UiColor; }> = {
     delete: { path: ICONS.trash, color: "red" },
@@ -994,4 +999,4 @@ export const NoteCard = ErrorBoundary.wrap(({ message }: { message: any; }) => {
 
 // ---------------------------------------------------------------- Icons (ModNotes channel)
 
-const CHANNEL_PATH = "M10.9 3.2a1 1 0 0 0-1.97-.36L8.4 6H5a1 1 0 0 0 0 2h3.05l-.73 4H4a1 1 0 1 0 0 2h2.96l-.57 3.16a1 1 0 0 0 1.97.36L8.99 14h3.95l-.57 3.16a1 1 0 0 0 1.97.36l.63-3.52H19a1 1 0 1 0 0-2h-3.66l.73-4H20a1 1 0 1 0 0-2h-3.57l.48-2.8a1 1 0 0 0-1.97-.36L14.4 6h-3.96l.46-2.8ZM10.08 8h3.96l-.73 4H9.35l.73-4Z";
+const CHANNEL_PATH = ICONS.hash;

@@ -10,11 +10,21 @@ import { copyToClipboard } from "@utils/clipboard";
 import { classes } from "@utils/misc";
 import { showToast, useEffect, useState } from "@webpack/common";
 
-import { Button, ICONS, LinkRow, Row, Section, Segmented, Sheet, Slider, State, TextField, ToggleRow } from "../_ui";
+import { Button, ICONS, LinkRow, Row, Section, Segmented, Sheet, Slider, State, strokeIcon, TextField, ToggleRow } from "../_ui";
 import { buildQuery, DEFAULT_PORT, DEFAULTS, isHexColor, OverlayConfig, RANGES } from "./config";
 import { getConfig, onStatusChange, refreshStatus, serverStatus, settings } from "./index";
 
-const BROADCAST_PATH = "M12 9.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5ZM7.05 7.05a1 1 0 0 1 0 1.41 5 5 0 0 0 0 7.08 1 1 0 1 1-1.41 1.41 7 7 0 0 1 0-9.9 1 1 0 0 1 1.41 0Zm9.9 0a1 1 0 0 1 1.41 0 7 7 0 0 1 0 9.9 1 1 0 1 1-1.41-1.41 5 5 0 0 0 0-7.08 1 1 0 0 1 0-1.41ZM4.22 4.22a1 1 0 0 1 0 1.42 9 9 0 0 0 0 12.72 1 1 0 1 1-1.42 1.42 11 11 0 0 1 0-15.56 1 1 0 0 1 1.42 0Zm15.56 0a1 1 0 0 1 1.42 0 11 11 0 0 1 0 15.56 1 1 0 1 1-1.42-1.42 9 9 0 0 0 0-12.72 1 1 0 0 1 0-1.42Z";
+/** Circle as path data (for Lucide icons drawn with strokeIcon) */
+const circle = (cx: number, cy: number, r: number) => `M${cx - r} ${cy}a${r} ${r} 0 1 0 ${r * 2} 0a${r} ${r} 0 1 0 ${-r * 2} 0`;
+
+// Lucide "radio"
+const BROADCAST_PATH = strokeIcon(
+    "M4.9 19.1C1 15.2 1 8.8 4.9 4.9",
+    "M7.8 16.2c-2.3-2.3-2.3-6.1 0-8.5",
+    circle(12, 12, 2),
+    "M16.2 7.8c2.3 2.3 2.3 6.1 0 8.5",
+    "M19.1 4.9C23 8.8 23 15.1 19.1 19"
+);
 
 // ---------------------------------------------------------------- State
 

@@ -8,6 +8,7 @@
 import { classes } from "@utils/misc";
 import { useEffect, useLayoutEffect, useRef, useState } from "@webpack/common";
 
+import { ICONS } from "../_ui";
 import { cl, Icon, LEFT_PATH, RIGHT_PATH } from "./shared";
 
 export interface MenuItem {
@@ -37,7 +38,7 @@ const EDGE = 8;
 function CheckBox({ on }: { on: boolean; }) {
     return (
         <span className={classes(cl("menu-check"), on && cl("menu-check-on"))}>
-            {on && <svg viewBox="0 0 24 24" width={14} height={14} aria-hidden><path fill="currentColor" d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2Z" /></svg>}
+            {on && <Icon path={ICONS.check} size={14} />}
         </span>
     );
 }

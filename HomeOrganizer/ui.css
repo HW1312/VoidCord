@@ -63,7 +63,7 @@
     flex: none;
     height: 34px;
     padding: 0 14px;
-    border-radius: 10px;
+    border-radius: 8px;
 }
 
 .vc-homeorganizer-selbar {
@@ -118,7 +118,7 @@
 /* List rows */
 
 .vc-homeorganizer-selected {
-    background: color-mix(in srgb, var(--vc-ui-blue) 12%, transparent);
+    background: var(--vc-ui-group-active);
 }
 
 .vc-homeorganizer-title,
@@ -139,7 +139,7 @@
     width: 8px;
     height: 8px;
     border-radius: 50%;
-    background: var(--vc-ui-blue);
+    background: var(--vc-ui-accent);
 }
 
 .vc-homeorganizer-date {
@@ -147,7 +147,9 @@
     flex-direction: column;
     align-items: flex-end;
     min-width: 90px;
+    font-family: var(--vc-ui-mono);
     font-size: 12px;
+    font-variant-numeric: tabular-nums;
     color: var(--vc-ui-text);
 }
 
@@ -171,11 +173,11 @@
     flex-direction: column;
     gap: 6px;
     color: var(--vc-ui-text);
-    font-size: 14px;
-    line-height: 1.4;
+    font-size: 13px;
+    line-height: 1.45;
 }
 
-/* Round selection check */
+/* Selection check */
 
 .vc-homeorganizer-check {
     flex: none;
@@ -184,17 +186,21 @@
     width: 20px;
     height: 20px;
     padding: 0;
-    border: 1.5px solid var(--vc-ui-dim);
-    border-radius: 50%;
+    border: 1px solid var(--vc-ui-faint);
+    border-radius: 6px;
     background: transparent;
-    color: #fff;
+    color: var(--vc-ui-on-accent);
     cursor: pointer;
     transition: background 0.15s var(--vc-ui-ease), border-color 0.15s var(--vc-ui-ease);
 }
 
 .vc-homeorganizer-check-on {
-    border-color: var(--vc-ui-blue);
-    background: var(--vc-ui-blue);
+    border-color: var(--vc-ui-accent);
+    background: var(--vc-ui-accent);
+}
+
+.vc-homeorganizer-check:hover:not(:disabled, .vc-homeorganizer-check-on) {
+    border-color: var(--vc-ui-dim);
 }
 
 .vc-homeorganizer-check:disabled {
@@ -226,7 +232,7 @@
     left: 8px;
     right: 8px;
     top: 50%;
-    height: 0.5px;
+    height: 1px;
     background: var(--vc-ui-sep);
     pointer-events: none;
 }

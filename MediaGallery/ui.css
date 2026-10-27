@@ -49,11 +49,12 @@
 .vc-mediagallery-stats {
     color: var(--vc-ui-dim);
     font-size: 13px;
+    font-variant-numeric: tabular-nums;
 }
 
 .vc-mediagallery-stats strong {
     color: var(--vc-ui-title);
-    font-weight: 600;
+    font-weight: 500;
 }
 
 .vc-mediagallery-date {
@@ -112,16 +113,16 @@
     width: 20px;
     height: 20px;
     box-sizing: border-box;
-    border: 1.5px solid var(--vc-ui-dim);
+    border: 1px solid var(--vc-ui-dim);
     border-radius: 50%;
-    color: #fff;
+    color: var(--vc-ui-on-accent);
     cursor: pointer;
-    transition: background 0.15s var(--vc-ui-ease), border-color 0.15s;
+    transition: background 0.15s var(--vc-ui-ease), border-color 0.15s var(--vc-ui-ease);
 }
 
 .vc-mediagallery-check-on {
-    border-color: var(--vc-ui-blue);
-    background: var(--vc-ui-blue);
+    border-color: var(--vc-ui-accent);
+    background: var(--vc-ui-accent);
 }
 
 /* Grid */
@@ -156,18 +157,19 @@
     overflow: hidden;
     border-radius: 12px;
     background: var(--vc-ui-group);
-    outline: 3px solid transparent;
-    outline-offset: -3px;
+    outline: 2px solid transparent;
+    outline-offset: -2px;
     cursor: pointer;
-    transition: outline-color 0.15s, transform 0.2s var(--vc-ui-spring);
+    transition: outline-color 0.15s var(--vc-ui-ease);
 }
 
-.vc-mediagallery-tile:active {
-    transform: scale(0.98);
+.vc-mediagallery-tile:hover {
+    outline-color: var(--vc-ui-edge);
 }
 
-.vc-mediagallery-tile-selected {
-    outline-color: var(--vc-ui-blue);
+.vc-mediagallery-tile-selected,
+.vc-mediagallery-tile-selected:hover {
+    outline-color: var(--vc-ui-accent);
 }
 
 .vc-mediagallery-thumb {
@@ -194,8 +196,9 @@
 }
 
 .vc-mediagallery-ext {
+    font-family: var(--vc-ui-mono);
     font-size: 11px;
-    font-weight: 700;
+    font-weight: 500;
     letter-spacing: 0.04em;
 }
 
@@ -211,28 +214,28 @@
 .vc-mediagallery-badge {
     display: inline-flex;
     align-items: center;
-    padding: 2px 6px;
-    border-radius: 999px;
-    background: var(--vc-ui-glass-strong);
+    padding: 2px 5px;
+    border-radius: 6px;
+    background: rgb(17 18 21 / 78%);
     color: var(--vc-ui-title);
     font-size: 10px;
-    font-weight: 700;
-    backdrop-filter: blur(12px);
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
 }
 
 .vc-mediagallery-tile-check {
     position: absolute;
     top: 6px;
     left: 6px;
-    border-color: #fff;
-    background: var(--vc-ui-glass);
+    border-color: var(--vc-ui-title);
+    background: rgb(17 18 21 / 60%);
     opacity: 0;
-    transition: opacity 0.1s;
+    transition: opacity 0.15s var(--vc-ui-ease);
 }
 
 .vc-mediagallery-tile-check.vc-mediagallery-check-on {
-    border-color: var(--vc-ui-blue);
-    background: var(--vc-ui-blue);
+    border-color: var(--vc-ui-accent);
+    background: var(--vc-ui-accent);
 }
 
 .vc-mediagallery-tile:hover .vc-mediagallery-tile-check,
@@ -246,13 +249,12 @@
     bottom: 4px;
     left: 4px;
     padding: 5px 8px;
-    border-radius: 9px;
-    background: var(--vc-ui-glass-strong);
+    border-radius: 8px;
+    background: rgb(17 18 21 / 88%);
     color: var(--vc-ui-title);
     opacity: 0;
-    transition: opacity 0.1s;
+    transition: opacity 0.15s var(--vc-ui-ease);
     pointer-events: none;
-    backdrop-filter: blur(16px);
 }
 
 .vc-mediagallery-tile:hover .vc-mediagallery-info {
@@ -262,7 +264,7 @@
 .vc-mediagallery-info-name {
     overflow: hidden;
     font-size: 12px;
-    font-weight: 600;
+    font-weight: 500;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
@@ -271,6 +273,7 @@
     overflow: hidden;
     color: var(--vc-ui-dim);
     font-size: 11px;
+    font-variant-numeric: tabular-nums;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
@@ -285,17 +288,15 @@
     flex-direction: column;
     gap: 10px;
     padding: 14px;
-    border-radius: 22px;
-    background: var(--vc-ui-glass-strong);
+    border-radius: 16px;
+    background: var(--vc-ui-glass);
     color: var(--vc-ui-text);
-    backdrop-filter: blur(40px) saturate(180%);
     animation: vc-mediagallery-in 0.2s var(--vc-ui-ease);
 }
 
 @keyframes vc-mediagallery-in {
     from {
         opacity: 0;
-        transform: scale(0.98);
     }
 }
 
@@ -314,7 +315,7 @@
 .vc-mediagallery-lb-name {
     overflow: hidden;
     color: var(--vc-ui-title);
-    font-weight: 600;
+    font-weight: 500;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
@@ -347,7 +348,7 @@
 .vc-mediagallery-lb-media {
     max-width: 100%;
     max-height: 100%;
-    border-radius: 12px;
+    border-radius: 8px;
     object-fit: contain;
 }
 
@@ -362,7 +363,7 @@
 .vc-mediagallery-lb-file-name {
     max-width: 480px;
     color: var(--vc-ui-title);
-    font-weight: 600;
+    font-weight: 500;
     text-align: center;
     word-break: break-all;
 }

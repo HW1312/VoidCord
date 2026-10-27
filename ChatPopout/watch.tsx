@@ -11,7 +11,7 @@ import {
     SelectedChannelStore, showToast, useEffect, useRef, UserStore, useState, useStateFromStores
 } from "@webpack/common";
 
-import { Empty, Spinner } from "../_ui";
+import { Empty, Spinner, strokeIcon } from "../_ui";
 import { ContextMenu, MenuItem, MenuState } from "./menu";
 import { cl, CLOSE_PATH, displayName, Icon, log, MAIN_PATH, MAX_PATH, MIN_PATH, MUTE_PATH, PIN_PATH, POPOUT_PATH, SPEAKER_PATH, tip, usePopoutDocument, userAvatar } from "./shared";
 import { toggleUserMute, VolumeSlider } from "./voice";
@@ -24,7 +24,8 @@ export interface StreamTarget {
 }
 
 const WINDOW_PREFIX = "DISCORD_VC_CHATPOPOUT_STREAM_";
-const FULLSCREEN_PATH = "M4 4h6v2H6v4H4V4Zm10 0h6v6h-2V6h-4V4ZM4 14h2v4h4v2H4v-6Zm14 0h2v6h-6v-2h4v-4Z";
+// maximize
+const FULLSCREEN_PATH = strokeIcon("M8 3H5a2 2 0 0 0-2 2v3", "M21 8V5a2 2 0 0 0-2-2h-3", "M3 16v3a2 2 0 0 0 2 2h3", "M16 21h3a2 2 0 0 0 2-2v-3");
 
 /** Streams shown in their own window – a docked view must not stop them when it closes */
 const inWindow = new Set<string>();

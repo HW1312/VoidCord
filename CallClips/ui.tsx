@@ -11,11 +11,11 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { classes } from "@utils/misc";
 import type { Channel } from "@vencord/discord-types";
 import { filters, findComponentByCodeLazy, mapMangledModuleLazy } from "@webpack";
-import { ChannelActionCreators, ChannelStore, GuildStore, IconUtils, Popout, RelationshipStore, useEffect, useMemo, useRef, UserStore, useState } from "@webpack/common";
+import { ChannelActionCreators, ChannelStore, GuildStore, IconUtils, Popout, RelationshipStore, SelectedChannelStore, useEffect, useMemo, useRef, UserStore, useState } from "@webpack/common";
 import type { CSSProperties } from "react";
 
-import { AppIcon, Avatar, Button, confirm, Empty, Field, Icon, IconButton, ICONS, LinkRow, Note, notify, openWindow, Popover, Progress, RoundButton, Row, SearchField, Section, Segmented, Sheet, Spinner, TextField, ToggleRow, useListener } from "../_ui";
-import { callChannel, Clip, clipListeners, clipState, deleteClip, loadTracks, makeClip, openFolder, readClip, refresh, renameClip, sendClipTo, sendToChat, showInFolder, trimClip } from "./clips";
+import { AppIcon, Avatar, Button, confirm, Empty, Field, Icon, IconButton, ICONS, LinkRow, Note, notify, openWindow, Popover, Progress, RoundButton, Row, SearchField, Section, Segmented, Select, Sheet, Spinner, strokeIcon, TextField, ToggleRow, useListener } from "../_ui";
+import { addToSoundboard, callChannel, Clip, clipListeners, clipState, deleteClip, loadTracks, makeClip, openFolder, playInCall, readClip, refresh, removeFromSoundboard, renameClip, sendClipTo, sendToChat, showInFolder, SOUND_MAX_SECONDS, soundboardGuilds, trimClip } from "./clips";
 import { RATE } from "./encode";
 import { applyHotkey, settings } from "./index";
 import { listeners, MicMode, state } from "./recorder";
@@ -26,11 +26,12 @@ const POPOUT_STYLE: CSSProperties = { maxHeight: "min(720px, calc(100vh - 72px))
 /** Discord's own voice panel button (noise suppression, disconnect …), so the clip button looks the same */
 const { PanelButton } = mapMangledModuleLazy("Masks.PANEL_BUTTON", { PanelButton: filters.byCode("tooltipPositionKey") });
 
-export const REPLAY_PATH = "M12 5V2.2a.5.5 0 0 0-.85-.36L7.2 5.8a.5.5 0 0 0 0 .7l3.95 3.95a.5.5 0 0 0 .85-.35V7a6 6 0 1 1-6 6.4 1 1 0 0 0-2 .1A8 8 0 1 0 12 5Z";
-const SEND_PATH = "M3.4 20.4 20.85 12.9a1 1 0 0 0 0-1.84L3.4 3.6a.99.99 0 0 0-1.39.91L2 9.12c0 .5.37.93.87.99L17 12 2.87 13.88c-.5.07-.87.5-.87 1l.01 4.61c0 .71.73 1.2 1.39.91Z";
-const TRIM_PATH = "M9.64 7.64A4 4 0 1 0 6 10c.59 0 1.14-.13 1.64-.36L10 12l-2.36 2.36A4 4 0 1 0 10 18c0-.59-.13-1.14-.36-1.64L12 14l7 7h3v-1L9.64 7.64ZM6 8a2 2 0 1 1 0-4 2 2 0 0 1 0 4Zm0 12a2 2 0 1 1 0-4 2 2 0 0 1 0 4Zm13-17-6 6 2 2 7-7V3h-3Z";
-const PAUSE_PATH = "M7 4h3a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1Zm7 0h3a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-3a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1Z";
-const KEY_PATH = "M20 5H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2Zm-9 3h2v2h-2V8Zm0 3h2v2h-2v-2ZM8 8h2v2H8V8Zm0 3h2v2H8v-2Zm-1 2H5v-2h2v2Zm0-3H5V8h2v2Zm9 7H8v-2h8v2Zm0-4h-2v-2h2v2Zm0-3h-2V8h2v2Zm3 3h-2v-2h2v2Zm0-3h-2V8h2v2Z";
+// Lucide rotate-ccw, send, scissors, pause, keyboard
+export const REPLAY_PATH = strokeIcon("M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8", "M3 3v5h5");
+const SEND_PATH = strokeIcon("M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z", "m21.854 2.147-10.94 10.939");
+const TRIM_PATH = strokeIcon("M3 6a3 3 0 1 0 6 0a3 3 0 1 0-6 0", "M8.12 8.12 12 12", "M20 4 8.12 15.88", "M3 18a3 3 0 1 0 6 0a3 3 0 1 0-6 0", "M14.8 14.8 20 20");
+const PAUSE_PATH = strokeIcon("M15 4h2a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-2a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1z", "M7 4h2a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1z");
+const KEY_PATH = strokeIcon("M10 8h.01", "M12 12h.01", "M14 8h.01", "M16 12h.01", "M18 8h.01", "M6 8h.01", "M7 16h10", "M8 12h.01", "M4 4h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z");
 
 const LENGTHS = [15, 30, 60, 120];
 
@@ -111,7 +112,7 @@ function RenameSheet({ clip, onClose }: { clip: Clip; onClose(): void; }) {
     });
     return (
         <Sheet
-            header={{ title: "Rename clip", icon: ICONS.edit, iconColor: "red" }}
+            header={{ title: "Rename clip", icon: ICONS.edit, iconColor: "gray" }}
             onClose={onClose}
             actions={[{ label: "Cancel", onClick: onClose }, { label: "Save", onClick: save, disabled: !name.trim() }]}
         >
@@ -219,7 +220,11 @@ function Trimmer({ tracks, audio, range, onRange, time, onSeek }: {
     );
 }
 
-function TrimSheet({ clip, onClose }: { clip: Clip; onClose(): void; }) {
+/**
+ * Waveform editor. Trims the clip – or, with `sound`, picks the part (at most 5.2 s) that goes onto a server's
+ * soundboard so it can be played in calls.
+ */
+function TrimSheet({ clip, sound, onClose }: { clip: Clip; sound?: boolean; onClose(): void; }) {
     const [tracks, setTracks] = useState<Float32Array[] | null>(null);
     const [error, setError] = useState("");
     const [range, setRange] = useState<[number, number]>([0, 0]);
@@ -247,7 +252,9 @@ function TrimSheet({ clip, onClose }: { clip: Clip; onClose(): void; }) {
         };
         loadTracks(clip).then(t => {
             setTracks(t);
-            setRange([0, t[0].length / RATE]);
+            const length = t[0].length / RATE;
+            // For the soundboard: the last 5.2 s – the moment you clipped is at the end
+            setRange(sound ? [Math.max(0, length - SOUND_MAX_SECONDS), length] : [0, length]);
             return readClip(clip.file);
         }).then(blob => {
             a = new Audio(url = URL.createObjectURL(blob));
@@ -278,6 +285,10 @@ function TrimSheet({ clip, onClose }: { clip: Clip; onClose(): void; }) {
     };
 
     const changeRange = (r: [number, number]) => {
+        // Soundboard: the other handle follows, so the part never gets longer than Discord allows
+        if (sound && r[1] - r[0] > SOUND_MAX_SECONDS) {
+            r = r[0] !== start ? [r[0], r[0] + SOUND_MAX_SECONDS] : [r[1] - SOUND_MAX_SECONDS, r[1]];
+        }
         setRange(r);
         // Keep the playhead inside while moving the handles
         if (audio && (audio.currentTime < r[0] || audio.currentTime > r[1])) seek(Math.min(Math.max(audio.currentTime, r[0]), r[1]));
@@ -315,9 +326,26 @@ function TrimSheet({ clip, onClose }: { clip: Clip; onClose(): void; }) {
     const total = tracks ? tracks[0].length / RATE : 0;
     const unchanged = start === 0 && end === total;
 
+    if (sound) return (
+        <SoundSheet clip={clip} tracks={tracks} error={error} range={range} onClose={onClose} beforeSave={() => audio?.pause()}>
+            {tracks && (
+                <Section plain>
+                    <Trimmer tracks={tracks} audio={audio} range={range} onRange={changeRange} time={time} onSeek={seek} />
+                    <div className={cl("trim-foot")}>
+                        <button type="button" className={cl("trim-play")} aria-label={playing ? "Pause" : "Play"} disabled={!audio} onClick={toggle}>
+                            <Icon path={playing ? PAUSE_PATH : ICONS.play} size={18} />
+                        </button>
+                        <span className={cl("trim-time")}>{formatTime(time, true)}</span>
+                        <span className={cl("dim")}>Pick up to {SOUND_MAX_SECONDS} s · space to play</span>
+                    </div>
+                </Section>
+            )}
+        </SoundSheet>
+    );
+
     return (
         <Sheet
-            header={{ title: "Trim clip", subtitle: nameOf(clip.file), icon: TRIM_PATH, iconColor: "red" }}
+            header={{ title: "Trim clip", subtitle: nameOf(clip.file), icon: TRIM_PATH, iconColor: "gray" }}
             onClose={onClose}
             actions={[
                 { label: "Cancel", onClick: onClose },
@@ -332,7 +360,7 @@ function TrimSheet({ clip, onClose }: { clip: Clip; onClose(): void; }) {
                     <Trimmer tracks={tracks} audio={audio} range={range} onRange={changeRange} time={time} onSeek={seek} />
                     <div className={cl("trim-foot")}>
                         <button type="button" className={cl("trim-play")} aria-label={playing ? "Pause" : "Play"} disabled={!audio} onClick={toggle}>
-                            <svg width={18} height={18} viewBox="0 0 24 24" fill="currentColor"><path d={playing ? PAUSE_PATH : ICONS.play} /></svg>
+                            <Icon path={playing ? PAUSE_PATH : ICONS.play} size={18} />
                         </button>
                         <span className={cl("trim-time")}>{formatTime(time, true)}</span>
                         <span className={cl("dim")}>Drag the handles · click to jump · space to play</span>
@@ -344,10 +372,110 @@ function TrimSheet({ clip, onClose }: { clip: Clip; onClose(): void; }) {
     );
 }
 
-const openTrim = (clip: Clip) => {
+const openTrim = (clip: Clip, sound?: boolean) => {
     stopPlayback();
-    openWindow(close => <TrimSheet clip={clip} onClose={close} />, { size: "medium", className: cl("fit-window") });
+    openWindow(close => <TrimSheet clip={clip} sound={sound} onClose={close} />, { size: "medium", className: cl("fit-window") });
 };
+
+// ---------------------------------------------------------------- Soundboard
+
+// Lucide audio-lines
+const SOUNDBOARD_PATH = strokeIcon("M2 10v3", "M6 6v11", "M10 3v18", "M14 8v7", "M18 5v13", "M22 10v3");
+
+const guildName = (id: string) => GuildStore.getGuild(id)?.name ?? "a server";
+/** Soundboard names: 2–32 characters */
+const soundName = (file: string) => nameOf(file).slice(0, 32).padEnd(2, "_");
+
+function SoundSheet({ clip, tracks, error, range, beforeSave, onClose, children }: {
+    clip: Clip; tracks: Float32Array[] | null; error: string; range: [number, number];
+    beforeSave(): void; onClose(): void; children: React.ReactNode;
+}) {
+    useListener(clipListeners);
+    // The list re-reads its clips after an upload – show the current state of this one
+    const current = clipState.clips.find(c => c.file === clip.file) ?? clip;
+    const guilds = useMemo(soundboardGuilds, []);
+    const callGuild = callChannel()?.guild_id;
+    const [guildId, setGuildId] = useState(() => guilds.find(g => g.id === callGuild)?.id ?? guilds[0]?.id ?? "");
+    const [name, setName] = useState(() => soundName(clip.file));
+    const [busy, setBusy] = useState(false);
+    const inCall = !!SelectedChannelStore.getVoiceChannelId();
+
+    const add = (play: boolean) => guard("add the clip to the soundboard", async () => {
+        if (!tracks || !guildId) return;
+        setBusy(true);
+        try {
+            beforeSave();
+            await addToSoundboard(current, tracks, range[0], range[1], guildId, name.trim());
+            if (play) {
+                const fresh = clipState.clips.find(c => c.file === clip.file);
+                if (fresh) await playInCall(fresh);
+            }
+            onClose();
+            notify({ title: play ? "Played in the call" : "Added to the soundboard", body: `“${name.trim()}” · ${guildName(guildId)}`, kind: "success", app: "CallClips" });
+        } finally {
+            setBusy(false);
+        }
+    });
+
+    const remove = () => guard("remove the sound", async () => {
+        setBusy(true);
+        try {
+            await removeFromSoundboard(current);
+        } finally {
+            setBusy(false);
+        }
+    });
+
+    const validName = name.trim().length >= 2 && name.trim().length <= 32;
+    const ready = !!tracks && !!guildId && validName && !busy;
+
+    return (
+        <Sheet
+            header={{ title: "Play in calls", subtitle: nameOf(clip.file), icon: SOUNDBOARD_PATH, iconColor: "gray" }}
+            onClose={onClose}
+            actions={[
+                { label: "Cancel", onClick: onClose },
+                ...inCall ? [{ label: "Add & play", onClick: () => add(true), disabled: !ready, variant: "gray" as const }] : [],
+                { label: busy ? "Uploading…" : current.sound ? "Replace" : "Add to soundboard", onClick: () => add(false), disabled: !ready }
+            ]}
+        >
+            {current.sound && (
+                <Section>
+                    <Row
+                        leading={<AppIcon path={SOUNDBOARD_PATH} color="gray" size={28} />}
+                        title={`On the soundboard of ${guildName(current.sound.guildId)}`}
+                        subtitle="The soundboard button in the list plays it in your call"
+                        trailing={<Button small variant="destructive" icon={ICONS.trash} disabled={busy} onClick={remove}>Remove</Button>}
+                    />
+                </Section>
+            )}
+            {error ? <Note tone="bad">{error}</Note> : !tracks ? (
+                <div className={cl("loading")}><Spinner /> Loading clip…</div>
+            ) : children}
+            {!guilds.length ? (
+                <Note tone="warn">You can't add soundboard sounds on any of your servers. It needs the “Create Expressions” permission – on your own server you have it.</Note>
+            ) : (
+                <Section plain>
+                    <Field label="Server" hint="Its soundboard needs a free slot. Playing it in calls of other servers or DMs needs Nitro.">
+                        <Select<string> value={guildId} options={guilds.map(g => ({ value: g.id, label: g.name }))} onChange={setGuildId} />
+                    </Field>
+                    <Field label="Name" hint={validName ? "Everyone in the call sees who played it and this name." : "2–32 characters"}>
+                        <TextField value={name} onChange={setName} />
+                    </Field>
+                </Section>
+            )}
+        </Sheet>
+    );
+}
+
+/** On a soundboard and in a call: play it. Otherwise (or right-click): the soundboard window. */
+async function soundClip(clip: Clip) {
+    if (clip.sound && SelectedChannelStore.getVoiceChannelId()) {
+        await playInCall(clip);
+        return;
+    }
+    openTrim(clip, true);
+}
 
 // ---------------------------------------------------------------- Send to a chat (when none is open)
 
@@ -364,8 +492,9 @@ interface Target {
 
 const userName = (u: any) => u?.globalName || u?.username || "Unknown";
 const avatarOf = (u: any) => { try { return u ? IconUtils.getUserAvatarURL(u, false, 64) : undefined; } catch { return undefined; } };
-const GROUP_PATH = "M16 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm-8 0a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5C15 14.17 10.33 13 8 13Zm8 0c-.29 0-.62.02-.97.05A4.22 4.22 0 0 1 17 16.5V19h6v-2.5c0-2.33-4.67-3.5-7-3.5Z";
-const SPEAKER_PATH = "M3 10v4a1 1 0 0 0 1 1h3l3.7 3.7a.75.75 0 0 0 1.3-.53V5.83a.75.75 0 0 0-1.3-.53L7 9H4a1 1 0 0 0-1 1Zm13.5 2A4.5 4.5 0 0 0 14 7.97v8.05A4.47 4.47 0 0 0 16.5 12ZM14 3.23v2.06a7 7 0 0 1 0 13.42v2.06a9 9 0 0 0 0-17.54Z";
+// Lucide users, volume-2
+const GROUP_PATH = strokeIcon("M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2", "M5 7a4 4 0 1 0 8 0a4 4 0 1 0-8 0", "M22 21v-2a4 4 0 0 0-3-3.87", "M16 3.13a4 4 0 0 1 0 7.75");
+const SPEAKER_PATH = strokeIcon("M11 4.702a.705.705 0 0 0-1.203-.498L6.413 7.587A1.4 1.4 0 0 1 5.416 8H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2.416a1.4 1.4 0 0 1 .997.413l3.383 3.384A.705.705 0 0 0 11 19.298z", "M16 9a5 5 0 0 1 0 6", "M19.364 18.364a9 9 0 0 0 0-12.728");
 
 function chatTarget(c: Channel): Target {
     const users = (c.recipients ?? []).map(id => UserStore.getUser(id)).filter(Boolean);
@@ -429,7 +558,7 @@ function SendSheet({ clip, onClose }: { clip: Clip; onClose(): void; }) {
 
     return (
         <Sheet
-            header={{ title: "Send clip", subtitle: nameOf(clip.file), icon: SEND_PATH, iconColor: "red" }}
+            header={{ title: "Send clip", subtitle: nameOf(clip.file), icon: SEND_PATH, iconColor: "gray" }}
             onClose={onClose}
             top={
                 <div className={cl("search")}>
@@ -489,6 +618,13 @@ function ClipRow({ clip, onSent }: { clip: Clip; onSent?(): void; }) {
             ].filter(Boolean).join(" · ")}
             trailing={
                 <div className={cl("actions")}>
+                    <span className={cl("sound-btn")} onContextMenu={e => { e.preventDefault(); openTrim(clip, true); }}>
+                        <IconButton
+                            icon={SOUNDBOARD_PATH}
+                            label={clip.sound ? "Play in your call (right-click: soundboard)" : "Play in calls via the soundboard"}
+                            onClick={() => guard("play the clip in the call", () => soundClip(clip))}
+                        />
+                    </span>
                     <IconButton icon={SEND_PATH} label="Send into a chat" onClick={() => guard("send the clip", () => sendClip(clip, onSent))} />
                     <IconButton icon={TRIM_PATH} label="Trim" onClick={() => openTrim(clip)} />
                     <IconButton icon={ICONS.edit} label="Rename" onClick={() => openRename(clip)} />
@@ -497,7 +633,7 @@ function ClipRow({ clip, onSent }: { clip: Clip; onSent?(): void; }) {
                 </div>
             }
         >
-            {current && length ? <Progress value={player.time / length * 100} color="red" /> : null}
+            {current && length ? <Progress value={player.time / length * 100} /> : null}
         </Row>
     );
 }
@@ -529,7 +665,7 @@ function ClipsSheet({ embedded, onClose }: { embedded?: boolean; onClose(): void
             }}
             top={
                 <div className={cl("top")}>
-                    <Button wide color="red" icon={REPLAY_PATH} disabled={!state.running || clipState.busy} onClick={() => void makeClip()}>
+                    <Button wide icon={REPLAY_PATH} disabled={!state.running || clipState.busy} onClick={() => void makeClip()}>
                         {clipState.busy ? "Saving…" : `Clip last ${seconds} s`}
                     </Button>
                     <span className={cl("dim")}>{hotkey ? `or press ${hotkey} – also in games` : "Set a shortcut in the plugin settings"}</span>
@@ -587,7 +723,7 @@ function TitleBarButton() {
                     tooltip={isShown ? null : state.running ? `CallClips – recording, clip the last ${settings.store.seconds} s` : "CallClips"}
                     icon={() => (
                         <span className={cl("tb-icon")}>
-                            <svg width={20} height={20} viewBox="0 0 24 24" fill="currentColor" className="vc-ui-tb-icon"><path d={REPLAY_PATH} /></svg>
+                            <Icon path={REPLAY_PATH} size={20} className="vc-ui-tb-icon" />
                             {state.running && <i className={cl("rec-dot")} />}
                         </span>
                     )}
@@ -607,7 +743,7 @@ export function renderTitleBarButton() {
 
 // ---------------------------------------------------------------- Voice panel button
 
-const CHECK_PATH = "M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2Z";
+const CHECK_PATH = ICONS.check;
 
 /** Left click = clip now, right click = clip list. Shows a check for a moment after clipping. */
 function PanelClipButton() {
@@ -635,10 +771,8 @@ function PanelClipButton() {
             disabled={!ready && !done}
             onClick={() => void clip()}
             onContextMenu={(e: React.MouseEvent) => { e.preventDefault(); openClipsWindow(); }}
-            icon={({ width = 20, height = 20 }: { width?: number; height?: number; }) => (
-                <svg width={width} height={height} viewBox="0 0 24 24" fill="currentColor" className={done ? cl("panel-done") : undefined}>
-                    <path d={done ? CHECK_PATH : REPLAY_PATH} />
-                </svg>
+            icon={({ width = 20 }: { width?: number; height?: number; }) => (
+                <Icon path={done ? CHECK_PATH : REPLAY_PATH} size={width} className={done ? cl("panel-done") : undefined} />
             )}
         />
     );
@@ -724,7 +858,7 @@ function HotkeyRow() {
 export const SettingsPanel = ErrorBoundary.wrap(() => {
     const s = settings.use(["seconds", "micMode", "showTitleBarButton", "showPanelButton"]);
     return (
-        <Sheet embedded header={{ app: "CallClips", title: "CallClips", subtitle: "Clip the last seconds of a voice call", icon: REPLAY_PATH, iconColor: "red" }}>
+        <Sheet embedded header={{ app: "CallClips", title: "CallClips", subtitle: "Clip the last seconds of a voice call", icon: REPLAY_PATH, iconColor: "gray" }}>
             <Section title="Clip length" footer="Kept in memory only while you're in a call – nothing is saved until you clip.">
                 <div className={cl("seg")}>
                     <Segmented
@@ -745,8 +879,8 @@ export const SettingsPanel = ErrorBoundary.wrap(() => {
             </Section>
             <Section title="Controls">
                 <HotkeyRow />
-                <ToggleRow icon={REPLAY_PATH} color="red" title="Clip button in the voice panel" subtitle="Bottom left while you're in a call – right-click it for all clips" checked={s.showPanelButton} onChange={v => settings.store.showPanelButton = v} />
-                <ToggleRow icon={REPLAY_PATH} color="red" title="Show icon in the title bar" checked={s.showTitleBarButton} onChange={v => settings.store.showTitleBarButton = v} />
+                <ToggleRow icon={REPLAY_PATH} title="Clip button in the voice panel" subtitle="Bottom left while you're in a call – right-click it for all clips" checked={s.showPanelButton} onChange={v => settings.store.showPanelButton = v} />
+                <ToggleRow icon={REPLAY_PATH} title="Show icon in the title bar" checked={s.showTitleBarButton} onChange={v => settings.store.showTitleBarButton = v} />
                 <LinkRow icon={ICONS.folder} onClick={() => void openFolder()}>Open clips folder</LinkRow>
                 <LinkRow icon={REPLAY_PATH} onClick={openClipsWindow}>Show clips</LinkRow>
             </Section>

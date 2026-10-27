@@ -15,6 +15,7 @@ import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType, PluginNative } from "@utils/types";
 import { Menu, showToast } from "@webpack/common";
 
+import { Icon } from "../_ui";
 import type { OcrResult } from "./native";
 import { LanguageList, openTextModal, TEXT_ICON } from "./ui";
 
@@ -209,11 +210,7 @@ async function copyText(src: string) {
 
 // ---------------------------------------------------------------- Context menus
 
-const TextIcon = () => (
-    <svg viewBox="0 0 24 24" width={18} height={18}>
-        <path fill="currentColor" d={TEXT_ICON} />
-    </svg>
-);
+const TextIcon = () => <Icon path={TEXT_ICON} size={18} />;
 
 function makeItems(src: string) {
     return [

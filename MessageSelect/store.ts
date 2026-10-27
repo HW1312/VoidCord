@@ -301,7 +301,7 @@ function updateHighlight() {
     }
     const selectors = [...state.ids].map(id => `[id="chat-messages-${channelId}-${id}"]`).join(",\n");
     styleEl.textContent = `${selectors} {
-    background: color-mix(in srgb, var(--vc-ui-blue) 16%, transparent) !important;
-    box-shadow: inset 3px 0 0 var(--vc-ui-blue);
+    background: color-mix(in srgb, var(--vc-ui-accent) 7%, transparent) !important;
+    box-shadow: inset 2px 0 0 var(--vc-ui-accent);
 }`;
 }

@@ -12,6 +12,8 @@ import { openModal } from "@utils/modal";
 import { Tooltip, useEffect, useRef, useState } from "@webpack/common";
 import type { CSSProperties, ReactNode } from "react";
 
+import { Icon, ICONS } from "../_ui";
+import { EXIT_FULLSCREEN_ICON, EXPAND_ICON, FULLSCREEN_ICON, LOOP_ICON, MUTE_ICON, PAUSE_ICON, PIP_ICON, VOLUME_ICON, VOLUME_LOW_ICON } from "./icons";
 import { saveDecrypted } from "./save";
 
 const cl = classNameFactory("vc-secretchat-player-");
@@ -34,27 +36,20 @@ function saveVolume(volume: number, muted: boolean) {
     } catch { /* not important */ }
 }
 
-// ---------------------------------------------------------------- Icons (Lucide style, line)
-// A function, not an object of JSX: JSX at module level runs before React is ready and crashes all of Vencord
+// ---------------------------------------------------------------- Icons (Lucide, line) – path strings for the kit's <Icon>
 
-const icons = () => ({
-    play: <path d="M7 4.5v15a1 1 0 0 0 1.5.86l12.5-7.5a1 1 0 0 0 0-1.72L8.5 3.64A1 1 0 0 0 7 4.5Z" fill="currentColor" stroke="none" />,
-    pause: <><rect x="6" y="4" width="4" height="16" rx="1.2" fill="currentColor" stroke="none" /><rect x="14" y="4" width="4" height="16" rx="1.2" fill="currentColor" stroke="none" /></>,
-    volume: <><path d="M11 5 6 9H3v6h3l5 4V5Z" /><path d="M15.5 8.5a5 5 0 0 1 0 7" /><path d="M18.5 5.5a9 9 0 0 1 0 13" /></>,
-    volumeLow: <><path d="M11 5 6 9H3v6h3l5 4V5Z" /><path d="M15.5 8.5a5 5 0 0 1 0 7" /></>,
-    mute: <><path d="M11 5 6 9H3v6h3l5 4V5Z" /><path d="m22 9-6 6" /><path d="m16 9 6 6" /></>,
-    loop: <><path d="m17 2 4 4-4 4" /><path d="M3 11v-1a4 4 0 0 1 4-4h14" /><path d="m7 22-4-4 4-4" /><path d="M21 13v1a4 4 0 0 1-4 4H3" /></>,
-    pip: <><rect x="2" y="4" width="20" height="16" rx="2" /><rect x="12" y="12" width="7" height="5" rx="1" fill="currentColor" /></>,
-    expand: <><path d="M15 3h6v6" /><path d="M9 21H3v-6" /><path d="m21 3-7 7" /><path d="m3 21 7-7" /></>,
-    fullscreen: <><path d="M8 3H5a2 2 0 0 0-2 2v3" /><path d="M21 8V5a2 2 0 0 0-2-2h-3" /><path d="M3 16v3a2 2 0 0 0 2 2h3" /><path d="M16 21h3a2 2 0 0 0 2-2v-3" /></>,
-    exitFullscreen: <><path d="M8 3v3a2 2 0 0 1-2 2H3" /><path d="M21 8h-3a2 2 0 0 1-2-2V3" /><path d="M3 16h3a2 2 0 0 1 2 2v3" /><path d="M16 21v-3a2 2 0 0 1 2-2h3" /></>
-});
-
-const Svg = ({ children, size = 18 }: { children: ReactNode; size?: number; }) => (
-    <svg viewBox="0 0 24 24" width={size} height={size} fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-        {children}
-    </svg>
-);
+const ICON = {
+    play: ICONS.play,
+    pause: PAUSE_ICON,
+    volume: VOLUME_ICON,
+    volumeLow: VOLUME_LOW_ICON,
+    mute: MUTE_ICON,
+    loop: LOOP_ICON,
+    pip: PIP_ICON,
+    expand: EXPAND_ICON,
+    fullscreen: FULLSCREEN_ICON,
+    exitFullscreen: EXIT_FULLSCREEN_ICON
+};
 
 function Ctrl({ label, onClick, active, className, children }: { label: string; onClick(): void; active?: boolean; className?: string; children: ReactNode; }) {
     return (
@@ -102,7 +97,7 @@ export function VideoPlayer({ src, name, style, big, autoPlay, startAt }: {
     const [idle, setIdle] = useState(false);
     const idleTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
-    const I = icons();
+    const I = ICON;
     const v = () => video.current;
 
     useEffect(() => {
@@ -223,7 +218,7 @@ export function VideoPlayer({ src, name, style, big, autoPlay, startAt }: {
 
             {!playing && (
                 <button type="button" className={cl("bigplay")} aria-label="Play" onClick={toggle}>
-                    <Svg size={26}>{I.play}</Svg>
+                    <Icon path={I.play} size={26} />
                 </button>
             )}
 
@@ -241,11 +236,11 @@ export function VideoPlayer({ src, name, style, big, autoPlay, startAt }: {
                 </div>
                 <div className={cl("row")}>
                     <Ctrl label={playing ? "Pause (K)" : "Play (K)"} onClick={toggle}>
-                        <Svg>{playing ? I.pause : I.play}</Svg>
+                        <Icon path={playing ? I.pause : I.play} size={18} />
                     </Ctrl>
                     <div className={cl("volume")}>
                         <Ctrl label={muted || !volume ? "Unmute (M)" : "Mute (M)"} onClick={() => setVolume(volume || 0.5, !(muted || !volume))}>
-                            <Svg>{volumeIcon}</Svg>
+                            <Icon path={volumeIcon} size={18} />
                         </Ctrl>
                         {/* Pops up above the button, so it also fits in narrow players */}
                         <div className={cl("volume-pop")}>
@@ -264,20 +259,20 @@ export function VideoPlayer({ src, name, style, big, autoPlay, startAt }: {
                     <span className={cl("time")}>{time(current)} / {time(duration)}</span>
                     <span className={cl("spacer")} />
                     <Ctrl label={loop ? "Loop on (L)" : "Loop (L)"} active={loop} onClick={() => setLoop(x => !x)}>
-                        <Svg>{I.loop}</Svg>
+                        <Icon path={I.loop} size={18} />
                     </Ctrl>
                     {pipSupported && (
                         <Ctrl label="Pop out (picture in picture)" onClick={pip}>
-                            <Svg>{I.pip}</Svg>
+                            <Icon path={I.pip} size={18} />
                         </Ctrl>
                     )}
                     {!big && !fullscreen && (
                         <Ctrl label="Bigger view" onClick={expand} className={cl("btn-expand")}>
-                            <Svg>{I.expand}</Svg>
+                            <Icon path={I.expand} size={18} />
                         </Ctrl>
                     )}
                     <Ctrl label={fullscreen ? "Exit fullscreen (F)" : "Fullscreen (F)"} onClick={toggleFullscreen}>
-                        <Svg>{fullscreen ? I.exitFullscreen : I.fullscreen}</Svg>
+                        <Icon path={fullscreen ? I.exitFullscreen : I.fullscreen} size={18} />
                     </Ctrl>
                 </div>
             </div>

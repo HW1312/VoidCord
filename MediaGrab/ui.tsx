@@ -10,18 +10,19 @@ import { IconComponent } from "@utils/types";
 import { Channel } from "@vencord/discord-types";
 import { useEffect, useReducer, useRef, useState } from "@webpack/common";
 
-import { Field, Glyph, ICONS, Note, openWindow, Pill, Pills, Row, Section, Segmented, Sheet, TextField, ToggleRow } from "../_ui";
+import { Field, Glyph, ICONS, Note, openWindow, Pill, Pills, Row, Section, Segmented, Sheet, strokeIcon, TextField, ToggleRow } from "../_ui";
 import { getRunning, grab, isInstalled, isSoundLink, isUrl, needsRestart, shortUrl, subscribeRunning } from "./grab";
 import { settings } from "./settings";
 
-const GRAB_PATH = "M5 3a3 3 0 0 0-3 3v8a3 3 0 0 0 3 3h5.1a6.97 6.97 0 0 1 .9-2H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v4.1c.71.26 1.39.62 2 1.06V6a3 3 0 0 0-3-3H5Zm4.5 4.13v5.74a.5.5 0 0 0 .75.43l4.92-2.87a.5.5 0 0 0 0-.86L10.25 6.7a.5.5 0 0 0-.75.43ZM17 12a1 1 0 0 1 1 1v4.59l1.3-1.3a1 1 0 0 1 1.4 1.42l-3 3a1 1 0 0 1-1.4 0l-3-3a1 1 0 1 1 1.4-1.42l1.3 1.3V13a1 1 0 0 1 1-1Z";
-const MUSIC_PATH = "M12 3v10.55A4 4 0 1 0 14 17V7h4V3h-6Z";
-const LINK_PATH = "M10.6 13.4a1 1 0 0 1 0-1.4l3.5-3.5a1 1 0 1 1 1.4 1.4l-3.5 3.5a1 1 0 0 1-1.4 0Zm-3.3 6.2a4.5 4.5 0 0 1-3.2-7.7l2.5-2.5a1 1 0 0 1 1.4 1.4l-2.5 2.5a2.5 2.5 0 0 0 3.5 3.5l2.5-2.5a1 1 0 0 1 1.4 1.4l-2.5 2.5a4.5 4.5 0 0 1-3.1 1.4Zm9.3-5.6a1 1 0 0 1-.7-1.7l2.5-2.5a2.5 2.5 0 0 0-3.5-3.5l-2.5 2.5a1 1 0 0 1-1.4-1.4l2.5-2.5a4.5 4.5 0 0 1 6.4 6.4l-2.5 2.5a1 1 0 0 1-.8.2Z";
+// Lucide monitor-down (video + download arrow), music, link
+const GRAB_PATH = strokeIcon("M12 13V7", "m15 10-3 3-3-3", "M4 3h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z", "M12 17v4", "M8 21h8");
+const MUSIC_PATH = ICONS.music;
+const LINK_PATH = strokeIcon("M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71", "M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71");
 
 export const GrabIcon: IconComponent = ({ width = 24, height = 24, className }) => {
     return (
-        <svg width={width} height={height} viewBox="0 0 24 24" className={className} fill="currentColor">
-            <path d={GRAB_PATH} />
+        <svg width={width} height={height} viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round">
+            {GRAB_PATH.split("|").map(d => <path key={d} d={d} />)}
         </svg>
     );
 };

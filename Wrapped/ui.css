@@ -3,8 +3,8 @@
 .vc-wrapped-unit {
     margin-left: 2px;
     font-size: 0.6em;
-    font-weight: 600;
-    opacity: 0.8;
+    font-weight: 500;
+    color: var(--vc-ui-dim);
 }
 
 .vc-wrapped-game {
@@ -35,8 +35,9 @@
 
 .vc-wrapped-sub-title {
     margin-top: 4px;
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 500;
+    letter-spacing: 0.04em;
     text-transform: uppercase;
     color: var(--vc-ui-dim);
 }
@@ -47,11 +48,12 @@
 }
 
 .vc-wrapped-alltime-num {
-    font-family: var(--vc-ui-font-display);
-    font-size: 28px;
-    font-weight: 700;
-    color: var(--vc-ui-purple);
+    font-family: var(--vc-ui-mono);
+    font-size: 26px;
+    font-weight: 500;
+    color: var(--vc-ui-title);
     font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
 }
 
 /* ---------- Chart card ---------- */
@@ -61,6 +63,7 @@
     flex-direction: column;
     gap: 10px;
     padding: 14px;
+    border: 1px solid var(--vc-ui-sep);
     border-radius: 12px;
     background: var(--vc-ui-group);
 }
@@ -74,14 +77,16 @@
 .vc-wrapped-bars-max,
 .vc-wrapped-bars-labels,
 .vc-wrapped-heat-legend {
+    font-family: var(--vc-ui-mono);
     font-size: 11px;
+    font-variant-numeric: tabular-nums;
     color: var(--vc-ui-dim);
 }
 
 .vc-wrapped-bars-svg {
     width: 100%;
     height: 140px;
-    border-bottom: 0.5px solid var(--vc-ui-sep);
+    border-bottom: 1px solid var(--vc-ui-sep);
 }
 
 .vc-wrapped-bar {
@@ -126,7 +131,9 @@
 
 .vc-wrapped-heat-hour,
 .vc-wrapped-heat-day {
+    font-family: var(--vc-ui-mono);
     font-size: 10px;
+    font-variant-numeric: tabular-nums;
     line-height: 1.6;
     color: var(--vc-ui-dim);
 }
@@ -141,7 +148,7 @@
 }
 
 .vc-wrapped-heat-grid .vc-wrapped-heat-cell:hover {
-    outline: 1.5px solid var(--vc-ui-title);
+    outline: 1px solid var(--vc-ui-title);
 }
 
 .vc-wrapped-heat-legend {
@@ -160,22 +167,23 @@
 
 .vc-wrapped-meter-value {
     color: var(--vc-ui-dim);
-    font-size: 13px;
+    font-family: var(--vc-ui-mono);
+    font-size: 12px;
     font-variant-numeric: tabular-nums;
     white-space: nowrap;
 }
 
 .vc-wrapped-meter-track {
     margin-top: 5px;
-    height: 5px;
-    border-radius: 3px;
+    height: 4px;
+    border-radius: 999px;
     background: var(--vc-ui-track);
     overflow: hidden;
 }
 
 .vc-wrapped-meter-fill {
     height: 100%;
-    border-radius: 3px;
+    border-radius: 999px;
     background: var(--vc-ui-purple);
 }
 
