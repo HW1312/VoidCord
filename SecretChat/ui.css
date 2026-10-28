@@ -2098,3 +2098,38 @@ video.vc-secretchat-file-media {
     font-family: var(--vc-ui-mono);
     letter-spacing: 0.04em;
 }
+
+/* ---------------------------------------------------------------- Phone (Android app): rooms window fills the screen */
+
+@media (width < 560px) {
+    .vc-secretchat-layer {
+        align-items: stretch;
+        background: var(--vc-ui-glass-strong);
+        animation: none;
+    }
+
+    .vc-secretchat-layer-card {
+        width: 100%;
+        height: 100%;
+        border: none;
+        border-radius: 0;
+        animation: none;
+    }
+
+    .vc-secretchat-chatwin .vc-chatpopout-titlebar {
+        min-height: 52px;
+        padding: 0 8px 0 12px;
+    }
+
+    /* The room list is its own page – picking a room closes it (ChatPopout) */
+    .vc-secretchat-chatwin .vc-chatpopout-sidebar {
+        width: 100%;
+        border-right: none;
+        box-shadow: none;
+        background: var(--vc-ui-glass-strong);
+    }
+
+    .vc-secretchat-chatwin .vc-chatpopout-sidebar .vc-secretchat-side {
+        padding: 0 4px;
+    }
+}
