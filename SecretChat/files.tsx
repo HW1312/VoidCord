@@ -247,11 +247,15 @@ export function sendFilesOverride(channel: Channel, list: File[], messageReferen
 
 // ---------------------------------------------------------------- Showing
 
+/** Phone app (Discord Web): Discord's CDN doesn't allow the download from the page, and there's no main process */
+const NO_FILES_HERE = "Open it on your PC – the phone app can't load encrypted files";
+
 async function fetchBytes(url: string): Promise<ArrayBuffer> {
     try {
         const res = await fetch(url);
         if (res.ok) return await res.arrayBuffer();
     } catch { /* CORS – the main process can */ }
+    if (!IS_DISCORD_DESKTOP) throw new Error(NO_FILES_HERE);
     if (!Native?.download) throw new Error("Restart Discord completely once to load encrypted files");
     const bytes = await Native.download(url);
     return bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength) as ArrayBuffer;
@@ -469,7 +473,7 @@ export function EncryptedFile({ message }: { message: Message; }) {
                         {busy ? phase : url ? "Save" : "Decrypt .bin"}
                     </Button>
                 </>
-            ) : (
+            ) : error === NO_FILES_HERE ? null : (
                 <Button small disabled={busy} onClick={error ? () => start(undefined, true) : kind === "file" ? download : () => start(undefined, true)}>
                     {busy ? phase : error ? "Retry" : kind === "file" ? "Download" : "Show"}
                 </Button>

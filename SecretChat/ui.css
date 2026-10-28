@@ -2133,3 +2133,29 @@ video.vc-secretchat-file-media {
         padding: 0 4px;
     }
 }
+
+/* Phone: file cards in two rows – icon + name / size first, badge and buttons below */
+@media (width < 560px) {
+    .vc-secretchat-file-card {
+        flex-wrap: wrap;
+        row-gap: 8px;
+        width: auto;
+    }
+
+    .vc-secretchat-file-card .vc-secretchat-file-meta {
+        flex: 1 1 calc(100% - 50px);
+    }
+
+    .vc-secretchat-file-card .vc-secretchat-file-name {
+        white-space: normal;
+        overflow-wrap: anywhere;
+    }
+
+    .vc-secretchat-file-card .vc-secretchat-file-badge {
+        margin-left: 40px;
+    }
+
+    .vc-secretchat-file-card .vc-ui-btn:last-child {
+        margin-left: auto;
+    }
+}
