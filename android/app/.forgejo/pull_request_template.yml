@@ -1,0 +1,48 @@
+name: PR
+about: PR
+body:
+    - type: markdown
+      attributes:
+          value: |
+              ## AI Policy
+              - You may only use AI/LLMs as an assistant (e.g. inline suggestions or code review).
+              - **This means that fully AI generated PRs (3rd and 4th options in the AI Involvement field) are not acceptable, will not be merged, and may result in you being blocked from contributing again.**
+              - Please do not use AI for writing the PR's description.
+    - type: textarea
+      id: changes
+      attributes:
+          label: "Describe your Changes"
+          description: "What does your PR bring to VendroidEnhanced?"
+      validations:
+          required: true
+    - type: input
+      id: discord-uname
+      attributes:
+          label: "Discord Username"
+          description: "So you can get the contributor badge."
+      validations:
+          required: true
+    - type: dropdown
+      id: ai
+      attributes:
+          label: "AI Involvement"
+          description: "How were AI/LLMs used in this PR's creation? If any use, please state the AI tool (Copilot, Claude Code...) that was used in the description. Regardless of your AI usage, you must be able to explain what your changes do."
+          options:
+              - "None were used in any way"
+              - "I wrote the PR, but used some AI assistance (inline suggestions, code review...)"
+              - "I prompted an AI to write the code, with me reviewing it"
+              - "I used an AI Agent to automatically write the PR and submit it"
+      validations:
+          required: true
+    - type: checkboxes
+      id: checklist
+      attributes:
+          label: "Checklist before submitting"
+          description: "You do not necessarily need to do things marked as optional, but it is still desirable."
+          options:
+              - label: "This PR successfully compiles"
+                required: true
+              - label: "I have tested this PR on an Android Emulator, or preferably a real device"
+                required: false
+              - label: "This PR was not fully AI generated, and any AI involvement was correctly indicated"
+                required: true

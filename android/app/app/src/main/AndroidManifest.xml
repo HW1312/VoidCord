@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.nin0dev.vendroid">
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <!-- VoidCord: voice and video calls -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-feature android:name="android.hardware.camera" android:required="false" />
+    <uses-feature android:name="android.hardware.microphone" android:required="false" />
+
+    <application
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher_round"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/AppTheme"
+        tools:targetApi="34">
+        <activity
+            android:name=".RecoveryActivity"
+            android:exported="true"
+            android:launchMode="singleTask"
+            android:theme="@style/AppTheme" />
+        <activity
+            android:name=".MainActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize|layoutDirection"
+            android:exported="true"
+            android:launchMode="singleTask"
+            android:theme="@style/AppTheme">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.BROWSABLE" />
+                <category android:name="android.intent.category.DEFAULT" />
+
+                <data android:scheme="https" />
+                <data android:scheme="http" />
+                <data android:host="discord.com" />
+                <data android:host="*.discord.com" />
+                <data android:host="ptb.discord.com" />
+                <data android:host="canary.discord.com" />
+                <data android:host="discordapp.com" />
+                <data android:host="*.discordapp.com" />
+            </intent-filter>
+        </activity>
+
+        <!-- icons -->
+        <activity-alias
+            android:name=".MainMainActivity"
+            android:exported="true"
+            android:roundIcon="@mipmap/ic_launcher_round"
+            android:label="@string/app_name"
+            android:icon="@mipmap/ic_launcher_round"
+            android:enabled="true"
+            android:targetActivity=".MainActivity">
+            <meta-data
+                android:name="android.app.shortcuts"
+                android:resource="@xml/shortcuts" />
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity-alias>
+        <activity-alias
+            android:name=".JollyMainActivity"
+            android:exported="true"
+            android:roundIcon="@mipmap/ic_launcher_jolly_round"
+            android:label="@string/app_name"
+            android:icon="@mipmap/ic_launcher_jolly"
+            android:enabled="false"
+            android:targetActivity=".MainActivity">
+            <meta-data
+                android:name="android.app.shortcuts"
+                android:resource="@xml/shortcuts" />
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity-alias>
+        <activity-alias
+            android:name=".RetroMainActivity"
+            android:exported="true"
+            android:roundIcon="@mipmap/ic_launcher_retro_round"
+            android:label="@string/app_name"
+            android:icon="@mipmap/ic_launcher_retro"
+            android:enabled="false"
+            android:targetActivity=".MainActivity">
+            <meta-data
+                android:name="android.app.shortcuts"
+                android:resource="@xml/shortcuts" />
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity-alias>
+        <activity-alias
+            android:name=".DiscordMainActivity"
+            android:exported="true"
+            android:roundIcon="@mipmap/ic_launcher_discord_round"
+            android:label="@string/app_name"
+            android:icon="@mipmap/ic_launcher_discord"
+            android:enabled="false"
+            android:targetActivity=".MainActivity">
+            <meta-data
+                android:name="android.app.shortcuts"
+                android:resource="@xml/shortcuts" />
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity-alias>
+        <activity-alias
+            android:name=".TS12MainActivity"
+            android:exported="true"
+            android:roundIcon="@mipmap/ic_launcher_ts12_round"
+            android:label="@string/app_name"
+            android:icon="@mipmap/ic_launcher_ts12"
+            android:enabled="false"
+            android:targetActivity=".MainActivity">
+            <meta-data
+                android:name="android.app.shortcuts"
+                android:resource="@xml/shortcuts" />
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+        <activity-alias
+            android:name=".EncoreMainActivity"
+            android:exported="true"
+            android:roundIcon="@mipmap/ic_launcher_encore_round"
+            android:label="@string/app_name"
+            android:icon="@mipmap/ic_launcher_encore"
+            android:enabled="false"
+            android:targetActivity=".MainActivity">
+            <meta-data
+                android:name="android.app.shortcuts"
+                android:resource="@xml/shortcuts" />
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+    </application>
+
+</manifest>

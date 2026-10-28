@@ -7,3 +7,5 @@ performance/
 bench/results/
 website/
 bench/channels.local.json
+
+.claude/settings.local.json
