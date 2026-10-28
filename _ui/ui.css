@@ -36,7 +36,8 @@
     --vc-ui-accent-hover: #ffffff;
     --vc-ui-on-accent: #111215;
 
-    --vc-ui-shadow: 0 12px 32px rgb(0 0 0 / 40%);
+    /* No shadows anywhere – planes are told apart by their hairline edge */
+    --vc-ui-shadow: none;
 
     /* Data / status colors – carry meaning, never decoration */
     --vc-ui-blue: #7fb0ff;
@@ -142,6 +143,26 @@
 }
 
 /* ---------------------------------------------------------------- Window */
+
+/* Discord's own tooltips, popouts, menus and modals: no shadow around them either (the variables are set again
+   on every theme element, so they are overridden there too) */
+:root,
+[class*="theme-"] {
+    --shadow-low: none !important;
+    --shadow-low-hover: none !important;
+    --shadow-low-active: none !important;
+    --shadow-medium: none !important;
+    --shadow-high: none !important;
+    --shadow-top-high: none !important;
+    --elevation-low: none !important;
+    --elevation-medium: none !important;
+    --elevation-high: none !important;
+}
+
+[class^="tooltip_"],
+[class*=" tooltip_"] {
+    box-shadow: none !important;
+}
 
 .vc-ui-window {
     display: flex !important;

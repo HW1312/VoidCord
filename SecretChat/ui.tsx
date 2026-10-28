@@ -11,7 +11,7 @@ import { copyWithToast } from "@utils/discord";
 import { classes } from "@utils/misc";
 import { IconComponent } from "@utils/types";
 import { Channel, Message } from "@vencord/discord-types";
-import { showToast, Tooltip, UserStore, useState } from "@webpack/common";
+import { ChannelStore, showToast, Tooltip, UserStore, useState } from "@webpack/common";
 import type { ReactNode } from "react";
 
 import { Avatar as KitAvatar, Button, PluginArtwork, confirm, openAlert, Empty, Glyph, Icon, IconButton, ICONS, LinkRow, Note, openWindow, Pill, Pills, Row, Section, Segmented, Sheet, State, TextField } from "../_ui";
@@ -19,7 +19,7 @@ import { RoomCard } from "./area";
 import { LOCK_ICON, SHIELD_ICON, UNLOCK_ICON, USERS_ICON } from "./icons";
 import { SecretLogo } from "./logo";
 import { keyFromPassword, randomBytes } from "./crypto";
-import { acceptHandshake, cancelRequest, declineHandshake, decrypted, deleteKeyForBoth, handshakes, keyDeletes, retryLocked, startHandshake } from "./messages";
+import { acceptHandshake, cancelRequest, chatsWithKey, declineHandshake, decrypted, deleteKeyForBoth, handshakes, keyDeletes, retryLocked, startHandshake } from "./messages";
 import { chatLabel, makeRoom, pruneStale, roomMessages } from "./rooms";
 import { settings } from "./settings";
 import { addKey, channelKey, deleteKey, getKey, inviteCode, KeyRecord, parseInviteCode, renameKey, setChannelKey, toggleChannel, useStore } from "./store";
@@ -123,6 +123,19 @@ async function confirmDelete(k: KeyRecord) {
             showToast(`No DM with ${partner} – deleted only for you`, "message");
             deleteKey(k.id);
         }
+        return;
+    }
+    const chats = k.kind === "group" ? chatsWithKey(k.id) : [];
+    if (chats.length) {
+        const choice = await openAlert({
+            title: `Delete “${k.name}”?`,
+            body: `Messages sent with this key can't be read anymore. “For everyone” also deletes it for the others in ${chats.length === 1 ? chatLabel(chats[0]) : `${chats.length} chats`} as soon as their Unter das OS sees the request.`,
+            icon: ICONS.trash,
+            iconColor: "red",
+            buttons: [{ label: "Cancel" }, { label: "Only for me", variant: "gray" }, { label: "Delete for everyone", variant: "destructive" }]
+        });
+        if (choice === 1) deleteKey(k.id);
+        else if (choice === 2) await deleteKeyForBoth(k);
         return;
     }
     const ok = await confirm({
@@ -241,7 +254,9 @@ function PrivateTab({ channel, current }: { channel: Channel; current: string | 
 function GroupTab({ channel, current }: { channel: Channel; current: string | null; }) {
     const s = useStore();
     const keys = s.keys.filter(k => k.kind === "group");
-    const [panel, setPanel] = useState<"new" | "code" | null>(keys.length ? null : "new");
+    // Group chats get their key with "Make secret room" (handed to every member automatically) – no code / password
+    const shareInChat = !channel.isDM?.();
+    const [panel, setPanel] = useState<"new" | "code" | null>(keys.length || shareInChat ? null : "new");
     const [name, setName] = useState("");
     const [mode, setMode] = useState<"random" | "password">("random");
     const [password, setPassword] = useState("");
@@ -284,10 +299,10 @@ function GroupTab({ channel, current }: { channel: Channel; current: string | nu
                 </Section>
             )}
 
-            <Pills>
+            {!shareInChat && <Pills>
                 <Pill icon={ICONS.plus} selected={panel === "new"} onClick={() => setPanel(panel === "new" ? null : "new")}>New key</Pill>
                 <Pill icon={ICONS.copy} selected={panel === "code"} onClick={() => setPanel(panel === "code" ? null : "code")}>Paste code</Pill>
-            </Pills>
+            </Pills>}
 
             {panel === "new" && (
                 <div className={cl("panel")}>
@@ -329,11 +344,11 @@ function GroupTab({ channel, current }: { channel: Channel; current: string | nu
 }
 
 /** Bottom of the chat window: make this chat a secret room (listed in the server list area, own pings) */
-function RoomSection({ channel }: { channel: Channel; }) {
+function RoomSection({ channel, defaultOpen }: { channel: Channel; defaultOpen: boolean; }) {
     const s = useStore();
     const active = channelKey(channel.id);
     const room = s.rooms[channel.id];
-    const [open, setOpen] = useState(false);
+    const [open, setOpen] = useState(defaultOpen);
     const [name, setName] = useState(() => active?.kind === "group" ? active.name : chatLabel(channel.id).slice(0, 64));
     const [busy, setBusy] = useState(false);
 
@@ -403,7 +418,8 @@ function ChatWindow({ channel, close }: { channel: Channel; close(): void; }) {
                 ? <PrivateTab channel={channel} current={active?.id ?? null} />
                 : <GroupTab channel={channel} current={active?.id ?? null} />}
 
-            <RoomSection channel={channel} />
+            {/* Group chats: the secret room is how the group gets its key, so it's ready to go */}
+            <RoomSection key={tab} channel={channel} defaultOpen={tab === "group" && !channel.isDM?.()} />
         </Sheet>
     );
 }
@@ -543,7 +559,9 @@ export function MessageCard({ message }: { message: Message; }) {
             <div className={cl("card")}>
                 <Icon path={ICONS.trash} size={18} />
                 <span className={cl("card-text")}>
-                    {del.authorId === UserStore.getCurrentUser()?.id ? "You deleted the encrypted chat key for both of you" : `${userName(del.authorId)} deleted the encrypted chat key`}
+                    {ChannelStore.getChannel(message.channel_id)?.isDM()
+                        ? del.authorId === UserStore.getCurrentUser()?.id ? "You deleted the encrypted chat key for both of you" : `${userName(del.authorId)} deleted the encrypted chat key`
+                        : del.authorId === UserStore.getCurrentUser()?.id ? "You deleted the group key for everyone" : `${userName(del.authorId)} deleted the group key for everyone`}
                 </span>
             </div>
         );
