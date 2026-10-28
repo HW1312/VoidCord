@@ -13,7 +13,7 @@
  */
 
 import { execSync } from "child_process";
-import { cpSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from "fs";
+import { cpSync, existsSync, mkdirSync, readdirSync, readFileSync, renameSync, rmSync, statSync, writeFileSync } from "fs";
 import { dirname, join } from "path";
 import { fileURLToPath } from "url";
 
@@ -226,6 +226,10 @@ if (args.has("--inject")) run("pnpm inject");
 const ANDROID = join(ROOT, "android");
 const ANDROID_PLUGINS = ["SecretChat"];
 const ANDROID_OUT = join(RELEASE, "android", "voidcord-android.js");
+// Vencord-Plugins, die im Android-WebView nicht gehen – wie VendroidEnhanced's blacklisted-plugins.txt.
+// webScreenShare ruft beim Laden navigator.mediaDevices.getDisplayMedia.bind auf: das gibt es dort nicht,
+// und dann bricht die ganze browser.js ab (kein Vencord, keine Vendroid-Einstellungen).
+const ANDROID_EXCLUDED = ["alwaysAnimate", "webScreenShare.browser", "webScreenShareFixes.web", "webPWA.browser"];
 
 /** Plugin-Ordner, die diese Ordner über "../Ordner" oder "../Ordner/…" importieren – rekursiv */
 function importedFolders(start) {
@@ -255,9 +259,21 @@ function buildAndroid() {
         ["VoidCordMobile", join(ANDROID, "VoidCordMobile")]
     ]);
     console.log(`Android: ${folders.join(", ")} + Vendroid`);
+    // Nur für diesen Build aus src/plugins heraus (nach dem Build wieder zurück, der Checkout bleibt sauber)
+    const parked = join(VENCORD, ".android-excluded");
+    const moved = [];
     try {
+        mkdirSync(parked, { recursive: true });
+        for (const name of ANDROID_EXCLUDED) {
+            const dir = join(VENCORD, "src", "plugins", name);
+            if (!existsSync(dir)) throw new Error(`Android: Vencord plugin ${name} not found (renamed?)`);
+            renameSync(dir, join(parked, name));
+            moved.push(name);
+        }
         withBranding(() => run("pnpm buildWeb"));
     } finally {
+        for (const name of moved) renameSync(join(parked, name), join(VENCORD, "src", "plugins", name));
+        rmSync(parked, { recursive: true, force: true });
         // userplugins wieder mit allen Plugins, wie für dein Discord gebaut
         syncAll();
     }
