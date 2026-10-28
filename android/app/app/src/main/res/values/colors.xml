@@ -63,4 +63,8 @@
     <color name="md_theme_dark_outlineVariant">#46464F</color>
     <color name="md_theme_dark_scrim">#000000</color>
     <color name="text">#000000</color>
+    <!-- VoidCord -->
+    <color name="voidcord_icon_background">#07080C</color>
+    <color name="voidcord_splash_background">#07080C</color>
+    <color name="voidcord_splash_text">#C9D4E8</color>
 </resources>

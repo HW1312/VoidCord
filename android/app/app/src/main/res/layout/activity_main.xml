@@ -45,8 +45,17 @@
         android:id="@+id/loading_screen"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:background="@color/voidcord_splash_background"
         android:gravity="center"
         android:orientation="vertical">
+
+        <!-- VoidCord: own logo instead of the Vendroid mascots -->
+        <ImageView
+            android:id="@+id/voidcord_logo"
+            android:layout_width="220dp"
+            android:layout_height="220dp"
+            android:contentDescription="@string/app_name"
+            android:src="@drawable/voidcord_logo" />
 
         <pl.droidsonroids.gif.GifImageView
             android:id="@+id/viggy_gif"
@@ -81,8 +90,8 @@
             android:layout_gravity="center"
             android:layout_marginTop="20dp"
             android:text="@string/splashscreen_text"
-            android:textColor="@color/text"
-            android:textSize="22sp" />
+            android:textColor="@color/voidcord_splash_text"
+            android:textSize="18sp" />
 
     </LinearLayout>
 

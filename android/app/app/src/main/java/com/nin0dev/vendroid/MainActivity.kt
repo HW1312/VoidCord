@@ -182,15 +182,11 @@ class MainActivity : Activity() {
         )
         setContentView(R.layout.activity_main)
 
-        findViewById<GifImageView>(
-            mapOf(
-                "viggy" to R.id.viggy_gif,
-                "shiggy" to R.id.shiggy_gif,
-                "oneko" to R.id.oneko_gif
-            )[sPrefs.getString("splashScreen", "viggy")]!!
-        ).visibility = VISIBLE
+        // VoidCord: the splash shows the VoidCord logo (layout) – the Vendroid mascots stay hidden
 
         wv = findViewById(R.id.webview)!!
+        // VoidCord: dark while Discord loads, no white flash
+        wv!!.setBackgroundColor(getColor(R.color.voidcord_splash_background))
         setupQuickCss()
         wv!!.setWebViewClient(VWebviewClient())
         wv!!.setWebChromeClient(VChromeClient(this))
