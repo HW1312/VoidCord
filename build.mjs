@@ -8,6 +8,7 @@
  *                               (Freunde bekommen es dann über den Vencord-Updater)
  *   node build.mjs --update     vorher Vencord aktualisieren (git pull + pnpm install)
  *   node build.mjs --android    ... und die browser.js für die Android-App (VendroidEnhanced) bauen
+ *   node build.mjs --apk        ... und die Android-App selbst (release/VoidCord-Android.apk)
  *
  * Jeder Unterordner mit einer index.ts / index.tsx gilt als Plugin.
  */
@@ -321,6 +322,24 @@ if (args.has("--package")) {
 // VendroidEnhanced immer dieselbe: .../releases/latest/download/voidcord-android.js
 if (args.has("--android") || args.has("--release")) buildAndroid();
 
+// Die Android-App selbst (android/app, eigener Build von VendroidEnhanced). Signiert mit dem Schlüssel aus
+// ~/.voidcord – ohne den gibt es keine APK, weil Updates immer denselben Schlüssel brauchen.
+const APK_OUT = join(RELEASE, "VoidCord-Android.apk");
+const KEYSTORE = join(process.env.USERPROFILE ?? process.env.HOME ?? "", ".voidcord", "keystore.properties");
+function buildApk() {
+    if (!existsSync(KEYSTORE)) {
+        console.warn(`Keine APK: ${KEYSTORE} fehlt (Signier-Schlüssel)`);
+        return false;
+    }
+    const app = join(ANDROID, "app");
+    const javaHome = process.env.JAVA_HOME ?? "C:\\Program Files\\Android\\Android Studio\\jbr";
+    run(`"${join(app, process.platform === "win32" ? "gradlew.bat" : "gradlew")}" assembleRelease --no-daemon -q`, app, { JAVA_HOME: javaHome });
+    cpSync(join(app, "app", "build", "outputs", "apk", "release", "app-release.apk"), APK_OUT);
+    console.log(`\nAndroid-App: ${APK_OUT}`);
+    return true;
+}
+const hasApk = (args.has("--apk") || args.has("--release")) && buildApk();
+
 // ---- GitHub-Release
 if (args.has("--release")) {
     // Der Commit muss auf GitHub liegen, sonst findet der Updater keinen Changelog
@@ -329,7 +348,7 @@ if (args.has("--release")) {
     const assets = ["patcher.js", "preload.js", "renderer.js", "renderer.css"]
         .map(f => `"${join(FILES, "dist", f)}"`)
         // Older installers fetch the new exe from here to update themselves
-        .concat(`"${INSTALLER}"`, `"${ANDROID_OUT}"`);
+        .concat(`"${INSTALLER}"`, `"${ANDROID_OUT}"`, hasApk ? [`"${APK_OUT}"`] : []);
     // Release notes = commit body, shown as changelog in the UpdateButton plugin. One line per change:
     //   - Added: Plugin X in the Plugin Hub
     //   - Fixed: Popout shows GIFs again
