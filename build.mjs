@@ -8,7 +8,8 @@
  *                               (Freunde bekommen es dann über den Vencord-Updater)
  *   node build.mjs --update     vorher Vencord aktualisieren (git pull + pnpm install)
  *   node build.mjs --android    ... und die browser.js für die Android-App (VendroidEnhanced) bauen
- *   node build.mjs --apk        ... und die Android-App selbst (release/VoidCord-Android.apk)
+ *   node build.mjs --apk        ... und die Android-App selbst (release/VoidCord-Android.apk);
+ *                               --release baut sie nur, wenn sich android/app seit dem letzten Release geändert hat
  *
  * Jeder Unterordner mit einer index.ts / index.tsx gilt als Plugin.
  */
@@ -338,7 +339,18 @@ function buildApk() {
     console.log(`\nAndroid-App: ${APK_OUT}`);
     return true;
 }
-const hasApk = (args.has("--apk") || args.has("--release")) && buildApk();
+// Ein Release baut die APK nur, wenn sich android/app seit dem letzten Release geändert hat (Gradle dauert ewig).
+// Nichts lädt sie über releases/latest – nur voidcord-android.js muss in jedem Release liegen.
+function apkChanged() {
+    try {
+        const last = execSync(`gh release view --repo ${REPO} --json tagName -q .tagName`, { cwd: ROOT, encoding: "utf-8" }).trim();
+        return git(`diff --name-only ${last} HEAD -- android/app`) !== "";
+    } catch {
+        return true;
+    }
+}
+const hasApk = (args.has("--apk") || (args.has("--release") && apkChanged())) && buildApk();
+if (args.has("--release") && !hasApk) console.log("Keine APK in diesem Release: android/app unverändert (erzwingen mit --apk)");
 
 // ---- GitHub-Release
 if (args.has("--release")) {
