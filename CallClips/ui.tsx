@@ -10,8 +10,8 @@ import { classNameFactory } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { classes } from "@utils/misc";
 import type { Channel } from "@vencord/discord-types";
-import { filters, findComponentByCodeLazy, mapMangledModuleLazy } from "@webpack";
-import { ChannelActionCreators, ChannelStore, GuildStore, IconUtils, Popout, RelationshipStore, SelectedChannelStore, useEffect, useMemo, useRef, UserStore, useState } from "@webpack/common";
+import { filters, findByPropsLazy, findComponentByCodeLazy, mapMangledModuleLazy } from "@webpack";
+import { ChannelActionCreators, ChannelStore, GuildStore, IconUtils, MediaEngineStore, Popout, RelationshipStore, SelectedChannelStore, useEffect, useMemo, useRef, UserStore, useState } from "@webpack/common";
 import type { CSSProperties } from "react";
 
 import { AppIcon, Avatar, Button, confirm, Empty, Field, Icon, IconButton, ICONS, LinkRow, Note, notify, openWindow, Popover, Progress, RoundButton, Row, SearchField, Section, Segmented, Select, Sheet, Spinner, strokeIcon, TextField, ToggleRow, useListener } from "../_ui";
@@ -25,6 +25,7 @@ const HeaderBarIcon = findComponentByCodeLazy(".HEADER_BAR_BADGE_BOTTOM,", 'posi
 const POPOUT_STYLE: CSSProperties = { maxHeight: "min(720px, calc(100vh - 72px))" };
 /** Discord's own voice panel button (noise suppression, disconnect …), so the clip button looks the same */
 const { PanelButton } = mapMangledModuleLazy("Masks.PANEL_BUTTON", { PanelButton: filters.byCode("tooltipPositionKey") });
+const VoiceActions = findByPropsLazy("toggleSelfMute", "toggleSelfDeaf");
 
 // Lucide rotate-ccw, send, scissors, pause, keyboard
 export const REPLAY_PATH = strokeIcon("M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8", "M3 3v5h5");
@@ -45,15 +46,24 @@ function formatTime(seconds: number, tenths = false) {
     return `${Math.floor(t / 60)}:${String(s).padStart(2, "0")}${rest}`;
 }
 
-function formatWhen(ms: number) {
+const formatClock = (ms: number) => new Date(ms).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" });
+
+/** Today / Yesterday / Monday, Oct 27 (with the year when it's not this one) */
+function formatDay(ms: number) {
     const d = new Date(ms);
-    const time = d.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" });
     const today = new Date();
-    if (d.toDateString() === today.toDateString()) return `Today ${time}`;
+    if (d.toDateString() === today.toDateString()) return "Today";
     const yesterday = new Date(today.getTime() - 86_400_000);
-    if (d.toDateString() === yesterday.toDateString()) return `Yesterday ${time}`;
-    return `${d.toLocaleDateString("en-US", { month: "short", day: "numeric" })}, ${time}`;
+    if (d.toDateString() === yesterday.toDateString()) return "Yesterday";
+    return d.toLocaleDateString("en-US", { weekday: "long", month: "short", day: "numeric", year: d.getFullYear() === today.getFullYear() ? undefined : "numeric" });
 }
+
+function formatWhen(ms: number) {
+    const day = formatDay(ms);
+    return day === "Today" || day === "Yesterday" ? `${day} ${formatClock(ms)}` : `${new Date(ms).toLocaleDateString("en-US", { month: "short", day: "numeric" })}, ${formatClock(ms)}`;
+}
+
+const whenOf = (clip: Clip) => clip.created ?? clip.modified;
 
 const nameOf = (file: string) => file.replace(/\.(ogg|wav)$/i, "");
 
@@ -100,6 +110,28 @@ async function togglePlay(clip: Clip) {
     a.onended = () => { player.playing = false; player.time = 0; emitPlayer(); };
     emitPlayer();
     await a.play();
+}
+
+// ---------------------------------------------------------------- Deafen while editing
+
+/** Set when the trim / soundboard window deafened you – only then it undeafens again */
+let deafenedByUs = false;
+
+/** Back to how it was before the window opened (a manual undeafen meanwhile is left alone) */
+function undeafen() {
+    if (!deafenedByUs) return;
+    deafenedByUs = false;
+    if (MediaEngineStore.isSelfDeaf()) VoiceActions.toggleSelfDeaf();
+}
+
+/** In a call the others would talk over the clip – deafen while the window is open */
+function useDeafenWhileOpen() {
+    useEffect(() => {
+        if (!settings.store.deafenWhileEditing || deafenedByUs || !SelectedChannelStore.getVoiceChannelId() || MediaEngineStore.isSelfDeaf()) return;
+        VoiceActions.toggleSelfDeaf();
+        deafenedByUs = true;
+        return undeafen;
+    }, []);
 }
 
 // ---------------------------------------------------------------- Windows
@@ -234,6 +266,7 @@ function TrimSheet({ clip, sound, onClose }: { clip: Clip; sound?: boolean; onCl
     const [audio, setAudio] = useState<HTMLAudioElement | null>(null);
     const rangeRef = useRef(range);
     rangeRef.current = range;
+    useDeafenWhileOpen();
 
     useEffect(() => {
         let url: string | null = null;
@@ -407,6 +440,8 @@ function SoundSheet({ clip, tracks, error, range, beforeSave, onClose, children 
             beforeSave();
             await addToSoundboard(current, tracks, range[0], range[1], guildId, name.trim());
             if (play) {
+                // Discord doesn't play soundboard sounds while you're deafened
+                undeafen();
                 const fresh = clipState.clips.find(c => c.file === clip.file);
                 if (fresh) await playInCall(fresh);
             }
@@ -596,7 +631,7 @@ async function sendClip(clip: Clip, done?: () => void) {
 
 // ---------------------------------------------------------------- Clip list
 
-function ClipRow({ clip, onSent }: { clip: Clip; onSent?(): void; }) {
+function ClipRow({ clip, onSent, timeOnly }: { clip: Clip; onSent?(): void; timeOnly?: boolean; }) {
     useListener(playerListeners);
     const current = player.file === clip.file;
     const length = current && player.duration ? player.duration : clip.seconds;
@@ -614,7 +649,7 @@ function ClipRow({ clip, onSent }: { clip: Clip; onSent?(): void; }) {
             subtitle={[
                 current && player.time > 0 ? `${formatTime(player.time)} / ${formatTime(length ?? 0)}` : length != null && formatTime(length),
                 clip.where,
-                formatWhen(clip.created ?? clip.modified)
+                timeOnly ? formatClock(whenOf(clip)) : formatWhen(whenOf(clip))
             ].filter(Boolean).join(" · ")}
             trailing={
                 <div className={cl("actions")}>
@@ -638,10 +673,44 @@ function ClipRow({ clip, onSent }: { clip: Clip; onSent?(): void; }) {
     );
 }
 
+/** "Recent" shows what you clipped in the last 2 hours */
+const RECENT_MS = 2 * 60 * 60 * 1000;
+type Tab = "recent" | "all";
+
+/** Every clip, searchable, grouped by day */
+function AllClips({ clips, onSent }: { clips: Clip[]; onSent?(): void; }) {
+    const [query, setQuery] = useState("");
+    const q = query.trim().toLowerCase();
+    const found = q ? clips.filter(c => nameOf(c.file).toLowerCase().includes(q) || c.where?.toLowerCase().includes(q)) : clips;
+
+    const days: { day: string; clips: Clip[]; }[] = [];
+    for (const c of found) {
+        const day = formatDay(whenOf(c));
+        if (days.at(-1)?.day === day) days.at(-1)!.clips.push(c);
+        else days.push({ day, clips: [c] });
+    }
+
+    return (
+        <>
+            <div className={cl("search")}>
+                <SearchField value={query} onChange={setQuery} placeholder="Search by name, channel or server" />
+            </div>
+            {!days.length ? (
+                <Empty icon={ICONS.search} title="Nothing found" hint="No clip has that in its name or where it was made." />
+            ) : days.map(d => (
+                <Section key={d.day} title={`${d.day} · ${d.clips.length}`}>
+                    {d.clips.map(c => <ClipRow key={c.file} clip={c} onSent={onSent} timeOnly />)}
+                </Section>
+            ))}
+        </>
+    );
+}
+
 function ClipsSheet({ embedded, onClose }: { embedded?: boolean; onClose(): void; }) {
     useListener(listeners);
     useListener(clipListeners);
     const { seconds, hotkey } = settings.use(["seconds", "hotkey"]);
+    const [tab, setTab] = useState<Tab>("recent");
 
     useEffect(() => {
         void refresh();
@@ -649,6 +718,9 @@ function ClipsSheet({ embedded, onClose }: { embedded?: boolean; onClose(): void
     }, []);
 
     const subtitle = state.running ? `Recording · last ${seconds} s` : "Join a voice call to clip";
+    const clips = [...clipState.clips].sort((a, b) => whenOf(b) - whenOf(a));
+    const recent = clips.filter(c => Date.now() - whenOf(c) < RECENT_MS);
+    const onSent = embedded ? undefined : onClose;
 
     return (
         <Sheet
@@ -670,16 +742,31 @@ function ClipsSheet({ embedded, onClose }: { embedded?: boolean; onClose(): void
                     </Button>
                     <span className={cl("dim")}>{hotkey ? `or press ${hotkey} – also in games` : "Set a shortcut in the plugin settings"}</span>
                     {state.error && !state.running && <Note tone="bad">Recording failed: {state.error}</Note>}
+                    {clips.length > 0 && (
+                        <div className={cl("tabs")}>
+                            <Segmented<Tab>
+                                value={tab}
+                                options={[{ value: "recent", label: "Recent", count: recent.length }, { value: "all", label: "All clips", count: clips.length }]}
+                                onChange={setTab}
+                            />
+                        </div>
+                    )}
                 </div>
             }
         >
             {!clipState.loaded ? (
                 <div className={cl("loading")}><Spinner /> Loading clips…</div>
-            ) : !clipState.clips.length ? (
+            ) : !clips.length ? (
                 <Empty icon={REPLAY_PATH} title="No clips yet" hint="While you're in a call, the last seconds are kept. Clip them with the button or your shortcut." />
+            ) : tab === "all" ? (
+                <AllClips clips={clips} onSent={onSent} />
+            ) : !recent.length ? (
+                <Empty icon={REPLAY_PATH} title="Nothing clipped in the last 2 hours" hint="Your older clips are under All clips.">
+                    <Button small variant="gray" onClick={() => setTab("all")}>Show all clips</Button>
+                </Empty>
             ) : (
-                <Section title={`${clipState.clips.length} clip${clipState.clips.length === 1 ? "" : "s"}`}>
-                    {clipState.clips.map(c => <ClipRow key={c.file} clip={c} onSent={embedded ? undefined : onClose} />)}
+                <Section title="Last 2 hours">
+                    {recent.map(c => <ClipRow key={c.file} clip={c} onSent={onSent} timeOnly />)}
                 </Section>
             )}
         </Sheet>
@@ -856,7 +943,7 @@ function HotkeyRow() {
 }
 
 export const SettingsPanel = ErrorBoundary.wrap(() => {
-    const s = settings.use(["seconds", "micMode", "showTitleBarButton", "showPanelButton"]);
+    const s = settings.use(["seconds", "micMode", "showTitleBarButton", "showPanelButton", "deafenWhileEditing"]);
     return (
         <Sheet embedded header={{ app: "CallClips", title: "CallClips", subtitle: "Clip the last seconds of a voice call", icon: REPLAY_PATH, iconColor: "gray" }}>
             <Section title="Clip length" footer="Kept in memory only while you're in a call – nothing is saved until you clip.">
@@ -880,6 +967,7 @@ export const SettingsPanel = ErrorBoundary.wrap(() => {
             <Section title="Controls">
                 <HotkeyRow />
                 <ToggleRow icon={REPLAY_PATH} title="Clip button in the voice panel" subtitle="Bottom left while you're in a call – right-click it for all clips" checked={s.showPanelButton} onChange={v => settings.store.showPanelButton = v} />
+                <ToggleRow icon={TRIM_PATH} title="Deafen while trimming" subtitle="In a call, the trim and soundboard windows deafen you so you hear only the clip – undeafened when you close them" checked={s.deafenWhileEditing} onChange={v => settings.store.deafenWhileEditing = v} />
                 <ToggleRow icon={REPLAY_PATH} title="Show icon in the title bar" checked={s.showTitleBarButton} onChange={v => settings.store.showTitleBarButton = v} />
                 <LinkRow icon={ICONS.folder} onClick={() => void openFolder()}>Open clips folder</LinkRow>
                 <LinkRow icon={REPLAY_PATH} onClick={openClipsWindow}>Show clips</LinkRow>

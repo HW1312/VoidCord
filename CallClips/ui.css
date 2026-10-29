@@ -38,6 +38,11 @@
     padding: 0 16px 12px;
 }
 
+.vc-callclips-tabs {
+    align-self: stretch;
+    margin-top: 6px;
+}
+
 .vc-callclips-search {
     padding: 0 16px 10px;
 }

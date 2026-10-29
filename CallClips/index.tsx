@@ -56,6 +56,12 @@ export const settings = definePluginSettings({
         description: "Show a clip button in the voice panel",
         default: true,
         hidden: true
+    },
+    deafenWhileEditing: {
+        type: OptionType.BOOLEAN,
+        description: "Deafen while the trim or soundboard window is open",
+        default: true,
+        hidden: true
     }
 });
 
