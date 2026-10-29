@@ -723,9 +723,9 @@ function ClipsSheet({ embedded, onClose }: { embedded?: boolean; onClose(): void
     const onSent = embedded ? undefined : onClose;
 
     return (
+        // Not the kit's embedded mode in the popout – that one has no scroll area of its own
         <Sheet
-            embedded={embedded}
-            onClose={onClose}
+            onClose={embedded ? undefined : onClose}
             header={{
                 app: "CallClips",
                 title: "CallClips",
