@@ -91,11 +91,11 @@ export function spend(entry: Omit<HistoryEntry, "id" | "at">) {
 
 export function addRecent(u: RecentUser) {
     const entry = { id: u.id, name: u.name, displayName: u.displayName, verified: u.verified };
-    settings.store.recentSearches = [entry, ...settings.store.recentSearches.filter(r => r.id !== u.id)].slice(0, MAX_RECENT);
+    settings.store.recentSearches = [entry, ...settings.store.recentSearches.filter(r => r.id !== u.id).map(r => ({ ...r }))].slice(0, MAX_RECENT);
 }
 
 export function removeRecent(id: number) {
-    settings.store.recentSearches = settings.store.recentSearches.filter(r => r.id !== id);
+    settings.store.recentSearches = settings.store.recentSearches.filter(r => r.id !== id).map(r => ({ ...r }));
 }
 
 export default definePlugin({

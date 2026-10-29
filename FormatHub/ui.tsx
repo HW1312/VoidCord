@@ -27,7 +27,7 @@ import {
     channelDisplayName, channelLink, DecodedToken, decodeText, emojiCdnUrl, emojiSyntax, eventLink, formatDate, FormatEntry, getRecentMessages,
     getSlashCommands, guildLink, inviteLink, messageLink, snowflakeToDate, TIMESTAMP_FLAGS, timestampSyntax, userDisplayName, userLink
 } from "./formats";
-import { copyFormat, insertFormat, MAX_RECENT, SavedFormat, settings, toggleFavorite } from "./index";
+import { copyFormat, insertFormat, MAX_RECENT, plainList, SavedFormat, settings, toggleFavorite } from "./index";
 
 const cl = classNameFactory("vc-formathub-");
 const MarkupClasses = findCssClassesLazy("markup", "codeContainer");
@@ -879,7 +879,7 @@ function FavoritesTab({ ctx }: { ctx: HubContext; }) {
                                     key={r.syntax}
                                     entry={r}
                                     ctx={ctx}
-                                    onRemove={() => { settings.store.recent = settings.store.recent.filter(x => x.syntax !== r.syntax); }}
+                                    onRemove={() => { settings.store.recent = plainList(settings.store.recent).filter(x => x.syntax !== r.syntax); }}
                                 />
                             ))}
                         </div>

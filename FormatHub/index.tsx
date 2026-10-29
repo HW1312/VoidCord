@@ -78,8 +78,14 @@ export function isFavorite(syntax: string) {
     return settings.store.favorites.some(f => f.syntax === syntax);
 }
 
+/**
+ * Plain copy of a list from settings.store – its items are proxies, and writing them back breaks saving
+ * ("An object could not be cloned"), which also stops every settings.use() in all plugins from updating
+ */
+export const plainList = (list: SavedFormat[]): SavedFormat[] => JSON.parse(JSON.stringify(list));
+
 export function toggleFavorite(entry: SavedFormat) {
-    const favs = settings.store.favorites;
+    const favs = plainList(settings.store.favorites);
     settings.store.favorites = isFavorite(entry.syntax)
         ? favs.filter(f => f.syntax !== entry.syntax)
         : [{ label: entry.label, syntax: entry.syntax }, ...favs];
@@ -87,7 +93,7 @@ export function toggleFavorite(entry: SavedFormat) {
 
 export function pushRecent(entry: SavedFormat) {
     if (!settings.store.trackRecent) return;
-    const rest = settings.store.recent.filter(r => r.syntax !== entry.syntax);
+    const rest = plainList(settings.store.recent).filter(r => r.syntax !== entry.syntax);
     settings.store.recent = [{ label: entry.label, syntax: entry.syntax }, ...rest].slice(0, MAX_RECENT);
 }
 
