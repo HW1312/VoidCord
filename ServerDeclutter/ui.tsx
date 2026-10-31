@@ -34,8 +34,8 @@ async function confirmReset() {
     });
     if (!ok) return;
     resetActivity()
-        .then(() => showToast("Tracking data reset", "success"))
-        .catch(() => showToast("Reset failed", "failure"));
+        .then(() => showToast({ text: "Tracking data reset", variant: "success" }))
+        .catch(() => showToast({ text: "Reset failed", variant: "critical" }));
 }
 
 function FolderNameField({ value }: { value: string; }) {

@@ -330,8 +330,8 @@ async function confirmReset() {
     });
     if (!ok) return;
     Promise.all([resetStats(), clearAllTime()])
-        .then(() => showToast("Wrapped was reset", "success"))
-        .catch(() => showToast("Reset failed", "failure"));
+        .then(() => showToast({ text: "Wrapped was reset", variant: "success" }))
+        .catch(() => showToast({ text: "Reset failed", variant: "critical" }));
 }
 
 const TOGGLES = [

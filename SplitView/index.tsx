@@ -122,22 +122,22 @@ export function openPanel(channelId: string | null | undefined, guildId?: string
     if (!channelId) return;
     const channel = ChannelStore.getChannel(channelId);
     if (!channel) {
-        showToast("SplitView: Channel not found", "failure");
+        showToast({ text: "SplitView: Channel not found", variant: "critical" });
         return;
     }
     if (!isTextCapable(channel)) {
-        showToast("SplitView: This channel has no text chat", "failure");
+        showToast({ text: "SplitView: This channel has no text chat", variant: "critical" });
         return;
     }
 
     const list = getPanels();
     settings.store.visible = true;
     if (list.some(p => p.channelId === channelId)) {
-        showToast("SplitView: Channel is already open", "message");
+        showToast({ text: "SplitView: Channel is already open" });
         return;
     }
     if (list.length >= MAX_PANELS) {
-        showToast(`SplitView: Maximum of ${MAX_PANELS} panels – close one first`, "failure");
+        showToast({ text: `SplitView: Maximum of ${MAX_PANELS} panels – close one first`, variant: "critical" });
         return;
     }
     list.push({ channelId, guildId: guildId ?? channel.guild_id ?? null });
@@ -207,7 +207,7 @@ function onKeyDown(e: KeyboardEvent) {
     e.stopPropagation();
     const channel = getCurrentChannel();
     if (!channel) {
-        showToast("SplitView: No channel selected", "failure");
+        showToast({ text: "SplitView: No channel selected", variant: "critical" });
         return;
     }
     openPanel(channel.id, channel.guild_id);

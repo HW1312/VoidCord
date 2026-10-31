@@ -209,7 +209,7 @@ function HealthPanel({ initialGuildId }: { initialGuildId: string | null; }) {
                 setFromCache(false);
                 saveCachedHealth(res);
             })
-            .catch(e => !isCancelled(e) && showToast(`Analysis failed: ${describeError(e)}`, "failure"));
+            .catch(e => !isCancelled(e) && showToast({ text: `Analysis failed: ${describeError(e)}`, variant: "critical" }));
     };
 
     // Rough upper bound on requests: up to max/100 per channel

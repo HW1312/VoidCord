@@ -514,7 +514,7 @@ function RuleEditor({ close, initial }: { close(): void; initial?: Rule; }) {
     const save = () => {
         if (!rule || error) return;
         upsertRule({ ...rule, name: rule.name.trim() });
-        showToast(initial ? "Rule saved" : "Rule created", "success");
+        showToast({ text: initial ? "Rule saved" : "Rule created", variant: "success" });
         close();
     };
 

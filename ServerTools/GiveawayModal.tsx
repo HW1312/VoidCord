@@ -91,7 +91,7 @@ function GiveawayPanel({ message }: { message: any; }) {
                 setLoadedKey(emojiKey(emoji));
                 setMembersMissing(res.missing);
             })
-            .catch(e => !isCancelled(e) && showToast(`Failed to load reactions: ${describeError(e)}`, "failure"));
+            .catch(e => !isCancelled(e) && showToast({ text: `Failed to load reactions: ${describeError(e)}`, variant: "critical" }));
     };
 
     // ---- Drawing & animation
@@ -138,7 +138,7 @@ function GiveawayPanel({ message }: { message: any; }) {
     const doDraw = async (reroll: boolean) => {
         const candidates = (reroll ? pool : filtered?.eligible ?? []).map(p => p.id);
         if (!candidates.length) {
-            showToast("No valid participants left", "failure");
+            showToast({ text: "No valid participants left", variant: "critical" });
             return;
         }
         try {
@@ -146,7 +146,7 @@ function GiveawayPanel({ message }: { message: any; }) {
             setRounds(r => reroll ? [...r, result] : [result]);
             animate(result, candidates);
         } catch (e) {
-            showToast(`Draw failed: ${describeError(e)}`, "failure");
+            showToast({ text: `Draw failed: ${describeError(e)}`, variant: "critical" });
         }
     };
 
@@ -155,12 +155,12 @@ function GiveawayPanel({ message }: { message: any; }) {
     const post = async () => {
         if (!await confirm({ title: "Really post?", body: "The result is posted in the channel and pings the winners.", confirmText: "Post in channel" })) return;
         if (resultText.length > 2000) {
-            showToast("Result is longer than 2000 characters - please copy it instead", "failure");
+            showToast({ text: "Result is longer than 2000 characters - please copy it instead", variant: "critical" });
             return;
         }
         Promise.resolve(sendMessage(message.channel_id, { content: resultText }))
-            .then(() => showToast("Result posted", "success"))
-            .catch(e => showToast(`Failed to send: ${describeError(e)}`, "failure"));
+            .then(() => showToast({ text: "Result posted", variant: "success" }))
+            .catch(e => showToast({ text: `Failed to send: ${describeError(e)}`, variant: "critical" }));
     };
 
     const locked = rounds.length > 0 || job.state.running || phase === "rolling";

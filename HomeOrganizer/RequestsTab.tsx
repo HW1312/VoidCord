@@ -97,7 +97,7 @@ function RequestRow({ r, selected, onSelect, onAccept, onRemove, onLoad, busy }:
                 <span className={cl("row-actions")} onClick={e => e.stopPropagation()}>
                     {r.incoming && <Button small variant="tinted" color="green" icon={ICONS.check} disabled={busy} onClick={onAccept}>Accept</Button>}
                     <Button small variant="gray" icon={ICONS.close} disabled={busy} onClick={onRemove}>{r.incoming ? "Ignore" : "Withdraw"}</Button>
-                    <IconButton icon={ICONS.person} label="Open profile" onClick={() => openUserProfile(r.id).catch(() => showToast("Could not open profile", "failure"))} />
+                    <IconButton icon={ICONS.person} label="Open profile" onClick={() => openUserProfile(r.id).catch(() => showToast({ text: "Could not open profile", variant: "critical" }))} />
                 </span>
             </>}
         />
@@ -156,9 +156,9 @@ export function RequestsTab() {
         return n;
     });
     const addSel = (list: RequestEntry[], label: string) => {
-        if (!list.length) return showToast(`No matches for “${label}”`, "message");
+        if (!list.length) return showToast({ text: `No matches for “${label}”` });
         setSelected(s => new Set([...s, ...list.map(r => r.id)]));
-        showToast(`${list.length} selected (${label})`, "success");
+        showToast({ text: `${list.length} selected (${label})`, variant: "success" });
     };
 
     const switchDir = (d: Dir) => {
@@ -171,7 +171,7 @@ export function RequestsTab() {
     const loadOne = (r: RequestEntry) => {
         mutualCache.delete(r.id);
         loadMutual(r.id)
-            .then(res => res === "error" && showToast("Could not load profile", "failure"))
+            .then(res => res === "error" && showToast({ text: "Could not load profile", variant: "critical" }))
             .finally(() => setMutualVersion(v => v + 1));
     };
 
@@ -194,8 +194,8 @@ export function RequestsTab() {
         const p = accept ? acceptRequest(r.id) : removeRequest(r.id);
         p.then(() => {
             setSel(r.id, false);
-            showToast(accept ? `Accepted ${r.name}` : r.incoming ? `Ignored request from ${r.name}` : `Withdrew request to ${r.name}`, "success");
-        }).catch(e => showToast(`Action failed: ${describeError(e)}`, "failure"));
+            showToast({ text: accept ? `Accepted ${r.name}` : r.incoming ? `Ignored request from ${r.name}` : `Withdrew request to ${r.name}`, variant: "success" });
+        }).catch(e => showToast({ text: `Action failed: ${describeError(e)}`, variant: "critical" }));
     };
 
     const bulk = (accept: boolean) => {
@@ -231,7 +231,7 @@ export function RequestsTab() {
                     }
                 }
                 progress(list.length, list.length, "Done");
-                if (failed) showToast(`${failed} requests failed`, "failure");
+                if (failed) showToast({ text: `${failed} requests failed`, variant: "critical" });
                 return `${ok} requests ${accept ? "accepted" : dir === "in" ? "ignored" : "withdrawn"}${failed ? `, ${failed} failed` : ""}.`;
             })
         });

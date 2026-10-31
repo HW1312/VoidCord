@@ -43,8 +43,8 @@ function DmRow({ dm, selected, onSelect, onOpen }: { dm: DmEntry; selected: bool
         items: [toItem(dm)],
         confirmText: "Leave group",
         onConfirm: () => leaveGroup(dm.id)
-            .then(() => showToast(`Left “${dm.name}”`, "success"))
-            .catch(e => showToast(`Failed to leave: ${describeError(e)}`, "failure"))
+            .then(() => showToast({ text: `Left “${dm.name}”`, variant: "success" }))
+            .catch(e => showToast({ text: `Failed to leave: ${describeError(e)}`, variant: "critical" }))
     });
 
     return (
@@ -142,7 +142,7 @@ export function DmTab({ onClose }: { onClose(): void; }) {
     /** Closes the 1:1 DMs; groups are only included when withGroups (explicit selection) and are left */
     function runClose(entries: DmEntry[], what: string, withGroups = false) {
         const list = entries.filter(d => !d.protected && (withGroups || !d.isGroup));
-        if (!list.length) return showToast("Nothing to close", "message");
+        if (!list.length) return showToast({ text: "Nothing to close" });
 
         const groups = list.filter(d => d.isGroup);
         const dmCount = list.length - groups.length;
@@ -180,7 +180,7 @@ export function DmTab({ onClose }: { onClose(): void; }) {
                     }
                 }
                 progress(list.length, list.length, "Done");
-                if (failed) showToast(`${failed} could not be closed`, "failure");
+                if (failed) showToast({ text: `${failed} could not be closed`, variant: "critical" });
                 return `Done: ${ok} closed/left${failed ? `, ${failed} failed` : ""}.`;
             })
         });

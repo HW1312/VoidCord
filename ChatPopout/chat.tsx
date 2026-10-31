@@ -768,7 +768,7 @@ function editMessage(channelId: string, messageId: string, content: string) {
 export function deleteMessage(channelId: string, messageId: string) {
     const fail = (e: any) => {
         logger.error("Couldn't delete message", e);
-        showToast("Couldn't delete message", "failure");
+        showToast({ text: "Couldn't delete message", variant: "critical" });
     };
     try {
         Promise.resolve(MessageActions.deleteMessage(channelId, messageId)).catch(fail);
@@ -911,7 +911,7 @@ function Composer({ channel, name, ctx }: { channel: any; name: string; ctx: Win
             if (content && content !== m.content) {
                 editMessage(channelId, m.id, content).catch((e: any) => {
                     logger.error("Couldn't edit message", e);
-                    showToast("Couldn't edit message", "failure");
+                    showToast({ text: "Couldn't edit message", variant: "critical" });
                 });
             }
             cancelMode();
@@ -920,7 +920,7 @@ function Composer({ channel, name, ctx }: { channel: any; name: string; ctx: Win
 
         if ((!content && !files.length) || !canSend) return;
         if (content.length > 2000) {
-            showToast("Message is too long (max. 2000 characters)", "failure");
+            showToast({ text: "Message is too long (max. 2000 characters)", variant: "critical" });
             return;
         }
 
@@ -931,7 +931,7 @@ function Composer({ channel, name, ctx }: { channel: any; name: string; ctx: Win
         if (slow > 0 && !bypass) {
             const left = Math.ceil(((lastSent.get(channelId) ?? 0) + slow * 1000 - Date.now()) / 1000);
             if (left > 0) {
-                showToast(`Slowmode: wait ${left}s`, "failure");
+                showToast({ text: `Slowmode: wait ${left}s`, variant: "critical" });
                 return;
             }
         }
@@ -951,7 +951,7 @@ function Composer({ channel, name, ctx }: { channel: any; name: string; ctx: Win
             const sent = ctx.sendFiles ? ctx.sendFiles(channel, attached, reference) : sendFiles(channel, attached, reference, ctx.doc().defaultView);
             sent.catch((e: any) => {
                 logger.error("Couldn't upload files", e);
-                showToast("Couldn't upload the file", "failure");
+                showToast({ text: "Couldn't upload the file", variant: "critical" });
             });
         }
         if (!content) return;
@@ -959,11 +959,11 @@ function Composer({ channel, name, ctx }: { channel: any; name: string; ctx: Win
             Promise.resolve(sendMessage(channelId, { content }, false, options as any)).catch((e: any) => {
                 logger.error("Couldn't send message", e);
                 const slowmode = e?.body?.code === 20016 || e?.status === 429;
-                showToast(slowmode ? "Slowmode is active – please wait a moment" : "Couldn't send message", "failure");
+                showToast({ text: slowmode ? "Slowmode is active – please wait a moment" : "Couldn't send message", variant: "critical" });
             });
         } catch (e) {
             logger.error("Couldn't send message", e);
-            showToast("Couldn't send message", "failure");
+            showToast({ text: "Couldn't send message", variant: "critical" });
             update(content);
         }
     };
@@ -1494,7 +1494,7 @@ async function dmChannelId(userId: string): Promise<string | null> {
         return body?.id ?? null;
     } catch (e) {
         logger.error("Couldn't open DM", e);
-        showToast("Couldn't open DM", "failure");
+        showToast({ text: "Couldn't open DM", variant: "critical" });
         return null;
     }
 }
@@ -1590,7 +1590,7 @@ function ChatWindowInner({ channelId: initialChannelId, windowKey, sidebar: Cust
         watchStream(userId) {
             const target = streamTargetFor(userId, channelRef.current);
             if (!target) {
-                showToast("This stream isn't available here", "failure");
+                showToast({ text: "This stream isn't available here", variant: "critical" });
                 return;
             }
             if (!startWatching(target)) return;

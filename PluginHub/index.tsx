@@ -150,7 +150,7 @@ export function setEnabled(p: Plugin, enable: boolean) {
     const ok = enable ? startPlugin(p) : stopPlugin(p);
     if (!ok) {
         pluginSettings.enabled = false;
-        showToast(`Failed to ${enable ? "start" : "stop"} ${p.name}`, "failure");
+        showToast({ text: `Failed to ${enable ? "start" : "stop"} ${p.name}`, variant: "critical" });
         return;
     }
 

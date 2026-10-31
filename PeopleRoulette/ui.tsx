@@ -93,7 +93,7 @@ function BioLink({ href, children }: { href: string; children: ReactNode; }) {
             setCopied(true);
             clearTimeout(timer.current);
             timer.current = setTimeout(() => setCopied(false), 1500);
-        }, () => showToast("Couldn't copy the link", "failure"));
+        }, () => showToast({ text: "Couldn't copy the link", variant: "critical" }));
     }
 
     return (

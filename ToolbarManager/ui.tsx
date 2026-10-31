@@ -105,7 +105,7 @@ function openMenuAt(e: AnyMouseEvent | undefined, anchor: Element, render: () =>
         ContextMenuApi.openContextMenu(event, render as any);
     } catch (err) {
         logger.error("Failed to open menu", err);
-        showToast("ToolbarManager: Failed to open menu", "failure");
+        showToast({ text: "ToolbarManager: Failed to open menu", variant: "critical" });
     }
 }
 
@@ -129,7 +129,7 @@ export function openDockMenu(e: AnyMouseEvent | undefined, bar: Bar, dock: Eleme
                                 // Trigger only after the menu has closed, otherwise Discord immediately closes the new popout again
                                 setTimeout(() => {
                                     if (!item.el.isConnected) {
-                                        showToast("ToolbarManager: Button no longer exists", "failure");
+                                        showToast({ text: "ToolbarManager: Button no longer exists", variant: "critical" });
                                         return;
                                     }
                                     positionUnderDock(dock);
@@ -477,7 +477,7 @@ function Profiles() {
         const p = snapshotProfile(n);
         update(dd => { dd.profiles = [...dd.profiles.filter(x => x.name !== n), p]; });
         setName("");
-        showToast(`Profile “${n}” saved`, "success");
+        showToast({ text: `Profile “${n}” saved`, variant: "success" });
     };
 
     const reset = async () => {

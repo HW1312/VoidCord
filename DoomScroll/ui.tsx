@@ -479,7 +479,7 @@ export const SettingsPanel = ErrorBoundary.wrap(() => {
                             small
                             onClick={async () => {
                                 await Native?.clearData();
-                                showToast("Logged out of all feeds", "success");
+                                showToast({ text: "Logged out of all feeds", variant: "success" });
                             }}
                         >
                             Log out everywhere

@@ -271,7 +271,7 @@ function deliverLink(channel: Channel, text: string) {
     const mode = settings.store.sendMode;
     if (mode === "copy" || NO_CHAT_TYPES.has(channel.type)) {
         copyToClipboard(text);
-        showToast("Download link copied to clipboard", "success");
+        showToast({ text: "Download link copied to clipboard", variant: "success" });
     } else if (mode === "insert") {
         insertTextIntoChatInputBox(text);
     } else {

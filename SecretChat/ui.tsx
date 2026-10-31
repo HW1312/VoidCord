@@ -120,7 +120,7 @@ async function confirmDelete(k: KeyRecord) {
         });
         if (choice === 1) deleteKey(k.id);
         else if (choice === 2 && !await deleteKeyForBoth(k)) {
-            showToast(`No DM with ${partner} – deleted only for you`, "message");
+            showToast({ text: `No DM with ${partner} – deleted only for you` });
             deleteKey(k.id);
         }
         return;
@@ -274,7 +274,7 @@ function GroupTab({ channel, current }: { channel: Channel; current: string | nu
             const { record, isNew } = await addKey(key, { name, kind: "group", source: mode });
             await setChannelKey(channel.id, record.id);
             retryLocked();
-            if (!isNew) showToast(`You already have this key as “${record.name}”`, "message");
+            if (!isNew) showToast({ text: `You already have this key as “${record.name}”` });
             else if (mode === "random") copyWithToast(inviteCode(record), "Key created – code copied");
             setName("");
             setPassword("");
@@ -435,7 +435,7 @@ export async function importCode(text: string, channelId?: string) {
     const result = await addKey(parsed.key, { name: parsed.name || "Group key", kind: "group", source: "code" });
     if (channelId) await setChannelKey(channelId, result.record.id);
     retryLocked();
-    showToast(result.isNew ? `Key “${result.record.name}” added` : `You already have this key as “${result.record.name}”`, "success");
+    showToast({ text: result.isNew ? `Key “${result.record.name}” added` : `You already have this key as “${result.record.name}”`, variant: "success" });
     return result;
 }
 

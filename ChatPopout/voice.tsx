@@ -163,7 +163,7 @@ export function VolumeSlider({ userId, context = "default", label = "User Volume
 function patchMember(guildId: string, userId: string, body: Record<string, unknown>, what: string) {
     RestAPI.patch({ url: `/guilds/${guildId}/members/${userId}`, body }).catch((e: any) => {
         log.error(`Couldn't ${what}`, e);
-        showToast(e?.body?.message ? `Couldn't ${what}: ${e.body.message}` : `Couldn't ${what}`, "failure");
+        showToast({ text: e?.body?.message ? `Couldn't ${what}: ${e.body.message}` : `Couldn't ${what}`, variant: "critical" });
     });
 }
 

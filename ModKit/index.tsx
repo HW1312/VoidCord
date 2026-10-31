@@ -93,10 +93,10 @@ export function setNotesChannel(guildId: string, channel: any) {
     const old = getNotesChannelId(guildId);
     if (old && old !== channel.id) void clearStored(old);
     settings.store.notesChannels = { ...settings.store.notesChannels, [guildId]: channel.id };
-    showToast(`ModKit: #${channel.name} is now the ModNotes channel`, "success");
+    showToast({ text: `ModKit: #${channel.name} is now the ModNotes channel`, variant: "success" });
 
     if (isPubliclyVisible(guildId, channel))
-        setTimeout(() => showToast("ModKit: Warning - this channel appears to be visible to @everyone!", "failure"), 1200);
+        setTimeout(() => showToast({ text: "ModKit: Warning - this channel appears to be visible to @everyone!", variant: "critical" }), 1200);
 }
 
 export function unsetNotesChannel(guildId: string) {
@@ -105,7 +105,7 @@ export function unsetNotesChannel(guildId: string) {
     const next = { ...settings.store.notesChannels };
     delete next[guildId];
     settings.store.notesChannels = next;
-    showToast("ModKit: ModNotes channel removed", "message");
+    showToast({ text: "ModKit: ModNotes channel removed" });
 }
 
 /** Rough check: can @everyone see the channel? */

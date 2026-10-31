@@ -58,7 +58,7 @@ export function Tooltip({ text, children }: { text: ReactNode; children(props: R
 
 export const ContextMenuApi = { openContextMenu() { }, closeContextMenu() { } };
 export const Menu = new Proxy({}, { get: () => ({ children }: { children?: ReactNode; }) => <>{children}</> });
-export const showToast = (text: string) => console.log("[toast]", text);
+export const showToast = ({ text, variant }: { text: string; variant?: string; }) => console.log("[toast]", variant ?? "default", text);
 export const Toasts = { Type: { SUCCESS: "success", FAILURE: "failure", MESSAGE: "message" } };
 
 export { cloneElement, isValidElement };

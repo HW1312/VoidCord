@@ -103,10 +103,10 @@ export async function copyFormat(entry: SavedFormat) {
     try {
         await copyToClipboard(entry.syntax);
         pushRecent(entry);
-        showToast(`Copied: ${entry.syntax.length > 60 ? entry.syntax.slice(0, 57) + "…" : entry.syntax}`, "success");
+        showToast({ text: `Copied: ${entry.syntax.length > 60 ? entry.syntax.slice(0, 57) + "…" : entry.syntax}`, variant: "success" });
     } catch (e) {
         logger.error("Copy failed", e);
-        showToast("Copy failed", "failure");
+        showToast({ text: "Copy failed", variant: "critical" });
     }
 }
 
@@ -118,7 +118,7 @@ export function insertFormat(entry: SavedFormat) {
         return true;
     } catch (e) {
         logger.error("Insert failed", e);
-        showToast("Insert failed – no chat input found", "failure");
+        showToast({ text: "Insert failed – no chat input found", variant: "critical" });
         return false;
     }
 }

@@ -386,9 +386,9 @@ export async function runMacro(
         if (i < macro.steps.length - 1) await sleep(350);
     }
 
-    if (failed) showToast(`ModKit: ${macro.name} – ${errors[0]}${failed > 1 ? ` (+${failed - 1} more ${failed - 1 === 1 ? "error" : "errors"})` : ""}`, "failure");
-    else if (done) showToast(`ModKit: ${macro.name} executed (${done}/${macro.steps.length}${skipped ? `, ${skipped} skipped` : ""})`, "success");
-    else showToast(`ModKit: ${macro.name} - nothing executed`, "message");
+    if (failed) showToast({ text: `ModKit: ${macro.name} – ${errors[0]}${failed > 1 ? ` (+${failed - 1} more ${failed - 1 === 1 ? "error" : "errors"})` : ""}`, variant: "critical" });
+    else if (done) showToast({ text: `ModKit: ${macro.name} executed (${done}/${macro.steps.length}${skipped ? `, ${skipped} skipped` : ""})`, variant: "success" });
+    else showToast({ text: `ModKit: ${macro.name} - nothing executed` });
 
     return { done, failed, skipped };
 }

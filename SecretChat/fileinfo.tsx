@@ -161,7 +161,7 @@ function FileInfoWindow({ info, close, fetchBytes, pickFile }: {
 
     const copy = (text: string) => {
         copyToClipboard(text);
-        showToast("Copied", "success");
+        showToast({ text: "Copied", variant: "success" });
     };
 
     return (

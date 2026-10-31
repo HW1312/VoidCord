@@ -310,9 +310,9 @@ function AddNoteForm({ guildId, userId, target, startOpen }: { guildId: string; 
                 excerpt: r && r === targetLink ? target?.excerpt : undefined
             });
             setReason("");
-            showToast("ModKit: Note saved", "success");
+            showToast({ text: "ModKit: Note saved", variant: "success" });
         } catch (e) {
-            showToast(`ModKit: Could not save note - ${describeError(e)}`, "failure");
+            showToast({ text: `ModKit: Could not save note - ${describeError(e)}`, variant: "critical" });
         } finally {
             setSaving(false);
         }
@@ -376,9 +376,9 @@ function NoteItem({ note, guildId, onNavigate }: { note: Note; guildId: string; 
         setBusy(true);
         try {
             await deleteNote(note);
-            showToast("ModKit: Note deleted", "success");
+            showToast({ text: "ModKit: Note deleted", variant: "success" });
         } catch (e) {
-            showToast(`ModKit: Could not delete note - ${describeError(e)}`, "failure");
+            showToast({ text: `ModKit: Could not delete note - ${describeError(e)}`, variant: "critical" });
             setBusy(false);
         }
     }
@@ -875,9 +875,9 @@ function MacroEditor() {
     function restorePresets() {
         const have = new Set(macros.map(m => m.id));
         const missing = makePresets().filter(p => !have.has(p.id));
-        if (!missing.length) return showToast("ModKit: All presets already exist", "message");
+        if (!missing.length) return showToast({ text: "ModKit: All presets already exist" });
         saveMacros([...macros, ...missing]);
-        showToast(`ModKit: ${plural(missing.length, "preset", "presets")} restored`, "success");
+        showToast({ text: `ModKit: ${plural(missing.length, "preset", "presets")} restored`, variant: "success" });
     }
 
     return (

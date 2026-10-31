@@ -82,7 +82,7 @@ export function isInCall(channelId: string) {
 export function openChatPopout(channelId: string | null | undefined) {
     const channel = channelId ? ChannelStore.getChannel(channelId) : null;
     if (!channel) {
-        showToast("This chat can't be opened", "failure");
+        showToast({ text: "This chat can't be opened", variant: "critical" });
         return;
     }
 
@@ -97,7 +97,7 @@ export function openChatPopout(channelId: string | null | undefined) {
         });
     } catch (e) {
         logger.error("Couldn't open window", e);
-        showToast("Couldn't open window", "failure");
+        showToast({ text: "Couldn't open window", variant: "critical" });
         return;
     }
 
@@ -112,7 +112,7 @@ export function openCallPopout(channelId: string) {
     const channel = ChannelStore.getChannel(channelId);
     if (!channel) return;
     if (!isInCall(channelId)) {
-        showToast("You're not in a call in this channel", "failure");
+        showToast({ text: "You're not in a call in this channel", variant: "critical" });
         return;
     }
     FluxDispatcher.dispatch({ type: "CHANNEL_CALL_POPOUT_WINDOW_OPEN", channel } as any);

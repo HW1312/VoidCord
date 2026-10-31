@@ -464,7 +464,7 @@ export const SettingsPanel = ErrorBoundary.wrap(() => {
     const clear = async () => {
         await clearCache();
         resetBackoffs();
-        showToast("LinkCards cache cleared", "success");
+        showToast({ text: "LinkCards cache cleared", variant: "success" });
     };
 
     return (

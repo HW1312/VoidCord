@@ -162,7 +162,7 @@ export function joinVoice(channelId: string, quiet = false): boolean {
 
     const blocker = getJoinBlocker(channelId);
     if (blocker) {
-        showToast(blocker, "failure");
+        showToast({ text: blocker, variant: "critical" });
         return false;
     }
 
@@ -171,13 +171,13 @@ export function joinVoice(channelId: string, quiet = false): boolean {
         ChannelActions.selectVoiceChannel(channelId);
         if (!quiet) {
             const info = getVoiceInfo(channelId);
-            if (info) showToast(`Joining ${info.isPrivate ? info.place : "#" + info.channelName}`, "success");
+            if (info) showToast({ text: `Joining ${info.isPrivate ? info.place : "#" + info.channelName}`, variant: "success" });
         }
         return true;
     } catch (e) {
         expectedChannelId = undefined;
         logger.error("Failed to join voice channel", e);
-        showToast("Failed to join the voice channel.", "failure");
+        showToast({ text: "Failed to join the voice channel.", variant: "critical" });
         return false;
     }
 }
@@ -247,10 +247,10 @@ export function startFollowing(id: string) {
     const name = getDisplayName(UserStore.getUser(id), id);
     const channelId = VoiceStateStore.getVoiceStateForUser(id)?.channelId;
 
-    if (!channelId) showToast(`Following ${name} - you'll join when they join voice.`, "message");
-    else if (channelId === getMyVoiceChannelId()) showToast(`Following ${name}.`, "success");
+    if (!channelId) showToast({ text: `Following ${name} - you'll join when they join voice.` });
+    else if (channelId === getMyVoiceChannelId()) showToast({ text: `Following ${name}.`, variant: "success" });
     else {
-        showToast(`Following ${name}.`, "success");
+        showToast({ text: `Following ${name}.`, variant: "success" });
         syncWithFollowed();
     }
 }
@@ -260,7 +260,7 @@ export function stopFollowing(quiet = false) {
     resetFollowState();
     if (!settings.store.following) return;
     settings.store.following = null;
-    if (!quiet) showToast(`Stopped following ${name}.`, "message");
+    if (!quiet) showToast({ text: `Stopped following ${name}.` });
 }
 
 export function toggleFollow(id: string) {
@@ -289,7 +289,7 @@ function syncWithFollowed() {
     if (!channelId) {
         hubWait = null;
         if (mine && settings.store.leaveWithFriend) {
-            showToast(`${followedName()} left voice - leaving too.`, "message");
+            showToast({ text: `${followedName()} left voice - leaving too.` });
             leaveVoice();
         }
         return;
@@ -310,12 +310,12 @@ function syncWithFollowed() {
     if (blocker) {
         if (blockedChannelId !== channelId) {
             blockedChannelId = channelId;
-            showToast(`${blocker} Still following ${followedName()}.`, "failure");
+            showToast({ text: `${blocker} Still following ${followedName()}.`, variant: "critical" });
         }
         return;
     }
     blockedChannelId = null;
-    if (joinVoice(channelId, true)) showToast(`Following ${followedName()} to ${channelLabel(channelId)}`, "message");
+    if (joinVoice(channelId, true)) showToast({ text: `Following ${followedName()} to ${channelLabel(channelId)}` });
 }
 
 interface VoiceStateChange {
@@ -354,7 +354,7 @@ function onVoiceStateUpdates({ voiceStates }: { voiceStates: VoiceStateChange[];
 
             if (!newChannel) {
                 paused = true;
-                if (friendChannel) showToast(`You left voice - still following ${followedName()}, you'll join when they switch channels.`, "message");
+                if (friendChannel) showToast({ text: `You left voice - still following ${followedName()}, you'll join when they switch channels.` });
                 continue;
             }
 
@@ -363,7 +363,7 @@ function onVoiceStateUpdates({ voiceStates }: { voiceStates: VoiceStateChange[];
             resyncs = resyncs.filter(t => now - t < RESYNC_WINDOW);
             if (resyncs.length >= MAX_RESYNCS) {
                 paused = true;
-                showToast(`You keep getting moved - waiting until ${followedName()} switches channels.`, "message");
+                showToast({ text: `You keep getting moved - waiting until ${followedName()} switches channels.` });
                 continue;
             }
             resyncs.push(now);

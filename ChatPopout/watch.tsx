@@ -50,7 +50,7 @@ export function streamTargetFor(userId: string, channelId: string): StreamTarget
 export function startWatching(t: StreamTarget) {
     // Only possible while connected to the call (Discord's rule)
     if (SelectedChannelStore.getVoiceChannelId() !== t.channelId) {
-        showToast("Join the call to watch the stream", "message");
+        showToast({ text: "Join the call to watch the stream" });
         return false;
     }
     try {
@@ -58,7 +58,7 @@ export function startWatching(t: StreamTarget) {
         return true;
     } catch (e) {
         log.error("Couldn't watch stream", e);
-        showToast("Couldn't open the stream", "failure");
+        showToast({ text: "Couldn't open the stream", variant: "critical" });
         return false;
     }
 }
@@ -297,7 +297,7 @@ export function openStreamWindow(t: StreamTarget, onDock?: () => void) {
     } catch (e) {
         inWindow.delete(t.streamKey);
         log.error("Couldn't open stream window", e);
-        showToast("Couldn't open stream window", "failure");
+        showToast({ text: "Couldn't open stream window", variant: "critical" });
     }
 }
 

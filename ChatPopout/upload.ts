@@ -50,7 +50,7 @@ export function attachmentOf(upload: TCloudUpload, index: number) {
 export function askGofile(file: File, note: string, win?: Window | null): Promise<boolean> {
     const limit = formatBytes(uploadLimit());
     if (!Settings.plugins.GofileUpload?.enabled) {
-        showToast(`${file.name} is larger than your upload limit (${limit}) – turn on GofileUpload to send big files`, "failure");
+        showToast({ text: `${file.name} is larger than your upload limit (${limit}) – turn on GofileUpload to send big files`, variant: "critical" });
         return Promise.resolve(false);
     }
     const text = `“${file.name}” (${formatBytes(file.size)}) is larger than your upload limit (${limit}). Upload it to Gofile and send the link instead? ${note}`;

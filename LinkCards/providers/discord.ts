@@ -77,7 +77,7 @@ function join(d: InviteData) {
         NavigationRouter.transitionToGuild(d.guildId);
         return;
     }
-    openInviteModal(d.code).catch(() => showToast("This invite is invalid or expired", "failure"));
+    openInviteModal(d.code).catch(() => showToast({ text: "This invite is invalid or expired", variant: "critical" }));
 }
 
 function render(d: InviteData): CardView {

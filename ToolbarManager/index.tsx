@@ -91,7 +91,7 @@ export default definePlugin({
             startDom();
         } catch (e) {
             logger.error("Failed to start", e);
-            showToast("ToolbarManager: Failed to start - see console for details", "failure");
+            showToast({ text: "ToolbarManager: Failed to start - see console for details", variant: "critical" });
         }
         document.addEventListener("contextmenu", onContextMenu, true);
     },

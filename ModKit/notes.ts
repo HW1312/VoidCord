@@ -285,7 +285,7 @@ export function ensureLoaded(guildId: string | null | undefined, force = false):
         .catch(e => {
             c.error = describeError(e);
             logger.error("Could not load ModNotes", e);
-            showToast(`ModKit: Could not load ModNotes - ${c.error}`, "failure");
+            showToast({ text: `ModKit: Could not load ModNotes - ${c.error}`, variant: "critical" });
         })
         .finally(() => {
             c.loading = null;
@@ -330,7 +330,7 @@ async function fetchAll(channelId: string, c: ChannelCache) {
         before = msgs.reduce((min, m) => compareIds(m.id, min) < 0 ? m.id : min, msgs[0].id);
         await sleep(PAGE_DELAY);
     }
-    showToast("ModKit: Very long history - only the latest 20,000 messages were loaded", "message");
+    showToast({ text: "ModKit: Very long history - only the latest 20,000 messages were loaded" });
 }
 
 async function fetchNewer(channelId: string, c: ChannelCache) {

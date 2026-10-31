@@ -28,7 +28,7 @@ export function quoteSelected() {
     const guildId = getChannel()?.guild_id;
 
     if (SelectedChannelStore.getChannelId() !== state.channelId) {
-        showToast("Open the channel to quote into its chat box", "failure");
+        showToast({ text: "Open the channel to quote into its chat box", variant: "critical" });
         return;
     }
     insertTextIntoChatInputBox(messagesToQuote(messages, guildId));
@@ -40,10 +40,10 @@ export async function copySelected() {
     if (!messages.length) return;
     try {
         await copyToClipboard(messagesToText(messages, getChannel()?.guild_id));
-        showToast(`Copied ${messages.length} message${messages.length === 1 ? "" : "s"}`, "success");
+        showToast({ text: `Copied ${messages.length} message${messages.length === 1 ? "" : "s"}`, variant: "success" });
     } catch (e) {
         logger.error("Couldn't copy", e);
-        showToast("Couldn't copy", "failure");
+        showToast({ text: "Couldn't copy", variant: "critical" });
     }
 }
 
@@ -231,7 +231,7 @@ export async function copyPng(png: Blob) {
         } else {
             throw new Error("ClipboardItem not available");
         }
-        showToast("Image copied", "success");
+        showToast({ text: "Image copied", variant: "success" });
         return;
     } catch (e) {
         logger.warn("navigator.clipboard.write failed, trying DiscordNative", e);
@@ -241,10 +241,10 @@ export async function copyPng(png: Blob) {
         const clip = nativeApi()?.clipboard;
         if (typeof clip?.copyImage !== "function") throw new Error("No native clipboard");
         await clip.copyImage(new Uint8Array(await png.arrayBuffer()), "messages.png");
-        showToast("Image copied", "success");
+        showToast({ text: "Image copied", variant: "success" });
     } catch (e) {
         logger.error("Couldn't copy image", e);
-        showToast("Couldn't copy image", "failure");
+        showToast({ text: "Couldn't copy image", variant: "critical" });
     }
 }
 
@@ -266,6 +266,6 @@ export async function savePng(png: Blob, name: string) {
         }, 0);
     } catch (e) {
         logger.error("Couldn't save image", e);
-        showToast("Couldn't save image", "failure");
+        showToast({ text: "Couldn't save image", variant: "critical" });
     }
 }

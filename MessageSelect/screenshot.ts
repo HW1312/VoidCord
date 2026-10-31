@@ -490,7 +490,7 @@ function buildModel(messages: Message[], opts: ShotOptions): ShotMessage[] {
             }
         }
 
-        const stickers = ((m as any).stickerItems ?? m.stickers ?? []).map((s: any) => ({
+        const stickers = ((m as any).stickerItems ?? (m as any).stickers ?? []).map((s: any) => ({
             name: s.name ?? "Sticker",
             // Lottie stickers (format 3) can't be drawn
             url: s.format_type === 3 ? null : `https://media.discordapp.net/stickers/${s.id}.png?size=160`
@@ -905,7 +905,7 @@ const MAX_SHOT_MESSAGES = 200;
 export function canRenderShot(count: number) {
     if (!count) return false;
     if (count > MAX_SHOT_MESSAGES) {
-        showToast(`Select at most ${MAX_SHOT_MESSAGES} messages for a screenshot`, "failure");
+        showToast({ text: `Select at most ${MAX_SHOT_MESSAGES} messages for a screenshot`, variant: "critical" });
         return false;
     }
     return true;

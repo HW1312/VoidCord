@@ -569,7 +569,7 @@ function Composer({ channel, name }: { channel: any; name: string; }) {
         const content = text.trim();
         if (!content || !canSend) return;
         if (content.length > 2000) {
-            showToast("Message is too long (max. 2000 characters)", "failure");
+            showToast({ text: "Message is too long (max. 2000 characters)", variant: "critical" });
             return;
         }
 
@@ -581,7 +581,7 @@ function Composer({ channel, name }: { channel: any; name: string; }) {
         if (slow > 0 && !bypass) {
             const left = Math.ceil(((lastSent.get(channelId) ?? 0) + slow * 1000 - Date.now()) / 1000);
             if (left > 0) {
-                showToast(`Slowmode: wait ${left} more s`, "failure");
+                showToast({ text: `Slowmode: wait ${left} more s`, variant: "critical" });
                 return;
             }
         }
@@ -592,11 +592,11 @@ function Composer({ channel, name }: { channel: any; name: string; }) {
             Promise.resolve(sendMessage(channelId, { content }, false)).catch((e: any) => {
                 logger.error("Message could not be sent", e);
                 const slowmode = e?.body?.code === 20016 || e?.status === 429;
-                showToast(slowmode ? "Slowmode active – please wait a moment" : "Message could not be sent", "failure");
+                showToast({ text: slowmode ? "Slowmode active – please wait a moment" : "Message could not be sent", variant: "critical" });
             });
         } catch (e) {
             logger.error("Message could not be sent", e);
-            showToast("Message could not be sent", "failure");
+            showToast({ text: "Message could not be sent", variant: "critical" });
             update(content);
         }
     };

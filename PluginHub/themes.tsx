@@ -84,7 +84,7 @@ function ThemeCard({ theme, installedVersion, enabled, refresh }: {
             await action();
         } catch (e) {
             logger.error(failText, e);
-            showToast(failText, "failure");
+            showToast({ text: failText, variant: "critical" });
         } finally {
             setBusy(false);
             refresh();
@@ -95,15 +95,15 @@ function ThemeCard({ theme, installedVersion, enabled, refresh }: {
         const written = await Native.installTheme(theme.id);
         apply(theme);
         if (written && isNewer(theme.version, written))
-            showToast(`Quit Discord completely (tray icon → Quit) and start it again to finish updating ${theme.name}`, "message");
+            showToast({ text: `Quit Discord completely (tray icon → Quit) and start it again to finish updating ${theme.name}` });
         else
-            showToast(`${theme.name} ${updatable ? "updated" : "installed and applied"}`, "success");
+            showToast({ text: `${theme.name} ${updatable ? "updated" : "installed and applied"}`, variant: "success" });
     }, `Could not install ${theme.name}`);
 
     const remove = () => run(async () => {
         unapply(theme);
         await Native.removeTheme(theme.id);
-        showToast(`${theme.name} removed`, "message");
+        showToast({ text: `${theme.name} removed` });
     }, `Could not remove ${theme.name}`);
 
     return (
@@ -153,7 +153,7 @@ export function ThemesTab({ query }: { query: string; }) {
         setChecking(true);
         try {
             const updated = await updateThemes();
-            if (!updated) showToast("All themes are up to date", "message");
+            if (!updated) showToast({ text: "All themes are up to date" });
         } finally {
             setChecking(false);
             refresh();

@@ -52,7 +52,7 @@ function CopyIdButton({ userId }: { userId: string; }) {
             timer.current = setTimeout(() => setCopied(false), 1500);
         }, e => {
             log.error("Couldn't copy", e);
-            showToast("Couldn't copy", "failure");
+            showToast({ text: "Couldn't copy", variant: "critical" });
         });
     }
 

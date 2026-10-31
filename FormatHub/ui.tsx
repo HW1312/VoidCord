@@ -776,7 +776,7 @@ function TokenRow({ token, onFetched }: { token: DecodedToken; onFetched(): void
             await UserUtils.getUser(id);
             onFetched();
         } catch {
-            showToast("Could not load user – invalid or deleted ID", "failure");
+            showToast({ text: "Could not load user – invalid or deleted ID", variant: "critical" });
         } finally {
             setLoading(false);
         }
@@ -814,7 +814,7 @@ function DecoderTab({ ctx }: { ctx: HubContext; }) {
         if (!ctx.channel) return;
         const draft = DraftStore.getDraft(ctx.channel.id, 0);
         if (draft) setText(draft);
-        else showToast("No draft in the chat input", "message");
+        else showToast({ text: "No draft in the chat input" });
     }
 
     return (

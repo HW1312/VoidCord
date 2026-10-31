@@ -251,7 +251,7 @@ export function messagesToText(messages: Message[], guildId: string | null | und
     return messages.map(m => {
         const lines = [`[${formatFullDate(messageDate(m))}] ${displayName(m.author, guildId)}: ${readableContent(m.content, guildId)}`];
         for (const a of m.attachments ?? []) lines.push(`    ${a.url}`);
-        for (const s of (m as any).stickerItems ?? m.stickers ?? []) lines.push(`    [Sticker: ${s.name}]`);
+        for (const s of (m as any).stickerItems ?? (m as any).stickers ?? []) lines.push(`    [Sticker: ${s.name}]`);
         return lines.join("\n");
     }).join("\n");
 }

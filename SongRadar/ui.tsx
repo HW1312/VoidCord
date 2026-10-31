@@ -148,19 +148,19 @@ function CoverImage({ url, className }: { url?: string; className?: string; }) {
 /** MP3 of the song: first YouTube result, downloaded by MediaGrab (yt-dlp) into the Downloads folder */
 async function downloadMp3(song: Song) {
     if (mediaGrabNeedsRestart()) {
-        showToast("Quit Discord completely once and start it again – the MP3 download needs that", "failure");
+        showToast({ text: "Quit Discord completely once and start it again – the MP3 download needs that", variant: "critical" });
         return;
     }
-    showToast(`Looking for "${song.title}" …`, "message");
+    showToast({ text: `Looking for "${song.title}" …` });
     try {
         const url = await findYouTube(song);
         if (!url) {
-            showToast("Couldn't find exactly this song on YouTube Music", "failure");
+            showToast({ text: "Couldn't find exactly this song on YouTube Music", variant: "critical" });
             return;
         }
         await grab({ url, kind: "audio", maxHeight: 0, toChat: false, toDisk: true });
     } catch (e: any) {
-        showToast(String(e?.message ?? e), "failure");
+        showToast({ text: String(e?.message ?? e), variant: "critical" });
     }
 }
 
@@ -183,7 +183,7 @@ function Cover({ song, size = 96 }: { song: Song; size?: number; }) {
             audio.current.onended = () => setPlaying(false);
         }
         if (audio.current.paused) {
-            audio.current.play().then(() => setPlaying(true)).catch(() => showToast("The preview couldn't be played", "failure"));
+            audio.current.play().then(() => setPlaying(true)).catch(() => showToast({ text: "The preview couldn't be played", variant: "critical" }));
         } else {
             audio.current.pause();
             setPlaying(false);
@@ -208,7 +208,7 @@ function Cover({ song, size = 96 }: { song: Song; size?: number; }) {
 
 function share(song: Song) {
     insertTextIntoChatInputBox(`🎵 **${song.title}** – ${song.artist}\n${song.appleUrl ?? song.shazamUrl ?? spotifyUrl(song)}`);
-    showToast("Added to your message – press Enter to send", "success");
+    showToast({ text: "Added to your message – press Enter to send", variant: "success" });
 }
 
 function ResultCard({ song }: { song: Song; }) {

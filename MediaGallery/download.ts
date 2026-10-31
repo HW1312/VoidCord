@@ -76,7 +76,7 @@ export async function downloadSingle(item: MediaItem, author?: Author) {
         const data = await fetchItem(item);
         saveFile(new File([data as BlobPart], zipName(item, author)));
     } catch (e) {
-        showToast(`Download failed: ${item.filename}`, "failure");
+        showToast({ text: `Download failed: ${item.filename}`, variant: "critical" });
     }
 }
 
@@ -146,7 +146,7 @@ export function downloadZip(
             files["_failed.txt"] = new TextEncoder().encode(failed.join("\r\n"));
         }
         if (Object.keys(files).length === (failed.length ? 1 : 0)) {
-            showToast("No file could be downloaded", "failure");
+            showToast({ text: "No file could be downloaded", variant: "critical" });
             return;
         }
 
@@ -158,8 +158,8 @@ export function downloadZip(
         if (cancelled) return;
         saveFile(new File([zipped as BlobPart], `${sanitize(archiveName)}.zip`, { type: "application/zip" }));
 
-        if (failed.length) showToast(`${failed.length} file(s) could not be downloaded`, "failure");
-        else showToast(`${items.length} files saved as ZIP`, "success");
+        if (failed.length) showToast({ text: `${failed.length} file(s) could not be downloaded`, variant: "critical" });
+        else showToast({ text: `${items.length} files saved as ZIP`, variant: "success" });
     })();
 
     return {

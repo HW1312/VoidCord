@@ -127,7 +127,7 @@ function ServerSection() {
             if (n !== port) set("port", n);
         } else {
             setPortText(String(port));
-            showToast("Invalid port – allowed range is 1024 to 65535.", "failure");
+            showToast({ text: "Invalid port – allowed range is 1024 to 65535.", variant: "critical" });
         }
     };
 
@@ -266,8 +266,8 @@ function UrlSection({ cfg }: { cfg: OverlayConfig; }) {
     const demoUrl = url + (url.includes("?") ? "&" : "?") + "demo=1";
 
     const copy = () => copyToClipboard(url)
-        .then(() => showToast("URL copied", "success"))
-        .catch(() => showToast("Copy failed", "failure"));
+        .then(() => showToast({ text: "URL copied", variant: "success" }))
+        .catch(() => showToast({ text: "Copy failed", variant: "critical" }));
 
     const isDefault = (Object.keys(DEFAULTS) as (keyof OverlayConfig)[]).every(k => cfg[k] === DEFAULTS[k]);
 

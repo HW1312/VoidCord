@@ -61,7 +61,7 @@ function ExportTab({ initialGuildId }: { initialGuildId: string | null; }) {
         setBundle(null);
         job.run(hooks => collectBackup(guildId, hooks))
             .then(res => res && setBundle(res))
-            .catch(e => !isCancelled(e) && showToast(`Backup failed: ${describeError(e)}`, "failure"));
+            .catch(e => !isCancelled(e) && showToast({ text: `Backup failed: ${describeError(e)}`, variant: "critical" }));
     };
 
     const save = () => {
@@ -69,9 +69,9 @@ function ExportTab({ initialGuildId }: { initialGuildId: string | null; }) {
         try {
             const zip = buildZip(bundle);
             saveFile(new File([zip as BlobPart], backupFileName(bundle.backup), { type: "application/zip" }));
-            showToast("Backup saved", "success");
+            showToast({ text: "Backup saved", variant: "success" });
         } catch (e) {
-            showToast(`Saving failed: ${describeError(e)}`, "failure");
+            showToast({ text: `Saving failed: ${describeError(e)}`, variant: "critical" });
         }
     };
 
@@ -159,7 +159,7 @@ function RestoreTab() {
             setBundle(await readBackupZip(file));
             setResult(null);
         } catch (e) {
-            showToast(`Failed to read backup: ${describeError(e)}`, "failure");
+            showToast({ text: `Failed to read backup: ${describeError(e)}`, variant: "critical" });
         }
     };
 
@@ -179,7 +179,7 @@ function RestoreTab() {
         if (!bundle || !targetId) return;
         // Safety net: check ownership again
         if (GuildStore.getGuild(targetId)?.ownerId !== UserStore.getCurrentUser()?.id) {
-            showToast("You are not the owner of this server", "failure");
+            showToast({ text: "You are not the owner of this server", variant: "critical" });
             return;
         }
         setResult(null);
@@ -188,9 +188,9 @@ function RestoreTab() {
                 if (!res) return;
                 setResult(res);
                 setDeleteConfirmed(false);
-                showToast(res.failed ? `Restore finished with ${res.failed} errors` : "Restore completed", res.failed ? "message" : "success");
+                showToast(res.failed ? { text: `Restore finished with ${res.failed} errors` } : { text: "Restore completed", variant: "success" });
             })
-            .catch(e => !isCancelled(e) && showToast(`Restore failed: ${describeError(e)}`, "failure"));
+            .catch(e => !isCancelled(e) && showToast({ text: `Restore failed: ${describeError(e)}`, variant: "critical" }));
     };
 
     const sum = bundle ? summarize(bundle.backup) : null;

@@ -183,26 +183,26 @@ let busy = false;
 async function copyText(src: string) {
     if (busy) return;
     busy = true;
-    showToast("Reading text from image …", "message");
+    showToast({ text: "Reading text from image …" });
 
     try {
         const result = await recognize(src);
         if (!result.ok) {
-            showToast(`Could not read text: ${result.error}`, "failure");
+            showToast({ text: `Could not read text: ${result.error}`, variant: "critical" });
             return;
         }
 
         const lines = result.lines.filter(l => l.trim());
         if (!lines.length) {
-            showToast("No text found", "message");
+            showToast({ text: "No text found" });
             return;
         }
 
         await copyToClipboard(joinText(lines));
-        showToast(`Copied ${lines.length} ${lines.length === 1 ? "line" : "lines"}`, "success");
+        showToast({ text: `Copied ${lines.length} ${lines.length === 1 ? "line" : "lines"}`, variant: "success" });
     } catch (e) {
         logger.error("Copying text failed", e);
-        showToast("Could not copy the text", "failure");
+        showToast({ text: "Could not copy the text", variant: "critical" });
     } finally {
         busy = false;
     }

@@ -88,7 +88,7 @@ export function addReminder(dueAt: number, note: string, message?: any) {
     };
     remindersStore.update(list => [...list, reminder]);
     scheduleReminders();
-    showToast(`Reminder set for ${formatWhen(dueAt)}`, "success");
+    showToast({ text: `Reminder set for ${formatWhen(dueAt)}`, variant: "success" });
 }
 
 export function deleteReminder(id: string) {
@@ -199,7 +199,7 @@ export function addBookmark(message: any, tags: string[], note: string, offline:
     const existing = findBookmark(message.id);
     if (existing) {
         bookmarksStore.update(list => list.map(b => b.id === existing.id ? { ...b, tags, note: note.trim() } : b));
-        showToast("Bookmark updated", "success");
+        showToast({ text: "Bookmark updated", variant: "success" });
         return;
     }
     const bookmark: Bookmark = {
@@ -211,7 +211,7 @@ export function addBookmark(message: any, tags: string[], note: string, offline:
         media: collectMedia(message)
     };
     bookmarksStore.update(list => [bookmark, ...list]);
-    showToast("Bookmark saved", "success");
+    showToast({ text: "Bookmark saved", variant: "success" });
     if (offline) saveMediaOffline(bookmark);
 }
 

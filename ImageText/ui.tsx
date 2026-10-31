@@ -80,12 +80,12 @@ function TextWindow({ src, close }: { src: string; close(): void; }) {
             ? el.value.slice(el.selectionStart, el.selectionEnd)
             : text;
         if (!selected.trim()) {
-            showToast("Nothing to copy", "message");
+            showToast({ text: "Nothing to copy" });
             return;
         }
         void copyToClipboard(selected).then(
-            () => showToast(selected === text ? "Copied text" : "Copied selection", "success"),
-            () => showToast("Could not copy the text", "failure")
+            () => showToast({ text: selected === text ? "Copied text" : "Copied selection", variant: "success" }),
+            () => showToast({ text: "Could not copy the text", variant: "critical" })
         );
     }
 

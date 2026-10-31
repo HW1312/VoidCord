@@ -120,7 +120,7 @@ export function jumpTo(target: { guildId?: string | null; channelId?: string; me
         NavigationRouter.transitionTo(`/channels/${target.guildId ?? "@me"}/${target.channelId}${target.messageId ? `/${target.messageId}` : ""}`);
     } catch (e) {
         logger.error("Jumping failed", e);
-        showToast("Radar: Could not jump to the message", "failure");
+        showToast({ text: "Radar: Could not jump to the message", variant: "critical" });
     }
 }
 
@@ -468,7 +468,7 @@ export const ACTIONS: Record<ActionType, ActionDef> = {
                 void StatusSetting.updateSetting(a.status);
             } catch (e) {
                 logger.error("Could not set status", e);
-                showToast("Radar: Could not set status", "failure");
+                showToast({ text: "Radar: Could not set status", variant: "critical" });
             }
         },
         end(_a, rule) {
@@ -633,7 +633,7 @@ export function testRule(rule: Rule) {
     const me = UserStore.getCurrentUser();
     // Don't change the real status while testing
     const hasStatus = rule.actions.some(a => a.type === "status");
-    if (hasStatus) showToast("Test: status will not be changed", "message");
+    if (hasStatus) showToast({ text: "Test: status will not be changed" });
     fireRule({ ...rule, id: `test-${rule.id}`, actions: rule.actions.filter(a => a.type !== "status") }, {
         title: `Test: ${rule.name || "New rule"}`,
         body: "This is what a hit of this rule looks like.",

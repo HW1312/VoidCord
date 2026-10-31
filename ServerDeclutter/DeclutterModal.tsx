@@ -256,7 +256,7 @@ function DeclutterPanel({ onCloseModal, initialGuildId }: { onCloseModal(): void
         const skipped = chosen.length - targets.length;
 
         if (!targets.length) {
-            showToast(kind === "leave" ? "You cannot leave servers you own" : "None of the selected servers need this action", "message");
+            showToast({ text: kind === "leave" ? "You cannot leave servers you own" : "None of the selected servers need this action" });
             return;
         }
 

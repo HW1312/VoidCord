@@ -64,10 +64,10 @@ export function mediaFromElement(el: Element | null): MediaItem | null {
 export async function copyText(text: string, label = "Copied to clipboard") {
     try {
         await copyToClipboard(text);
-        showToast(label, "success");
+        showToast({ text: label, variant: "success" });
     } catch (e) {
         log.error("Couldn't copy", e);
-        showToast("Couldn't copy", "failure");
+        showToast({ text: "Couldn't copy", variant: "critical" });
     }
 }
 
@@ -98,10 +98,10 @@ export async function copyImage(item: MediaItem, win: Window) {
             const Item = (win as any).ClipboardItem ?? ClipboardItem;
             await win.navigator.clipboard.write([new Item({ "image/png": png })]);
         }
-        showToast("Image copied", "success");
+        showToast({ text: "Image copied", variant: "success" });
     } catch (e) {
         log.error("Couldn't copy image", e);
-        showToast("Couldn't copy image", "failure");
+        showToast({ text: "Couldn't copy image", variant: "critical" });
     }
 }
 
@@ -125,7 +125,7 @@ export async function saveMedia(item: MediaItem, win: Window) {
         }, 0);
     } catch (e) {
         log.error("Couldn't save file", e);
-        showToast("Couldn't save file", "failure");
+        showToast({ text: "Couldn't save file", variant: "critical" });
     }
 }
 
