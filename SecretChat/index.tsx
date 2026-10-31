@@ -83,10 +83,10 @@ export default definePlugin({
         {
             // UploadHandler.promptToUpload (drop, paste, + button) – in encrypted chats the files are sent encrypted
             // instead of going into the draft. GofileUpload patches the same spot: this runs before its part, in
-            // either patch order (its match allows this block, marked /*vcSC*/).
+            // either patch order (its match allows this block, marked /*vcSC*/). FolderUpload's block (/*vcFU*/) stays first.
             find: "Unexpected mismatch between files and file metadata",
             replacement: {
-                match: /(?<=async function \i\((\i),(\i),\i\)\{)(?=\{let vcKeep=|let\{filesMetadata:)/,
+                match: /(?<=async function \i\((\i),(\i),\i\)\{(?:\/\*vcFU\*\/.*?\/\*vcFU\*\/)?)(?=\{let vcKeep=|let\{filesMetadata:)/,
                 replace: "/*vcSC*/if($self.interceptUpload($1,$2))return;/*vcSC*/"
             }
         },

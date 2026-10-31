@@ -1,0 +1,110 @@
+.vc-folderupload-list {
+    margin: 8px 0;
+    padding: 8px 12px;
+    border-radius: 10px;
+    background: var(--vc-ui-field);
+    font-family: var(--vc-ui-mono);
+    font-size: 12px;
+    text-align: left;
+    list-style: none;
+    overflow-wrap: anywhere;
+}
+
+.vc-folderupload-list li + li {
+    margin-top: 2px;
+}
+
+/* "Look inside" under zip attachments */
+.vc-folderupload-peeks {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 4px;
+}
+
+.vc-folderupload-peek {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    border: 0.5px solid var(--vc-ui-edge);
+    background: var(--vc-ui-group);
+    color: var(--vc-ui-text);
+    font-family: var(--vc-ui-font);
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.15s var(--vc-ui-ease);
+}
+
+.vc-folderupload-peek:hover {
+    background: var(--vc-ui-group-hover);
+    color: var(--vc-ui-title);
+}
+
+/* Preview window */
+.vc-folderupload-crumbs {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0 20px 10px;
+    min-width: 0;
+}
+
+.vc-folderupload-path {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: var(--vc-ui-dim);
+    font-family: var(--vc-ui-mono);
+    font-size: 12px;
+}
+
+.vc-folderupload-loading {
+    display: flex;
+    justify-content: center;
+    padding: 40px 0;
+}
+
+.vc-folderupload-file {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.vc-folderupload-text {
+    margin: 0;
+    padding: 12px 14px;
+    border-radius: 12px;
+    background: var(--vc-ui-group);
+    color: var(--vc-ui-text);
+    font-family: var(--vc-ui-mono);
+    font-size: 12px;
+    line-height: 1.5;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    user-select: text;
+}
+
+.vc-folderupload-image {
+    display: block;
+    max-width: 100%;
+    max-height: 60vh;
+    margin: 0 auto;
+    border-radius: 12px;
+    object-fit: contain;
+}
+
+.vc-folderupload-dim {
+    color: var(--vc-ui-dim);
+    font-size: 12px;
+}
+
+.vc-folderupload-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}

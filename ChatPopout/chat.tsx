@@ -29,7 +29,7 @@ import {
     isAnimated, isSpoiler, LINK_PATH, MAIN_PATH, Markdown, MAX_PATH, MIN_PATH, PIN_PATH, PLAY_PATH, POPOUT_PATH, REPLY_PATH, SIDEBAR_PATH, sized, SPEAKER_PATH, Spoiler, tip,
     TRASH_PATH, usePopoutDocument, USER_PATH, userAvatar, ZOOM_PATH
 } from "./shared";
-import { sendFiles } from "./upload";
+import { addFilesHooks, sendFiles } from "./upload";
 import { VoiceBar, voiceMenuSections } from "./voice";
 import { openStreamWindow, startWatching, StreamDock, StreamTarget, streamTargetFor, useDockWidth } from "./watch";
 
@@ -791,9 +791,13 @@ function Composer({ channel, name, ctx }: { channel: any; name: string; ctx: Win
     const [mode, setMode] = useState<ComposeMode | null>(null);
     const [files, setFiles] = useState<File[]>([]);
     const fileRef = useRef<HTMLInputElement>(null);
-    const addFiles = (list: ArrayLike<File> | null | undefined) => {
-        const add = Array.from(list ?? []);
+    const attach = (add: File[]) => {
         if (add.length) setFiles(prev => [...prev, ...add].slice(0, 10));
+    };
+    const addFiles = (list: ArrayLike<File> | null | undefined, data: DataTransfer | null = null) => {
+        let add = Array.from(list ?? []);
+        for (const hook of addFilesHooks) add = hook(channel, add, data, attach);
+        attach(add);
     };
 
     // Slash commands
@@ -1057,7 +1061,7 @@ function Composer({ channel, name, ctx }: { channel: any; name: string; ctx: Win
                             onDrop={e => {
                                 if (!canSend || mode?.type === "edit" || !e.dataTransfer.files.length) return;
                                 e.preventDefault();
-                                addFiles(e.dataTransfer.files);
+                                addFiles(e.dataTransfer.files, e.dataTransfer);
                             }}
                         >
                             {canSend && mode?.type !== "edit" && (
@@ -1080,7 +1084,7 @@ function Composer({ channel, name, ctx }: { channel: any; name: string; ctx: Win
                                 onPaste={e => {
                                     if (mode?.type === "edit" || !e.clipboardData.files.length) return;
                                     e.preventDefault();
-                                    addFiles(e.clipboardData.files);
+                                    addFiles(e.clipboardData.files, e.clipboardData);
                                 }}
                             />
                             {canSend && (

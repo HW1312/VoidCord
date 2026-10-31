@@ -640,8 +640,8 @@ export default definePlugin({
             // The function is async, so we can await the compression before Discord sees (and uploads) the files.
             find: "Unexpected mismatch between files and file metadata",
             replacement: {
-                // SecretChat's block (/*vcSC*/…/*vcSC*/) may already sit there – it stays first
-                match: /async function \i\((\i),(\i),(\i)\){(?:\/\*vcSC\*\/.*?\/\*vcSC\*\/)?(?=let\{filesMetadata:)/,
+                // FolderUpload's (/*vcFU*/) and SecretChat's block (/*vcSC*/…/*vcSC*/) may already sit there – they stay first
+                match: /async function \i\((\i),(\i),(\i)\){(?:\/\*vcFU\*\/.*?\/\*vcFU\*\/)?(?:\/\*vcSC\*\/.*?\/\*vcSC\*\/)?(?=let\{filesMetadata:)/,
                 replace: "$&{let vcKeep=$self.interceptFiles($1,$2,arguments[3]);if(vcKeep instanceof Promise)vcKeep=await vcKeep;if(vcKeep!=null){if(!vcKeep.length)return;$1=vcKeep}}"
             }
         }

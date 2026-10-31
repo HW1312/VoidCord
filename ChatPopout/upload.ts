@@ -72,6 +72,12 @@ export function sendViaGofile(channel: Channel, file: File) {
     UploadHandler.promptToUpload([file], channel, DraftType.ChannelMessage);
 }
 
+/**
+ * Other plugins can take dropped / pasted files before they are attached (FolderUpload zips folders) – they return
+ * the files that stay and attach the rest later. data = the drop / paste, only readable during the event.
+ */
+export const addFilesHooks = new Set<(channel: Channel, files: File[], data: DataTransfer | null, attach: (files: File[]) => void) => File[]>();
+
 /** Other plugins can send a window's files themselves (SecretChat encrypts them) – true = handled */
 export const sendFilesOverrides = new Set<(channel: Channel, files: File[], messageReference?: unknown) => boolean>();
 

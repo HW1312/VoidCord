@@ -180,11 +180,7 @@ const brand = src => src.split("\n").map(l => (BRAND_KEEP.test(l) ? l : l.replac
  */
 const SOURCE_TWEAKS = [
     // BetterSettings eagerLoad: +15 000 CSS rules and +17 MB heap at start (bench, 2026-10-12)
-    ["plugins/betterSettings/index.tsx", /(eagerLoad: \{[^}]*?default: )true/, "$1false"],
-    // BetterFolders: Discord now declares variables before the props ("let n,i,s,o,{disableAppDownload:…"), the
-    // patch no longer matched, so the whole guildsnav patch was dropped and the sidebar showed every server
-    // twice (2026-10-29). Without "let" it matches old and new Discord – remove once Vencord fixes it.
-    ["plugins/betterFolders/index.tsx", /match: \/let\{disableAppDownload:/, "match: /{disableAppDownload:"]
+    ["plugins/betterSettings/index.tsx", /(eagerLoad: \{[^}]*?default: )true/, "$1false"]
 ];
 
 function withBranding(fn) {
