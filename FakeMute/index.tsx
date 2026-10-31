@@ -103,6 +103,21 @@ function modifyVoiceState(args: VoiceStateArgs) {
     };
 }
 
+/**
+ * Your own voice icons: muted / deafened as others see you. Runs at the top of Discord's icon component (a hook:
+ * toggling Fake Mute / Deafen re-renders the icons right away, not only on the next speaking update).
+ */
+function useFakeSelf<T extends { user?: { id: string; }; mute?: boolean; deaf?: boolean; }>(props: T): T {
+    const { fakeMute, fakeDeafen } = settings.use(["fakeMute", "fakeDeafen"]);
+    try {
+        if (!running || !props?.user || props.user.id !== UserStore.getCurrentUser()?.id) return props;
+        if (!fakeMute && !fakeDeafen) return props;
+        return { ...props, mute: props.mute || fakeMute || fakeDeafen, deaf: props.deaf || fakeDeafen };
+    } catch {
+        return props;
+    }
+}
+
 let resendQueued = false;
 function scheduleResend() {
     if (resendQueued) return;
@@ -169,6 +184,11 @@ const plugin = definePlugin({
             find: 'location:"VoiceUserIcons"',
             replacement: [
                 {
+                    // Discord now takes your own icons from your real (local) state – show the faked one again
+                    match: /(?<=function \i\((\i)\)\{)(?=let\{className:\i,mute:\i,localMute:)/,
+                    replace: "$1=$self.useFakeSelf($1);"
+                },
+                {
                     match: /user:(\i),(?=[^}]{0,80}\}=\i,)(.{0,400}?location:"VoiceUserIcons"\}\),)/,
                     replace: "user:$1,$2vcFakeFlags=$self.useFakeFlags($1?.id),"
                 },
@@ -194,6 +214,7 @@ const plugin = definePlugin({
 
     renderTitleBarButton: titleBarSlot("FakeMute", renderTitleBarButton),
     modifyVoiceState,
+    useFakeSelf,
     useFakeFlags: (userId?: string) => {
         const flags = useFakeFlags(userId);
         return settings.store.detectOthers ? flags : undefined;
