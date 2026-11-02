@@ -157,6 +157,16 @@ $Worker = {
         foreach ($b in $Selected) {
             $verb = if ($Mode -eq "install") { "Installing into" } else { "Removing from" }
             Step "$verb $($b.Name)..." (55 + [int](40 * $i / $Selected.Count))
+            # The Vencord installer always patches the newest app-* folder. Without app.asar (or _app.asar when
+            # already patched) that folder is a Discord update that never finished, e.g. closed mid-update.
+            if ($Mode -eq "install") {
+                $newest = Get-ChildItem (Join-Path $env:LOCALAPPDATA $b.Dir) -Directory -Filter "app-*" -ErrorAction SilentlyContinue |
+                    Sort-Object { try { [version]$_.Name.Substring(4) } catch { [version]"0.0" } } -Descending | Select-Object -First 1
+                $res = if ($newest) { Join-Path $newest.FullName "resources" }
+                if ($res -and -not (Test-Path "$res\app.asar") -and -not (Test-Path "$res\_app.asar")) {
+                    throw "$($b.Name) has an unfinished update ($($newest.Name)). Start $($b.Name), wait until it is fully open, close it and try again. If that doesn't help, reinstall $($b.Name)."
+                }
+            }
             Invoke-Cli $cli $Mode $b
             $i++
         }
