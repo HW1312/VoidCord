@@ -69,7 +69,7 @@ function FeatureRows({ list }: { list: FeatureInfo[]; }) {
 }
 
 function Controls() {
-    const { enabled } = settings.use(["enabled"]);
+    const { active: enabled } = settings.use(["active"]);
 
     return (
         <>
@@ -80,7 +80,7 @@ function Controls() {
                     title="Silent Mode"
                     subtitle={enabled ? "On" : "Off"}
                     checked={enabled}
-                    onChange={v => settings.store.enabled = v}
+                    onChange={v => settings.store.active = v}
                 />
             </Section>
 
@@ -135,7 +135,7 @@ function PopoutPanel() {
 }
 
 function TitleBarButton() {
-    const { showTitleBarButton, enabled } = settings.use(["showTitleBarButton", "enabled"]);
+    const { showTitleBarButton, active: enabled } = settings.use(["showTitleBarButton", "active"]);
     const buttonRef = useRef(null);
     const [show, setShow] = useState(false);
 

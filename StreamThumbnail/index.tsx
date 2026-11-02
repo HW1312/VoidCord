@@ -28,7 +28,7 @@ export const settings = definePluginSettings({
         type: OptionType.COMPONENT,
         component: () => <SettingsPanel />
     },
-    enabled: {
+    active: {
         type: OptionType.BOOLEAN,
         description: "Send your picture instead of a screenshot",
         default: true,
@@ -150,7 +150,7 @@ export async function setPicture(file: File | null) {
 export async function refresh() {
     await render();
     emit();
-    if (isStreaming() && settings.store.enabled && thumbnail) await uploadNow().catch(e => logger.error("Upload failed", e));
+    if (isStreaming() && settings.store.active && thumbnail) await uploadNow().catch(e => logger.error("Upload failed", e));
 }
 
 // ---------------------------------------------------------------- Stream
@@ -188,7 +188,7 @@ function onStreamChange() {
     const delays = [2000, 4000, 8000, 15000];
     const attempt = (i: number) => {
         startTimer = setTimeout(async () => {
-            if (streamKey() !== key || !settings.store.enabled || !thumbnail) return;
+            if (streamKey() !== key || !settings.store.active || !thumbnail) return;
             try {
                 await uploadNow();
             } catch (e) {
@@ -220,7 +220,7 @@ export default definePlugin({
     ],
 
     thumbnail(screenshot: string) {
-        return settings.store.enabled && thumbnail ? thumbnail : screenshot;
+        return settings.store.active && thumbnail ? thumbnail : screenshot;
     },
 
     async start() {

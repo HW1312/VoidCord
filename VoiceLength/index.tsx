@@ -23,7 +23,7 @@ export const settings = definePluginSettings({
         type: OptionType.COMPONENT,
         component: () => <SettingsPanel />
     },
-    enabled: {
+    active: {
         type: OptionType.BOOLEAN,
         description: "Send voice messages with the fake length",
         default: true,
@@ -54,7 +54,7 @@ const isVoiceUpload = (upload: any) => upload?.durationSecs != null || upload?.i
  * the new length written into the file.
  */
 async function prepareUpload(upload: any) {
-    if (!settings.store.enabled || !isVoiceUpload(upload)) return;
+    if (!settings.store.active || !isVoiceUpload(upload)) return;
     // Encrypted chats: Unter das OS sends the real recording as an encrypted file
     if (encryptsVoice(upload.channelId)) return;
     const file = upload.item?.file;
@@ -84,7 +84,7 @@ let running = false;
  */
 function wrappedPost(this: any, options: any, ...rest: any[]) {
     const body = options?.body;
-    if (running && settings.store.enabled && body && (body.flags & IS_VOICE_MESSAGE) && Array.isArray(body.attachments)) {
+    if (running && settings.store.active && body && (body.flags & IS_VOICE_MESSAGE) && Array.isArray(body.attachments)) {
         for (const a of body.attachments) if (a && "duration_secs" in a) a.duration_secs = settings.store.seconds;
     }
     return originalPost!.call(this, options, ...rest);

@@ -36,7 +36,7 @@ function parse(text: string) {
 }
 
 export const SettingsPanel = ErrorBoundary.wrap(() => {
-    const { enabled, seconds, fill } = settings.use(["enabled", "seconds", "fill"]);
+    const { active: enabled, seconds, fill } = settings.use(["active", "seconds", "fill"]);
     const [text, setText] = useState(() => format(seconds));
     const parsed = parse(text);
 
@@ -56,7 +56,7 @@ export const SettingsPanel = ErrorBoundary.wrap(() => {
                     title="Fake length"
                     subtitle="For every voice message you send"
                     checked={enabled}
-                    onChange={v => settings.store.enabled = v}
+                    onChange={v => settings.store.active = v}
                 />
             </Section>
 

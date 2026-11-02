@@ -24,7 +24,7 @@ const HEADER = { title: "Stream Thumbnail", icon: PICTURE, iconColor: "pink" } a
 
 const ThumbnailSheet = ErrorBoundary.wrap(() => {
     useListener(listeners);
-    const { enabled, caption } = settings.use(["enabled", "caption"]);
+    const { active: enabled, caption } = settings.use(["active", "caption"]);
     const streaming = useStateFromStores([ApplicationStreamingStore], () => isStreaming());
     const [text, setText] = useState(caption);
     const [busy, setBusy] = useState(false);
@@ -88,7 +88,7 @@ const ThumbnailSheet = ErrorBoundary.wrap(() => {
                     subtitle="Instead of a screenshot of your stream"
                     checked={enabled}
                     onChange={v => {
-                        settings.store.enabled = v;
+                        settings.store.active = v;
                         if (v) refresh();
                     }}
                 />

@@ -36,7 +36,7 @@ export const settings = definePluginSettings({
         type: OptionType.COMPONENT,
         component: () => <SettingsPanel />
     },
-    enabled: {
+    active: {
         type: OptionType.BOOLEAN,
         description: "Silent Mode is on",
         default: false,
@@ -74,10 +74,10 @@ export const settings = definePluginSettings({
 
 type Feature = "typing" | "messages" | "replyPing" | "calls" | "deletes" | "invisible" | "activity";
 
-const on = (key: Feature) => running && settings.store.enabled && settings.store[key];
+const on = (key: Feature) => running && settings.store.active && settings.store[key];
 
 export function toggleSilentMode() {
-    settings.store.enabled = !settings.store.enabled;
+    settings.store.active = !settings.store.active;
 }
 
 // ---------------------------------------------------------------- Status & activity
@@ -197,7 +197,7 @@ type RequestFn = (req: any, ...rest: any[]) => Promise<any>;
 let originals: { post: RequestFn; del: RequestFn; } | null = null;
 
 function wrappedPost(this: any, req: any, ...rest: any[]) {
-    if (running && settings.store.enabled) {
+    if (running && settings.store.active) {
         const url = urlOf(req);
         if (on("typing") && TYPING_URL.test(url)) return fakeNoContent();
         if (SEND_URL.test(url)) silenceMessage(req);
