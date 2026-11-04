@@ -4,9 +4,9 @@
  */
 
 import * as DataStore from "@api/DataStore";
-import { showToast, useEffect, useReducer } from "@webpack/common";
+import { ChannelStore, showToast, useEffect, useReducer } from "@webpack/common";
 
-import { fromB64, keyIdOf, safetyCode, toB64 } from "./crypto";
+import { fromB64, keyFingerprint, keyIdOf, safetyCode, toB64 } from "./crypto";
 
 export interface KeyRecord {
     /** keyIdOf(key), sent with every message */
@@ -15,7 +15,7 @@ export interface KeyRecord {
     /** private: made by a handshake, only you and partnerId have it. group: anyone with the code / password */
     kind: "private" | "group";
     partnerId?: string;
-    source?: "handshake" | "random" | "password" | "code" | "room";
+    source?: "handshake" | "random" | "password" | "code" | "room" | "vault";
     /** Handshake keys: made with the hybrid ECDH + ML-KEM exchange (false = older ECDH-only handshake) */
     quantumSafe?: boolean;
     key: string;
@@ -64,8 +64,25 @@ export interface PendingJoin {
     created: number;
 }
 
+/**
+ * A server only you can read: its key lives only in the key file (USB stick) and – while unlocked – in memory.
+ * Saved here is only what isn't secret: which server, the key's id / fingerprint, and the channels left plain.
+ */
+export interface Vault {
+    guildId: string;
+    keyId: string;
+    /** keyFingerprint() – checks that an opened key file holds exactly this key */
+    fp: string;
+    name: string;
+    created: number;
+    /** Channels that are NOT encrypted (everything else is, also channels created later) */
+    plain: string[];
+}
+
 interface State {
     keys: KeyRecord[];
+    /** guild id → vault */
+    vaults: Record<string, Vault>;
     /** channel id → key id used for sending. Missing = encryption off */
     channels: Record<string, string>;
     /** channel id → key id that was on last, for the right-click toggle */
@@ -90,7 +107,7 @@ interface State {
 
 const STORE_KEY = "SecretChat_state";
 
-const empty = (): State => ({ keys: [], channels: {}, lastUsed: {}, pending: {}, handled: [], declined: [], rooms: {}, invites: {}, joins: {}, left: [], dismissed: [] });
+const empty = (): State => ({ keys: [], vaults: {}, channels: {}, lastUsed: {}, pending: {}, handled: [], declined: [], rooms: {}, invites: {}, joins: {}, left: [], dismissed: [] });
 
 export const state: State = empty();
 const keyBytes = new Map<string, Uint8Array>();
@@ -135,8 +152,77 @@ export function onChange(listener: () => void) {
 
 // ---------------------------------------------------------------- Keys
 
-export const getKey = (id: string) => state.keys.find(k => k.id === id);
+export const getKey = (id: string) => state.keys.find(k => k.id === id) ?? vaultRecord(Object.values(state.vaults).find(v => v.keyId === id));
 export const getKeyBytes = (id: string) => keyBytes.get(id);
+
+// ---------------------------------------------------------------- Vaults (key only in memory while unlocked)
+
+/** Stand-in key record for a vault: never in state.keys, so the key is never written to disk */
+const vaultRecords = new Map<string, KeyRecord>();
+function vaultRecord(v: Vault | undefined): KeyRecord | undefined {
+    if (!v) return undefined;
+    let r = vaultRecords.get(v.keyId);
+    if (!r) vaultRecords.set(v.keyId, r = { id: v.keyId, name: v.name, kind: "group", source: "vault", key: "", safety: "", created: v.created });
+    r.name = v.name;
+    return r;
+}
+
+export const getVault = (guildId: string | undefined | null) => guildId ? state.vaults[guildId] : undefined;
+export const isVaultUnlocked = (v: Vault) => keyBytes.has(v.keyId);
+
+/** The vault that encrypts this channel (threads follow their parent channel), if any */
+export function vaultOfChannel(channelId: string) {
+    const ch: any = ChannelStore.getChannel(channelId);
+    const vault = getVault(ch?.guild_id);
+    if (!vault) return undefined;
+    if (vault.plain.includes(channelId) || (ch.parent_id && vault.plain.includes(ch.parent_id))) return undefined;
+    return vault;
+}
+
+/** Puts the opened key into memory only – checked against the fingerprint saved with the vault */
+export async function unlockVault(guildId: string, key: Uint8Array) {
+    const vault = getVault(guildId);
+    if (!vault) throw new Error("This server isn't a vault");
+    if (await keyIdOf(key) !== vault.keyId || await keyFingerprint(key) !== vault.fp) throw new Error("This key file belongs to another vault");
+    keyBytes.set(vault.keyId, key);
+    emit();
+}
+
+/** Forgets the key (memory only) – the server's messages are random characters again */
+export function lockVault(guildId: string) {
+    const vault = getVault(guildId);
+    if (!vault) return;
+    keyBytes.get(vault.keyId)?.fill(0);
+    keyBytes.delete(vault.keyId);
+    emit();
+}
+
+/** Locks every vault (plugin stopped) */
+export function lockAllVaults() {
+    for (const v of Object.values(state.vaults)) lockVault(v.guildId);
+}
+
+export async function addVault(vault: Omit<Vault, "plain">, key: Uint8Array) {
+    state.vaults[vault.guildId] = { ...vault, plain: getVault(vault.guildId)?.plain ?? [] };
+    await save();
+    await unlockVault(vault.guildId, key);
+}
+
+/** Stops treating the server as a vault. Its messages stay encrypted – the key file can make it a vault again. */
+export async function removeVault(guildId: string) {
+    lockVault(guildId);
+    delete state.vaults[guildId];
+    await save();
+}
+
+export async function setVaultChannel(guildId: string, channelId: string, encrypted: boolean) {
+    const vault = getVault(guildId);
+    if (!vault) return;
+    const plain = vault.plain.filter(id => id !== channelId);
+    if (!encrypted) plain.push(channelId);
+    vault.plain = plain;
+    await save();
+}
 
 function uniqueName(name: string) {
     const taken = new Set(state.keys.map(k => k.name));
@@ -187,6 +273,10 @@ export async function renameKey(id: string, name: string) {
 
 /** A secret room's key always wins: a room must never fall back to plain text or switch to a key the others don't have */
 export const channelKey = (channelId: string) => {
+    // A vault channel always has its vault key – also while locked (then its bytes are missing and
+    // sending is refused instead of going out readable)
+    const vault = vaultOfChannel(channelId);
+    if (vault) return vaultRecord(vault);
     const room = state.rooms[channelId];
     const id = room && keyBytes.has(room.keyId) ? room.keyId : state.channels[channelId];
     return id && keyBytes.has(id) ? getKey(id) : undefined;
@@ -199,6 +289,10 @@ const roomKeyId = (channelId: string) => {
 };
 
 function refuseRoomChange(channelId: string, keyId: string | null) {
+    if (vaultOfChannel(channelId)) {
+        showToast({ text: "This channel belongs to your vault – choose its channels with right-click on the server → Vault", variant: "critical" });
+        return true;
+    }
     const roomKey = roomKeyId(channelId);
     if (!roomKey || keyId === roomKey) return false;
     state.channels[channelId] = roomKey;
@@ -225,6 +319,8 @@ export async function setChannelKey(channelId: string, keyId: string | null) {
 
 /** Right-click on the chat bar button: off ↔ the key used last (or the only key) */
 export async function toggleChannel(channelId: string) {
+    const vault = vaultOfChannel(channelId);
+    if (vault) return refuseRoomChange(channelId, null), vault.keyId;
     const roomKey = roomKeyId(channelId);
     if (roomKey) return refuseRoomChange(channelId, null), roomKey;
     if (state.channels[channelId]) return setChannelKey(channelId, null), null;

@@ -24,6 +24,7 @@ import { chatLabel, makeRoom, pruneStale, roomMessages } from "./rooms";
 import { settings } from "./settings";
 import { addKey, channelKey, deleteKey, getKey, inviteCode, KeyRecord, parseInviteCode, renameKey, setChannelKey, toggleChannel, useStore } from "./store";
 import { TransferCard, transferMessages } from "./transfer";
+import { openUnlockWindow, openVaultWindow, vaultStatus } from "./vault";
 
 const cl = classNameFactory("vc-secretchat-");
 
@@ -59,14 +60,17 @@ export const ChatButton: ChatBarButtonFactory = ({ channel, isMainChat }) => {
     if (!showChatBarButton || !isMainChat || !channel) return null;
 
     const active = channelKey(channel.id);
-    const tooltip = active
-        ? `Encrypted with “${active.name}” · right-click to turn off`
-        : "Unter das OS: off · click to choose a key";
+    const vault = active?.source === "vault" ? vaultStatus(channel.id) : null;
+    const tooltip = vault
+        ? (vault.unlocked ? `Vault “${vault.vault.name}” · unlocked · click for vault settings` : `Vault “${vault.vault.name}” is locked · click to unlock`)
+        : active
+            ? `Encrypted with “${active.name}” · right-click to turn off`
+            : "Unter das OS: off · click to choose a key";
 
     return (
         <ChatBarButton
             tooltip={tooltip}
-            onClick={() => openChatModal(channel)}
+            onClick={() => vault ? (vault.unlocked ? openVaultWindow(vault.vault.guildId) : openUnlockWindow(vault.vault.guildId)) : openChatModal(channel)}
             onContextMenu={async e => {
                 e.preventDefault();
                 const id = await toggleChannel(channel.id);

@@ -28,7 +28,7 @@ import { LOCK_ICON } from "./icons";
 import { VideoPlayer } from "./player";
 import { createFileProgress, saveDecrypted } from "./save";
 import { settings } from "./settings";
-import { channelKey, getKeyBytes, isLoaded } from "./store";
+import { channelKey, getKeyBytes, isLoaded, useStore } from "./store";
 import { LockIcon } from "./ui";
 import { VoicePlayer } from "./voiceplayer";
 
@@ -75,6 +75,15 @@ interface FileInfo {
 const files = new Map<string, FileInfo>();
 /** message id → decrypted blob URL (one download per session) */
 const loaded = new Map<string, Promise<string>>();
+
+/** Vault locked: the decrypted copies of its files leave memory too */
+export function forgetFiles(keyId: string) {
+    for (const [id, info] of files) {
+        if (info.keyId !== keyId) continue;
+        loaded.get(id)?.then(u => URL.revokeObjectURL(u), () => { });
+        loaded.delete(id);
+    }
+}
 
 // ---------------------------------------------------------------- Receiving (called from the interceptor)
 
@@ -159,6 +168,11 @@ export async function sendEncryptedFiles(channel: Channel, list: File[], message
     const record = channelKey(channel.id);
     const key = record && getKeyBytes(record.id);
     const me = UserStore.getCurrentUser()?.id;
+    // A chat with a key whose bytes are missing (locked vault) must never get the files readable
+    if (record && !key) {
+        notify({ title: record.source === "vault" ? "Your vault is locked – unlock it first (right-click the server → Unlock vault). Nothing was sent." : "The key of this chat is missing – nothing was sent", kind: "error", app: "Unter das OS" });
+        return;
+    }
     if (!record || !key || !me) return sendPlainFiles(channel, list, messageReference);
 
     const limit = uploadLimit();
@@ -319,6 +333,10 @@ export function EncryptedFile({ message }: { message: Message; }) {
     const [busy, setBusy] = useState(false);
     const [phase, setPhase] = useState("Loading…");
     const { emergency } = settings.use(["emergency"]);
+    useStore();
+    // Locked vault: the key left memory, so nothing decrypted may stay on screen
+    const hasKey = !!info && !!getKeyBytes(info.keyId);
+    useEffect(() => { if (!hasKey) setUrl(null); }, [hasKey]);
 
     // Gofile has only a download page: the user downloads the .bin there and picks it here
     const gofile = !!info && isGofileLink(info.url);
@@ -346,13 +364,13 @@ export function EncryptedFile({ message }: { message: Message; }) {
     };
 
     useEffect(() => {
-        if (!info || emergency) return;
+        if (!info || emergency || !hasKey) return;
         // Already decrypted this session (e.g. a Gofile file picked before)
         if (auto || loaded.has(message.id)) start();
-    }, [message.id, emergency]);
+    }, [message.id, emergency, hasKey]);
 
     // Emergency stop: nothing decrypted stays on screen
-    if (!info || emergency) return null;
+    if (!info || emergency || !hasKey) return null;
     const m = info.manifest;
 
     const save = (u: string) => saveDecrypted(u, m.n);

@@ -2159,3 +2159,22 @@ video.vc-secretchat-file-media {
         margin-left: auto;
     }
 }
+
+/* Vault lock next to the server name */
+.vc-secretchat-vault-badge {
+    display: inline-flex;
+    align-items: center;
+    flex-shrink: 0;
+    margin-left: 6px;
+    color: var(--interactive-normal);
+    cursor: pointer;
+}
+
+.vc-secretchat-vault-badge:hover {
+    color: var(--interactive-hover);
+}
+
+.vc-secretchat-vault-open,
+.vc-secretchat-vault-open:hover {
+    color: var(--vc-ui-green);
+}

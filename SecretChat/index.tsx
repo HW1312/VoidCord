@@ -10,6 +10,7 @@
 import { NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { addServerListElement, removeServerListElement, ServerListRenderPosition } from "@api/ServerList";
 import { migratePluginSettings } from "@api/Settings";
+import ErrorBoundary from "@components/ErrorBoundary";
 import { Logger } from "@utils/Logger";
 import definePlugin from "@utils/types";
 import { User } from "@vencord/discord-types";
@@ -24,8 +25,9 @@ import { EncryptedFile, interceptUpload, sendFilesOverride } from "./files";
 import { decryptLoaded, intercept, onBeforeEdit, onBeforeSend, retryHandshakes, retryLocked, startHandshake, unwrapMessageActions, wrapMessageActions } from "./messages";
 import { isRoomMessage, onChannelDelete, retryRooms } from "./rooms";
 import { settings } from "./settings";
-import { loadState } from "./store";
+import { loadState, lockAllVaults } from "./store";
 import { ChatButton, LockDecoration, LockIcon, MessageCard } from "./ui";
+import { channelVaultMenu, guildVaultMenu, VaultBadge } from "./vault";
 import { guardVoicePosts, takeVoiceUpload, unguardVoicePosts } from "./voice";
 import { closeRoomsWindow } from "./window";
 
@@ -91,6 +93,14 @@ export default definePlugin({
             }
         },
         {
+            // Server header: lock next to the server name for vaults (after the badge + name, before the arrow)
+            find: ".GUILD_HEADER_INVITE_BUTTON}",
+            replacement: {
+                match: /children:\[\(0,\i\.jsx\)\(\i\.\i,\{guild:(\i),isBannerVisible:\i\}\)/,
+                replace: "$&,$self.renderVaultBadge($1)"
+            }
+        },
+        {
             // Start of every attachment upload (also hooked by OpSec and VoiceLength) – voice messages in encrypted
             // chats are taken out here before anything is uploaded
             find: ".tryConvertToJpeg({file:",
@@ -105,9 +115,14 @@ export default definePlugin({
     interceptUpload,
     takeVoiceUpload,
     renderTitleBarButton: titleBarSlot("SecretChat", renderTitleBarButton),
+    renderVaultBadge: (guild: { id?: string; } | null) => guild?.id
+        ? <ErrorBoundary key="vc-secretchat-vault" noop><VaultBadge guildId={guild.id} /></ErrorBoundary>
+        : null,
 
     contextMenus: {
-        "user-context": userContext
+        "user-context": userContext,
+        "guild-context": guildVaultMenu,
+        "channel-context": channelVaultMenu
     },
 
     flux: {
@@ -153,6 +168,8 @@ export default definePlugin({
     },
 
     stop() {
+        // Vault keys only ever live in memory – turning the plugin off forgets them
+        lockAllVaults();
         closeRoomsWindow();
         unwrapMessageActions();
         unguardVoicePosts();

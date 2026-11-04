@@ -427,6 +427,19 @@ export function applyEmergency(on: boolean) {
     emit();
 }
 
+/** A key left memory (vault locked): its messages go back to the "no key" text until it's unlocked again */
+export function relockKey(keyId: string) {
+    for (const [id, k] of decrypted) {
+        if (k !== keyId) continue;
+        const e = encryptedSeen.get(id);
+        decrypted.delete(id);
+        if (!e) continue;
+        locked.set(id, e);
+        updateMessage(e.channelId, id, { content: LOCKED_TEXT });
+    }
+    emit();
+}
+
 export function retryLocked() {
     for (const [id, { channelId, authorId, raw }] of locked) {
         const result = tryDecrypt(raw, authorId);
@@ -463,7 +476,11 @@ function outgoing(channelId: string, content: string): string | null {
 
     const me = myId();
     const key = getKeyBytes(record.id);
-    if (!me || !key) return null;
+    if (!me || !key) {
+        // Vault channel while the vault is locked: never send it readable
+        if (record.source === "vault") notify({ title: "Your vault is locked – unlock it first (right-click the server → Unlock vault). Nothing was sent.", kind: "error", app: "Unter das OS" });
+        return null;
+    }
 
     const encrypted = encryptMessage(record.id, key, me, content);
     if (encrypted.length > MAX_LENGTH) {
@@ -489,7 +506,8 @@ function outgoingEdit(messageId: string, content: string): string | null {
     const key = getKeyBytes(keyId);
     const me = myId();
     if (!key || !me) {
-        notify({ title: `The key "${getKey(keyId)?.name ?? keyId}" was deleted – this message can't be edited anymore`, kind: "error", app: "Unter das OS" });
+        const k = getKey(keyId);
+        notify({ title: k?.source === "vault" ? "Your vault is locked – unlock it to edit this message" : `The key "${k?.name ?? keyId}" was deleted – this message can't be edited anymore`, kind: "error", app: "Unter das OS" });
         return null;
     }
     const encrypted = encryptMessage(keyId, key, me, content);
