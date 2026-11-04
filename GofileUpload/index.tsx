@@ -38,8 +38,8 @@ const active = new Set<string>();
 const settings = definePluginSettings({
     limitFree: {
         type: OptionType.NUMBER,
-        description: "Size limit without Nitro (MB) – larger files go to Gofile (Discord allows 10 MB)",
-        default: 9.8
+        description: "Size limit without Nitro (MB) – larger files go to Gofile (Discord allows 20 MB)",
+        default: 19.8
     },
     limitBasic: {
         type: OptionType.NUMBER,
@@ -627,7 +627,7 @@ function splitOff(list: File[], limit: number, channel: Channel, options?: { fil
 
 export default definePlugin({
     name: "GofileUpload",
-    description: "Files that are too large for Discord (19.8 MB without Nitro, 999 MB with Nitro) are uploaded to gofile.io (Catbox as fallback) with metadata stripped, and the link is sent in the chat instead. Oversized images are compressed first so they stay normal attachments",
+    description: "Files that are too large for Discord (20 MB without Nitro, 50 MB with Nitro Basic, 500 MB with Nitro) are uploaded to gofile.io (Catbox as fallback) with metadata stripped, and the link is sent in the chat instead. Oversized images are compressed first so they stay normal attachments",
     about: "Files too big for Discord no longer fail: big images get compressed so they stay normal attachments, everything else is uploaded to Gofile and the download link is sent in the chat instead.",
     authors: [{ name: "5406", id: 1062070744558870548n }],
     tags: ["Chat", "Utility"],
@@ -689,12 +689,17 @@ export default definePlugin({
 
     start() {
         running = true;
-        // Discord lowered its limits (free 25 → 10 MB, Nitro → 500 MB) – fix values saved from the old defaults once
+        // Fix values saved from old defaults once. Discord's limits: 2024 free 25 → 10 MB, Nitro → 500 MB;
+        // 2026-08-13 free 10 → 20 MB (Basic 50, Nitro 500 unchanged)
         const s = settings.store;
         if (s.limitsVersion < 1) {
-            if (s.limitFree > 10) s.limitFree = 9.8;
+            if (s.limitFree > 20) s.limitFree = 19.8;
             if (s.limitNitro > 500) s.limitNitro = 499;
-            s.limitsVersion = 1;
+        }
+        if (s.limitsVersion < 2) {
+            // only the old default – a value the user picked stays
+            if (s.limitFree === 9.8) s.limitFree = 19.8;
+            s.limitsVersion = 2;
         }
     },
 

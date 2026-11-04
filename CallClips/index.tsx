@@ -150,6 +150,9 @@ export default definePlugin({
     flux: {
         VOICE_CHANNEL_SELECT: syncSoon,
         RTC_CONNECTION_STATE: syncSoon,
+        // Recording follows Discord's mic / output device – reopen when they change
+        AUDIO_SET_INPUT_DEVICE: () => void setTimeout(restart, 300),
+        AUDIO_SET_OUTPUT_DEVICE: () => void setTimeout(restart, 300),
         SPEAKING({ userId, speakingFlags, context }: { userId: string; speakingFlags: number; context?: string; }) {
             if (context && context !== "default") return;
             if (userId !== UserStore.getCurrentUser()?.id) return;

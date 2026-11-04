@@ -742,6 +742,7 @@ function ClipsSheet({ embedded, onClose }: { embedded?: boolean; onClose(): void
                     </Button>
                     <span className={cl("dim")}>{hotkey ? `or press ${hotkey} – also in games` : "Set a shortcut in the plugin settings"}</span>
                     {state.error && !state.running && <Note tone="bad">Recording failed: {state.error}</Note>}
+                    {state.warning && state.running && <Note tone="warn">{state.warning}</Note>}
                     {clips.length > 0 && (
                         <div className={cl("tabs")}>
                             <Segmented<Tab>

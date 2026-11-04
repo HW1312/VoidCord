@@ -10,6 +10,7 @@
 
 import { Logger } from "@utils/Logger";
 import { PluginNative } from "@utils/types";
+import { MediaEngineStore } from "@webpack/common";
 
 import { RATE } from "./encode";
 
@@ -66,9 +67,11 @@ export interface RecorderState {
     running: boolean;
     /** Starting, or a problem (e.g. Windows didn't share the sound) */
     error: string;
+    /** Recording works, but something is missing from clips (e.g. no microphone, other output device) */
+    warning: string;
 }
 
-export const state: RecorderState = { running: false, error: "" };
+export const state: RecorderState = { running: false, error: "", warning: "" };
 export const listeners = new Set<() => void>();
 const set = (patch: Partial<RecorderState>) => {
     Object.assign(state, patch);
@@ -154,10 +157,68 @@ async function createTap(context: AudioContext, onBlock: (channels: Float32Array
     }
 }
 
-function openMic(): Promise<MediaStream | null> {
-    return navigator.mediaDevices.getUserMedia({
-        audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true }
-    }).catch(e => {
+/*
+ * Discord's voice engine names devices like Windows does ("Mikrofon (Realtek(R) Audio)"); its ids are not
+ * Chromium's. Chromium uses the same names, USB devices with " (046d:0825)" added. So devices are matched by name.
+ */
+const normName = (s: string) => s.toLowerCase().replace(/\s*\([0-9a-f]{4}:[0-9a-f]{4}\)\s*$/, "").trim();
+const sameName = (a: string, b: string) => {
+    const x = normName(a), y = normName(b);
+    return !!x && !!y && (x === y || x.startsWith(y) || y.startsWith(x));
+};
+/** Chromium's "default" / "communications" entries – their labels have a translated prefix */
+const isAlias = (d: MediaDeviceInfo) => d.deviceId === "default" || d.deviceId === "communications";
+
+/** The device Discord sends your voice from – null = Windows' default (Discord's "Default", or not found) */
+async function discordMicDeviceId(): Promise<string | null> {
+    try {
+        const id = MediaEngineStore.getInputDeviceId();
+        if (!id || id === "default") return null;
+        const name = MediaEngineStore.getInputDevices()?.[id]?.name;
+        if (!name) return null;
+        const inputs = (await navigator.mediaDevices.enumerateDevices()).filter(d => d.kind === "audioinput" && !isAlias(d));
+        const match = inputs.find(d => normName(d.label) === normName(name)) ?? inputs.find(d => sameName(d.label, name));
+        if (!match) logger.warn(`Discord's microphone "${name}" not found – using Windows' default`, inputs.map(d => d.label));
+        return match?.deviceId ?? null;
+    } catch (e) {
+        logger.warn("Could not look up Discord's microphone", e);
+        return null;
+    }
+}
+
+/*
+ * Chromium's PC sound capture only hears Windows' default output. If Discord plays the call on another device
+ * (e.g. a headset while the speakers are the default), the others are missing from clips – say so.
+ */
+async function outputWarning(): Promise<string> {
+    try {
+        const id = MediaEngineStore.getOutputDeviceId();
+        if (!id || id === "default") return "";
+        const name = MediaEngineStore.getOutputDevices()?.[id]?.name;
+        if (!name) return "";
+        const outputs = (await navigator.mediaDevices.enumerateDevices()).filter(d => d.kind === "audiooutput");
+        const def = outputs.find(d => d.deviceId === "default");
+        if (!def?.label) return "";
+        // "Default - Speakers (Realtek)" / "Standard - …" – the device name follows the prefix
+        const defName = def.label.replace(/^[^-–]+[-–]\s*/, "");
+        if (!defName || defName === def.label || sameName(defName, name)) return "";
+        return `Discord plays the call on “${name}”, but Windows' default output is “${defName}”. Clips only hear the default output, so the others will be missing – pick “Default” as output device in Discord's voice settings, or make “${name}” the Windows default.`;
+    } catch {
+        return "";
+    }
+}
+
+async function openMic(): Promise<MediaStream | null> {
+    const constraints = { echoCancellation: true, noiseSuppression: true, autoGainControl: true };
+    const deviceId = await discordMicDeviceId();
+    if (deviceId) {
+        try {
+            return await navigator.mediaDevices.getUserMedia({ audio: { ...constraints, deviceId: { exact: deviceId } } });
+        } catch (e) {
+            logger.warn("Could not open Discord's microphone – using Windows' default", e);
+        }
+    }
+    return navigator.mediaDevices.getUserMedia({ audio: constraints }).catch(e => {
         logger.warn("No microphone – clips only have the call sound", e);
         return null;
     });
@@ -193,7 +254,11 @@ export function start(seconds: number, withMic: boolean) {
             merger.connect(tap);
             // Only pulled while connected to the output; it writes silence there
             tap.connect(ctx.destination);
-            set({ running: true, error: "" });
+            const warnings = [
+                withMic && !mic ? "No microphone could be opened – clips only have the others, not you." : "",
+                await outputWarning()
+            ].filter(Boolean);
+            set({ running: true, error: "", warning: warnings.join(" ") });
         } catch (e: any) {
             logger.error("Could not start recording", e);
             stop();
@@ -214,7 +279,7 @@ export function stop() {
     ctx = tap = ring = null;
     streams = [];
     speaking = [];
-    if (state.running) set({ running: false });
+    if (state.running || state.warning) set({ running: false, warning: "" });
 }
 
 /** Discord's own speaking state (SPEAKING events for your user) */

@@ -72,8 +72,8 @@ function uploadLimit() {
     const premium = UserStore.getCurrentUser()?.premiumType ?? 0;
     const gofile = Settings.plugins.GofileUpload;
     const [free, basic, nitro] = gofile?.enabled
-        ? [gofile.limitFree ?? 9.8, gofile.limitBasic ?? 49.8, gofile.limitNitro ?? 499]
-        : [10, 50, 500];
+        ? [gofile.limitFree ?? 19.8, gofile.limitBasic ?? 49.8, gofile.limitNitro ?? 499]
+        : [20, 50, 500];
     return (premium === 2 ? nitro : premium === 1 || premium === 3 ? basic : free) * MB;
 }
 
