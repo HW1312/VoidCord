@@ -210,6 +210,11 @@ export async function keyIdOf(key: Uint8Array) {
     return toHex((await sha512("SecretChat key id", key)).subarray(0, 4));
 }
 
+/** Full 32-byte fingerprint of a key – the short key id (4 bytes) can be matched by trying random keys, this can't */
+export async function keyFingerprint(key: Uint8Array) {
+    return toHex((await sha512("SecretChat key fingerprint", key)).subarray(0, 32));
+}
+
 /** Code both people see for the same key – compare it (call, in person) to rule out a man in the middle */
 export async function safetyCode(key: Uint8Array) {
     const h = await sha512("SecretChat safety code", key);

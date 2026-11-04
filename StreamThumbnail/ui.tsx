@@ -38,7 +38,7 @@ const ThumbnailSheet = ErrorBoundary.wrap(() => {
         clearTimeout(timer.current);
         timer.current = setTimeout(() => {
             settings.store.caption = v;
-            refresh();
+            run(refresh);
         }, 600);
     };
 
@@ -89,7 +89,7 @@ const ThumbnailSheet = ErrorBoundary.wrap(() => {
                     checked={enabled}
                     onChange={v => {
                         settings.store.active = v;
-                        if (v) refresh();
+                        if (v) run(refresh);
                     }}
                 />
                 <Row

@@ -354,6 +354,28 @@ async function grabTikTokSound(url: string, id: string, job: Job) {
     return mp3;
 }
 
+/**
+ * "Save to Downloads": the file is downloaded in the job's temp folder and only moved there when it's complete –
+ * so a cancelled or failed download never leaves .part / .ytdl leftovers in the user's Downloads.
+ */
+async function moveToDownloads(job: Job) {
+    const downloads = app.getPath("downloads");
+    await fs.mkdir(downloads, { recursive: true });
+    const file = basename(job.path!);
+    const dot = file.lastIndexOf(".");
+    const [stem, ext] = dot > 0 ? [file.slice(0, dot), file.slice(dot)] : [file, ""];
+    let target = join(downloads, file);
+    for (let n = 2; existsSync(target); n++) target = join(downloads, `${stem} (${n})${ext}`);
+    try {
+        await fs.rename(job.path!, target);
+    } catch {
+        // Other drive than the temp folder
+        await fs.copyFile(job.path!, target);
+        await fs.rm(job.path!, { force: true });
+    }
+    job.path = target;
+}
+
 /** Starts a download and returns its job id. Poll getJob() for progress. */
 export function startGrab(_: IpcMainInvokeEvent, opts: GrabOptions) {
     if (!opts || typeof opts.url !== "string" || !/^https?:\/\/\S+$/i.test(opts.url.trim())) throw new Error("Invalid link");
@@ -361,7 +383,7 @@ export function startGrab(_: IpcMainInvokeEvent, opts: GrabOptions) {
     opts.url = opts.url.trim();
 
     const id = randomBytes(8).toString("hex");
-    const dir = opts.keep ? app.getPath("downloads") : join(tmpdir(), `vc-mediagrab-${id}`);
+    const dir = join(tmpdir(), `vc-mediagrab-${id}`);
     const job: Job = {
         state: { status: "running", progress: -1, phase: "starting", speed: 0, eta: 0, title: "" },
         dir,
@@ -377,6 +399,7 @@ export function startGrab(_: IpcMainInvokeEvent, opts: GrabOptions) {
         if (sound) {
             job.path = await grabTikTokSound(opts.url, sound[1], job);
             if (job.cancelled) throw new Error("Cancelled");
+            if (job.keep) await moveToDownloads(job);
             job.state.size = (await fs.stat(job.path)).size;
             job.state.file = basename(job.path);
             job.state.progress = 1;
@@ -413,6 +436,7 @@ export function startGrab(_: IpcMainInvokeEvent, opts: GrabOptions) {
         if (job.cancelled) throw new Error("Cancelled");
         if (code !== 0) throw new Error(errors || `yt-dlp exited with code ${code}`);
         if (!job.path || !existsSync(job.path)) throw new Error("yt-dlp finished but no file was found");
+        if (job.keep) await moveToDownloads(job);
 
         job.state.size = (await fs.stat(job.path)).size;
         job.state.file = basename(job.path);
@@ -421,7 +445,7 @@ export function startGrab(_: IpcMainInvokeEvent, opts: GrabOptions) {
     })().catch(e => {
         job.state.status = "error";
         job.state.error = String(e?.message ?? e);
-        if (!job.keep) fs.rm(dir, { recursive: true, force: true }).catch(() => { });
+        fs.rm(dir, { recursive: true, force: true }).catch(() => { });
     }).finally(() => { job.proc = undefined; });
 
     return id;
@@ -463,5 +487,6 @@ export async function finishJob(_: IpcMainInvokeEvent, id: string) {
         job.proc?.kill();
         job.abort?.();
     }
-    if (!job.keep) await fs.rm(job.dir, { recursive: true, force: true }).catch(() => { });
+    // Always the job's own temp folder – a saved file was already moved to Downloads
+    await fs.rm(job.dir, { recursive: true, force: true }).catch(() => { });
 }

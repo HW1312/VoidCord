@@ -214,10 +214,15 @@ export async function listen(): Promise<Song | null> {
         stream?.getTracks().forEach(t => t.stop());
         ctx?.close().catch(() => { });
     };
-    cancelCurrent = () => { cancelled = true; cleanup(); };
+    const myCancel = () => { cancelled = true; cleanup(); };
+    cancelCurrent = myCancel;
+    /** Only clear our own handle – a newer run may have set its own meanwhile */
+    const release = () => { if (cancelCurrent === myCancel) cancelCurrent = null; };
 
     try {
         stream = await openSystemSound();
+        // Cancelled while Windows was asked for the sound: cleanup() ran before the stream existed
+        if (cancelled) return null;
         ctx = new AudioContext();
         const rate = ctx.sampleRate;
         const chunks: Float32Array[] = [];
@@ -268,7 +273,7 @@ export async function listen(): Promise<Song | null> {
             if (cancelled) return null;
             if (song) {
                 cleanup();
-                cancelCurrent = null;
+                release();
                 remember(song);
                 set({ phase: "found", progress: 1, result: song });
                 return song;
@@ -276,7 +281,7 @@ export async function listen(): Promise<Song | null> {
         }
 
         cleanup();
-        cancelCurrent = null;
+        release();
         set({
             phase: heardSomething ? "notfound" : "error",
             progress: 0,
@@ -285,11 +290,14 @@ export async function listen(): Promise<Song | null> {
         return null;
     } catch (e: any) {
         cleanup();
-        cancelCurrent = null;
+        release();
         if (cancelled) return null;
         logger.error("Listening failed", e);
         set({ phase: "error", progress: 0, error: errorText(e) });
         return null;
+    } finally {
+        // Every cancelled way out: stream, audio context and the progress timer must not stay alive
+        if (cancelled) cleanup();
     }
 }
 
@@ -307,7 +315,8 @@ export async function recognizeMedia(url: string, name: string): Promise<Song | 
     if (busy()) return null;
     set({ phase: "searching", progress: 0, source: "media", sourceName: name, result: null, error: "" });
     let cancelled = false;
-    cancelCurrent = () => { cancelled = true; };
+    const myCancel = () => { cancelled = true; };
+    cancelCurrent = myCancel;
 
     try {
         const bytes = await native().downloadMedia(url);
@@ -346,7 +355,7 @@ export async function recognizeMedia(url: string, name: string): Promise<Song | 
         set({ phase: "error", error: String(e?.message ?? e) });
         return null;
     } finally {
-        cancelCurrent = null;
+        if (cancelCurrent === myCancel) cancelCurrent = null;
     }
 }
 

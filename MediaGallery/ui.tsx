@@ -352,7 +352,8 @@ function Gallery({ channel, onClose }: { channel: Channel; onClose(): void; }) {
 
     // Selection & view
     const [selection, setSelection] = useState<Set<string>>(() => new Set());
-    const lastClicked = useRef<number | null>(null);
+    // Key, not index: positions in `filtered` shift when more pages load
+    const lastClicked = useRef<string | null>(null);
     const [lightbox, setLightbox] = useState<number | null>(null);
     const [renderCount, setRenderCount] = useState(PAGE_RENDER);
     const scrollRef = useRef<HTMLDivElement>(null);
@@ -428,12 +429,13 @@ function Gallery({ channel, onClose }: { channel: Channel; onClose(): void; }) {
 
     const toggleItem = (index: number, e: ReactMouseEvent) => {
         const item = filtered[index];
+        const last = lastClicked.current == null ? -1 : filtered.findIndex(i => i.key === lastClicked.current);
         setSelection(prev => {
             const next = new Set(prev);
-            if (e.shiftKey && lastClicked.current != null && filtered[lastClicked.current]) {
+            if (e.shiftKey && last !== -1) {
                 // Select range (state of the clicked item decides on/off)
                 const on = !prev.has(item.key);
-                const [a, b] = [lastClicked.current, index].sort((x, y) => x - y);
+                const [a, b] = [last, index].sort((x, y) => x - y);
                 for (let i = a; i <= b; i++) {
                     if (on) next.add(filtered[i].key);
                     else next.delete(filtered[i].key);
@@ -442,7 +444,7 @@ function Gallery({ channel, onClose }: { channel: Channel; onClose(): void; }) {
             else next.add(item.key);
             return next;
         });
-        lastClicked.current = index;
+        lastClicked.current = item.key;
     };
 
     const selectAll = () => setSelection(new Set(filtered.map(i => i.key)));
@@ -476,7 +478,9 @@ function Gallery({ channel, onClose }: { channel: Channel; onClose(): void; }) {
             job.promise
                 .catch(() => { })
                 .finally(() => {
-                    if (zipJob.current === job) zipJob.current = null;
+                    // After a cancel a new job may already run – don't hide its progress
+                    if (zipJob.current !== job) return;
+                    zipJob.current = null;
                     setZip(null);
                 });
         };

@@ -139,6 +139,9 @@ function setStatus(id: string, patch: Partial<Status>) {
 }
 
 let alive = false;
+/** Bumped on every begin()/halt() – lanes of an older run stop even if the plugin was switched back on meanwhile */
+let generation = 0;
+const current = (gen: number) => alive && gen === generation;
 let timer: ReturnType<typeof setInterval> | undefined;
 const busy: Partial<Record<Lane, string>> = {};
 /** Quests that failed or were already handled this session – not tried again until restart */
@@ -160,9 +163,9 @@ const stopWaiters = new Set<() => void>();
 
 /** All quest requests go one after another with a random pause in between */
 let chain: Promise<unknown> = Promise.resolve();
-function request<T>(fn: () => Promise<T>): Promise<T> {
+function request<T>(fn: () => Promise<T>, gen?: number): Promise<T> {
     const run = chain.then(async () => {
-        if (!alive) throw new Error("stopped");
+        if (!alive || (gen !== undefined && gen !== generation)) throw new Error("stopped");
         for (let attempt = 0; ; attempt++) {
             try {
                 return await fn();
@@ -339,30 +342,32 @@ async function check() {
 }
 
 async function runLane(lane: Lane, quest: any) {
+    const gen = generation;
     track(quest, "running");
     try {
-        if (lane === "video") await doVideo(quest);
-        else if (lane === "game") await doGame(quest);
+        if (lane === "video") await doVideo(quest, gen);
+        else if (lane === "game") await doGame(quest, gen);
         else if (lane === "stream") await doStream(quest);
-        else await doActivity(quest);
+        else await doActivity(quest, gen);
 
-        if (!alive) return;
+        if (!current(gen)) return;
         setStatus(quest.id, { state: "done", note: undefined });
         logger.info(`Completed ${nameOf(quest)}`);
         // Discord's store only learns about it after fetching the quests again
         await sleep(rand([3000, 6000]));
-        await request(fetchQuests).catch(() => { });
+        await request(fetchQuests, gen).catch(() => { });
     } catch (e: any) {
-        if (!alive) return;
+        if (!current(gen)) return;
         logger.error(`${nameOf(quest)} failed`, e);
         skip.add(quest.id);
         setStatus(quest.id, { state: "failed", note: e?.body?.message ?? e?.message ?? String(e) });
     }
-    if (!alive) return;
+    if (!current(gen)) return;
     // The lane stays taken during the pause, so no other check starts the next quest early
     await sleep(rand(BETWEEN_QUESTS));
+    // An old run must not free the lane of a newer one
+    if (!current(gen)) return;
     if (busy[lane] === quest.id) delete busy[lane];
-    if (!alive) return;
     check();
 }
 
@@ -394,15 +399,15 @@ async function claim(quest: any) {
 
 // ---------------------------------------------------------------- Kinds of quests
 
-async function doVideo(quest: any) {
+async function doVideo(quest: any, gen: number) {
     const task = taskOf(quest)!;
     const enrolledAt = new Date(quest.userStatus.enrolledAt).getTime();
     let done = progressOf(quest, task.name);
     let completed = false;
 
-    while (alive && done < task.target) {
+    while (current(gen) && done < task.target) {
         await sleep(rand(VIDEO_STEP));
-        if (!alive) return;
+        if (!current(gen)) return;
         // Discord refuses progress further than the time since accepting the quest
         const allowed = (Date.now() - enrolledAt) / 1000;
         const next = Math.min(task.target, done + 7, allowed);
@@ -411,14 +416,14 @@ async function doVideo(quest: any) {
         const res = await request(() => RestAPI.post({
             url: `/quests/${quest.id}/video-progress`,
             body: { timestamp: Math.min(task.target, next + Math.random()) }
-        }));
+        }), gen);
         done = next;
         completed = res?.body?.completed_at != null;
         setStatus(quest.id, { done });
         if (completed) return;
     }
-    if (alive && !completed) {
-        await request(() => RestAPI.post({ url: `/quests/${quest.id}/video-progress`, body: { timestamp: task.target } }));
+    if (current(gen) && !completed) {
+        await request(() => RestAPI.post({ url: `/quests/${quest.id}/video-progress`, body: { timestamp: task.target } }), gen);
     }
 }
 
@@ -445,13 +450,13 @@ function waitForHeartbeats(quest: any, task: TaskName, target: number) {
 
 let restoreGames: (() => void) | null = null;
 
-async function doGame(quest: any) {
+async function doGame(quest: any, gen: number) {
     const task = taskOf(quest)!;
     if (!task.appId) throw new Error("Quest has no game");
-    const res = await request(() => RestAPI.get({ url: `/applications/public?application_ids=${task.appId}` }));
+    const res = await request(() => RestAPI.get({ url: `/applications/public?application_ids=${task.appId}` }), gen);
     const app = res.body?.[0];
     if (!app) throw new Error("Game not found");
-    if (!alive) return;
+    if (!current(gen)) return;
 
     const pid = Math.floor(Math.random() * 30000) + 1000;
     const exeName = app.executables?.find((x: any) => x.os === "win32")?.name?.replace(">", "") ?? app.name.replace(/[/\\:*?"<>|]/g, "");
@@ -510,19 +515,19 @@ async function doStream(quest: any) {
     }
 }
 
-async function doActivity(quest: any) {
+async function doActivity(quest: any, gen: number) {
     const task = taskOf(quest)!;
     const voice = Object.values(GuildChannelStore.getAllGuilds() as Record<string, any>).find(g => g?.VOCAL?.length)?.VOCAL[0]?.channel?.id;
     const channelId = (ChannelStore as any).getSortedPrivateChannels()[0]?.id ?? voice;
     if (!channelId) throw new Error("No channel for the activity");
     const streamKey = `call:${channelId}:1`;
 
-    while (alive) {
-        const res = await request(() => RestAPI.post({ url: `/quests/${quest.id}/heartbeat`, body: { stream_key: streamKey, terminal: false } }));
+    while (current(gen)) {
+        const res = await request(() => RestAPI.post({ url: `/quests/${quest.id}/heartbeat`, body: { stream_key: streamKey, terminal: false } }), gen);
         const done = res?.body?.progress?.PLAY_ACTIVITY?.value ?? 0;
         setStatus(quest.id, { done });
         if (done >= task.target) {
-            await request(() => RestAPI.post({ url: `/quests/${quest.id}/heartbeat`, body: { stream_key: streamKey, terminal: true } }));
+            await request(() => RestAPI.post({ url: `/quests/${quest.id}/heartbeat`, body: { stream_key: streamKey, terminal: true } }), gen);
             return;
         }
         await sleep(rand(ACTIVITY_STEP));
@@ -894,9 +899,10 @@ function setActive(on: boolean) {
 function begin(delay = 1500) {
     if (alive || !enabled) return;
     alive = true;
+    const gen = ++generation;
     // Discord loads the quests on its own – after a restart the first look waits until it's done with startup
     setTimeout(() => {
-        if (!alive) return;
+        if (!current(gen)) return;
         if (!QuestStore.quests?.size) request(fetchQuests).catch(() => { });
         else check();
     }, delay);
@@ -907,6 +913,7 @@ function begin(delay = 1500) {
 /** Stops everything that runs and puts back the faked game / stream */
 function halt() {
     alive = false;
+    generation++;
     clearInterval(timer);
     stopWaiters.forEach(f => f());
     stopWaiters.clear();

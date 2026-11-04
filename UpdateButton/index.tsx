@@ -75,6 +75,7 @@ const state = {
 };
 
 let timer: ReturnType<typeof setTimeout> | undefined;
+let running = false;
 let restarting = false;
 const listeners = new Set<() => void>();
 
@@ -268,7 +269,8 @@ const intervalMs = () => (Number(settings.store.interval) || 5) * 60_000;
 
 function schedule(delay: number) {
     clearTimeout(timer);
-    if (!canUpdate()) return;
+    // Also called after an await and from the interval setting – never while the plugin is off
+    if (!running || !canUpdate()) return;
     timer = setTimeout(async () => {
         await autoCheck();
         schedule(intervalMs());
@@ -450,6 +452,7 @@ export default definePlugin({
     },
 
     start() {
+        running = true;
         if (!canUpdate()) return;
         // No more popups: Vencord downloads silently, this button tells you about it
         Settings.autoUpdate = true;
@@ -458,6 +461,7 @@ export default definePlugin({
     },
 
     stop() {
+        running = false;
         clearTimeout(timer);
     }
 });

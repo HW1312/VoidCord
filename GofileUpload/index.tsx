@@ -14,7 +14,7 @@ import { insertTextIntoChatInputBox, sendMessage } from "@utils/discord";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType, PluginNative } from "@utils/types";
 import { Channel } from "@vencord/discord-types";
-import { showToast, UserStore } from "@webpack/common";
+import { SelectedChannelStore, showToast, UserStore } from "@webpack/common";
 
 import { ICONS, notify } from "../_ui";
 import { randomFilename, stripMetadata } from "../opsec/metadata";
@@ -273,7 +273,12 @@ function deliverLink(channel: Channel, text: string) {
         copyToClipboard(text);
         showToast({ text: "Download link copied to clipboard", variant: "success" });
     } else if (mode === "insert") {
-        insertTextIntoChatInputBox(text);
+        // The chat box takes the text wherever you are now – only insert if it's still the chat the file was for
+        if (SelectedChannelStore.getChannelId() === channel.id) insertTextIntoChatInputBox(text);
+        else {
+            copyToClipboard(text);
+            showToast({ text: "You switched chats – the download link was copied instead", variant: "success" });
+        }
     } else {
         sendMessage(channel.id, { content: text });
     }
@@ -296,12 +301,15 @@ async function uploadFiles(files: File[], channel: Channel) {
         const links: string[] = [];
         let folder: GofileFolder | null = null;
         let sentBefore = 0;
+        /** Names as uploaded (random ones if randomizeName is on) – the chat message must not show the real name */
+        const sentNames: string[] = [];
 
         for (const original of files) {
             if (handle.cancelled) throw new CancelledError("Cancelled");
 
             card.update(settings.store.stripMetadata ? "Stripping metadata …" : "Preparing …", sentBefore / total);
             const file = await prepareFile(original);
+            sentNames.push(file.name);
             if (handle.cancelled) throw new CancelledError("Cancelled");
 
             // Progress bar: copying to the main process counts 10 %, the upload 90 %
@@ -346,9 +354,11 @@ async function uploadFiles(files: File[], channel: Channel) {
                     if (!links.includes(result.url)) links.push(result.url);
                 }
             } finally {
-                if (jobId) {
-                    active.delete(jobId);
-                    void Native.discardUpload(jobId).catch(() => { });
+                // copyToMain may have created the job and then failed (cancelled while copying) before returning its id
+                const id = jobId ?? handle.jobId;
+                if (id) {
+                    active.delete(id);
+                    void Native.discardUpload(id).catch(() => { });
                 }
                 handle.jobId = null;
             }
@@ -356,7 +366,7 @@ async function uploadFiles(files: File[], channel: Channel) {
         }
 
         const label = files.length === 1
-            ? `**${files[0].name.replace(/[*_~`|\\]/g, "\\$&")}** (${formatSize(total)})`
+            ? `**${sentNames[0].replace(/[*_~`|\\]/g, "\\$&")}** (${formatSize(total)})`
             : `**${files.length} files** (${formatSize(total)})`;
         deliverLink(channel, `📎 ${label}\n${links.join("\n")}`);
         card.finish("done", "Uploaded");
@@ -411,9 +421,10 @@ export async function uploadForLink(file: File, title: string): Promise<{ url: s
         card.finish("error", e instanceof CancelledError ? "Cancelled" : `Failed – ${e instanceof Error ? e.message : e}`);
         return null;
     } finally {
-        if (jobId) {
-            active.delete(jobId);
-            void Native.discardUpload(jobId).catch(() => { });
+        const id = jobId ?? handle.jobId;
+        if (id) {
+            active.delete(id);
+            void Native.discardUpload(id).catch(() => { });
         }
     }
 }

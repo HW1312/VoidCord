@@ -159,6 +159,7 @@ export const openSystemSettings = () => SettingsRouter.openUserSettings("system_
 let root: ReturnType<typeof createRoot> | null = null;
 
 export function startDebug() {
+    if (root) return;
     FluxDispatcher.subscribe("MEDIA_ENGINE_CONNECTION_STATS", onStats);
     const host = document.createElement("div");
     host.id = "vc-streamunlock-debug";

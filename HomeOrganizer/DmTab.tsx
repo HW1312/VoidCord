@@ -10,7 +10,7 @@ import {
 
 import { Avatar, Badge, Button, Empty, Glyph, Group, IconButton, Note, Pill, Pills, Row, SearchField, Section, UiColor } from "../_ui";
 import { Check, cl, ConfirmItem, ICONS, JobBar, openConfirm, QueueBadge, useJob } from "./components";
-import { closeDm, collectDms, DM_GROUPS, DmEntry, DmGroup, formatDate, leaveGroup, relative, toggleProtected } from "./data";
+import { closeDm, collectDms, DM_GROUPS, DmEntry, DmGroup, formatDate, isProtectedNow, leaveGroup, relative, toggleProtected } from "./data";
 import { settings } from "./index";
 import { describeError, isCancelled } from "./queue";
 
@@ -165,9 +165,14 @@ export function DmTab({ onClose }: { onClose(): void; }) {
             items: [...groups, ...list.filter(d => !d.isGroup)].map(d => d.isGroup ? { ...toItem(d), detail: "leave group" } : toItem(d)),
             confirmText: groups.length ? `Close & leave ${list.length}` : `Close ${list.length}`,
             onConfirm: () => job.run(async ({ token, progress, onRateLimit }) => {
-                let ok = 0, failed = 0;
+                let ok = 0, failed = 0, skipped = 0;
                 for (let i = 0; i < list.length; i++) {
                     const d = list[i];
+                    // Protected/pinned while the job was running -> leave it alone
+                    if (isProtectedNow(d.id)) {
+                        skipped++;
+                        continue;
+                    }
                     progress(i, list.length, `${d.isGroup ? "Leaving" : "Closing"} “${d.name}” ...`);
                     try {
                         if (d.isGroup) await leaveGroup(d.id, token, onRateLimit);
@@ -181,7 +186,7 @@ export function DmTab({ onClose }: { onClose(): void; }) {
                 }
                 progress(list.length, list.length, "Done");
                 if (failed) showToast({ text: `${failed} could not be closed`, variant: "critical" });
-                return `Done: ${ok} closed/left${failed ? `, ${failed} failed` : ""}.`;
+                return `Done: ${ok} closed/left${skipped ? `, ${skipped} skipped (protected)` : ""}${failed ? `, ${failed} failed` : ""}.`;
             })
         });
     }

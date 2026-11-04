@@ -334,14 +334,18 @@ async function fetchAll(channelId: string, c: ChannelCache) {
 }
 
 async function fetchNewer(channelId: string, c: ChannelCache) {
+    // Own cursor: live messages (and our own notes) move c.lastId forward while we page – reading it here
+    // would skip everything between this page and the newest message
+    let after = c.lastId;
     for (let page = 0; page < MAX_PAGES; page++) {
-        if (c.cancelled || !c.lastId) return;
-        const res = await rest("get", { url: `/channels/${channelId}/messages`, query: { limit: 100, after: c.lastId }, retries: 2 });
+        if (c.cancelled || !after) return;
+        const res = await rest("get", { url: `/channels/${channelId}/messages`, query: { limit: 100, after }, retries: 2 });
         const msgs: any[] = Array.isArray(res?.body) ? res.body : [];
         ingest(c, msgs);
         c.progress += msgs.length;
         emit();
         if (msgs.length < 100) return;
+        after = msgs.reduce((max, m) => compareIds(m.id, max) > 0 ? m.id : max, msgs[0].id);
         await sleep(PAGE_DELAY);
     }
 }

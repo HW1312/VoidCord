@@ -147,6 +147,8 @@ export default definePlugin({
 
     /** mouseX / mouseY: the Draggable reports where the MOUSE was released, not where the window is */
     drop(win: any, mouseX: number, mouseY: number) {
+        // The drop arrived, so nothing is stuck – unstick can skip its document lookup again
+        dragWin = null;
         if (!settings.store.freePosition) return false;
         try {
             this.place(win, mouseX, mouseY);

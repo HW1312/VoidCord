@@ -9,7 +9,7 @@
 
 import { fetchBuffer } from "@main/utils/http";
 import { IpcMainInvokeEvent } from "electron";
-import { writeFile } from "fs/promises";
+import { copyFile, rename, rm, stat, writeFile } from "fs/promises";
 import { request } from "https";
 import { join } from "path";
 
@@ -27,13 +27,44 @@ const FILES = ["patcher.js", "preload.js", "renderer.js", "renderer.css"];
  */
 export async function installRelease(_: IpcMainInvokeEvent, tag: string) {
     if (typeof tag !== "string" || !/^[0-9a-f]{7,40}$/.test(tag)) throw new Error("Invalid version");
+    // Timeout per file (covers the body too), so a stalled download fails instead of "Downloading …" forever
     const files = await Promise.all(FILES.map(async name =>
-        [name, await fetchBuffer(`${REPO_URL}/releases/download/${tag}/${name}`, { headers: { "User-Agent": "VoidCord-Updater" } })] as const
+        [name, await fetchBuffer(`${REPO_URL}/releases/download/${tag}/${name}`, {
+            headers: { "User-Agent": "VoidCord-Updater" },
+            signal: AbortSignal.timeout(name === "renderer.js" ? 180_000 : 60_000)
+        })] as const
     ));
     for (const [name, data] of files) {
         if (!data.length) throw new Error(`Download of ${name} is empty`);
     }
-    await Promise.all(files.map(([name, data]) => writeFile(join(__dirname, name), data)));
+    // Never write over the running files directly: if Discord quits halfway or the antivirus blocks one file,
+    // a cut-off patcher.js would stop Discord from starting at all. So: write all as .new and check them,
+    // then swap them in one by one – each rename is atomic – and put the old ones back if a swap fails.
+    const path = (name: string, ext = "") => join(__dirname, name + ext);
+    try {
+        for (const [name, data] of files) {
+            await writeFile(path(name, ".new"), data);
+            if ((await stat(path(name, ".new"))).size !== data.length) throw new Error(`Writing ${name} failed`);
+        }
+    } catch (e) {
+        await Promise.all(FILES.map(n => rm(path(n, ".new"), { force: true }).catch(() => { })));
+        throw e;
+    }
+
+    const swapped: string[] = [];
+    try {
+        for (const [name] of files) {
+            await copyFile(path(name), path(name, ".bak")).catch(() => { });
+            await rename(path(name, ".new"), path(name));
+            swapped.push(name);
+        }
+    } catch (e) {
+        // Back to the old version, so all four files stay from the same release
+        for (const name of swapped) await rename(path(name, ".bak"), path(name)).catch(() => { });
+        await Promise.all(FILES.map(n => rm(path(n, ".new"), { force: true }).catch(() => { })));
+        throw e;
+    }
+    await Promise.all(FILES.map(n => rm(path(n, ".bak"), { force: true }).catch(() => { })));
     return true;
 }
 

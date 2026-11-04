@@ -3,7 +3,7 @@
  * their own pings instead of Discord's. The room key is handed to new members with a hybrid key exchange in the chat
  * (ECDH P-256 + ML-KEM-768, see crypto.ts):
  *
- * announce: "🔑 SC1R.<key id>"                                         – this chat is a room with that key
+ * announce: "🔑 SC1R.<key id>[.<fingerprint>]"                        – this chat is a room with that key
  * join:     "🔑 SC1J.<key id>.<join id>.<public key>"                  – someone without the key asks for it
  * key:      "🔑 SC1K.<join id>.<to user id>.<public key>.<sealed key>" – a member answers (key + room name, sealed)
  *
@@ -20,7 +20,7 @@ import { ChannelActionCreators, ChannelStore, GuildStore, PrivateChannelSortStor
 
 import { notify } from "../_ui";
 import { ageOf, MessageRef, refOf, removeMessage, STALE } from "./cleanup";
-import { answerHandshake, completeHandshakeKey, decodeText, encodeText, fromB64, HANDSHAKE_PUBLIC, keyIdOf, newHandshakeKeyPair, open, randomBytes, seal, toB64, toHex } from "./crypto";
+import { answerHandshake, completeHandshakeKey, decodeText, encodeText, fromB64, HANDSHAKE_PUBLIC, keyFingerprint, keyIdOf, newHandshakeKeyPair, open, randomBytes, seal, toB64, toHex } from "./crypto";
 import { decrypted, LOCKED_TEXT, retryLocked } from "./messages";
 import { settings } from "./settings";
 import { addInvite, addKey, addRoom, deleteKey, dropRoom, emit, getKey, getKeyBytes, isDismissed, save, state } from "./store";
@@ -30,7 +30,7 @@ const logger = new Logger("SecretChat");
 
 const SoundActions = findByPropsLazy("playNotificationSound", "showNotification");
 
-const ANNOUNCE_RE = /^🔑 SC1R\.([0-9a-f]{8})$/;
+const ANNOUNCE_RE = /^🔑 SC1R\.([0-9a-f]{8})(?:\.([0-9a-f]{64}))?$/;
 const JOIN_RE = new RegExp(String.raw`^🔑 SC1J\.([0-9a-f]{8})\.([0-9a-f]{16})\.(${HANDSHAKE_PUBLIC})$`);
 const KEY_RE = new RegExp(String.raw`^🔑 SC1K\.([0-9a-f]{16})\.(\d{15,21})\.(${HANDSHAKE_PUBLIC})\.([A-Za-z0-9_-]{60,600})$`);
 
@@ -49,6 +49,8 @@ export interface RoomMessage {
     channelId: string;
     timestamp: number;
     keyId?: string;
+    /** announce: full key fingerprint (missing from older versions) */
+    fp?: string;
     joinId?: string;
     to?: string;
     publicKey?: string;
@@ -104,7 +106,7 @@ const keyAad = (joinId: string, to: string) => encodeText(`SC1K|${joinId}|${to}`
 
 function parse(content: string): Omit<RoomMessage, "authorId" | "channelId" | "timestamp"> | null {
     let m = ANNOUNCE_RE.exec(content);
-    if (m) return { type: "announce", keyId: m[1] };
+    if (m) return { type: "announce", keyId: m[1], fp: m[2] };
     m = JOIN_RE.exec(content);
     if (m) return { type: "join", keyId: m[1], joinId: m[2], publicKey: m[3] };
     m = KEY_RE.exec(content);
@@ -201,7 +203,8 @@ export const isAnswered = (joinId: string) => answered.has(joinId);
 export async function letIn(msg: RoomMessage, manual: boolean) {
     const me = myId();
     const joinId = msg.joinId!;
-    if (!me || busy.has(joinId) || answered.has(joinId) || !canLetIn(msg)) return;
+    // Manual: also after an answer was seen – anyone in the chat can post a fake answer that blocks the automatic one
+    if (!me || busy.has(joinId) || (!manual && answered.has(joinId)) || !canLetIn(msg)) return;
     busy.add(joinId);
     try {
         // Several members may be online – wait a moment so usually only one of them answers
@@ -239,8 +242,11 @@ async function completeJoin(msg: RoomMessage) {
         const plain = open(shared, raw.subarray(0, 12), raw.subarray(12), keyAad(joinId, me));
         if (!plain || plain.length < 32) throw new Error("Could not unseal the room key");
         const key = plain.slice(0, 32);
-        // The key must be the one the room was announced with – nobody can slip in their own
-        if (await keyIdOf(key) !== pending.keyId) throw new Error("Got a different key than the room uses");
+        // The key must be the one the room was announced with – nobody can slip in their own.
+        // The full fingerprint when the announce had one; the short id alone could be matched by trying keys.
+        if (pending.fp ? await keyFingerprint(key) !== pending.fp : await keyIdOf(key) !== pending.keyId) {
+            throw new Error("Got a different key than the room uses");
+        }
         let name = "Secret room";
         try { name = decodeText(plain.subarray(32)) || name; } catch { }
 
@@ -251,8 +257,9 @@ async function completeJoin(msg: RoomMessage) {
         retryLocked();
         notify({ title: `You joined the secret room “${name}”`, kind: "success", app: "Unter das OS" });
     } catch (e) {
+        // The request stays open: a fake or broken answer must not end the join – a member can still let you in
         logger.error("Joining the room failed", e);
-        notify({ title: "Could not join the secret room", kind: "error", app: "Unter das OS" });
+        notify({ title: "An answer to your join request was invalid and was ignored – a member can still let you in", kind: "error", app: "Unter das OS" });
     } finally {
         busy.delete(joinId);
         emit();
@@ -269,7 +276,11 @@ export async function joinRoom(channelId: string, keyId: string) {
     if (Object.values(state.joins).some(j => j.channelId === channelId && j.keyId === keyId)) return;
     const joinId = toHex(randomBytes(8));
     const { publicKey, privateJwk, kemSeed } = await newHandshakeKeyPair();
-    state.joins[joinId] = { channelId, keyId, privateJwk, kemSeed, created: Date.now() };
+    const invite = state.invites[channelId];
+    const fp = invite?.keyId === keyId && invite.fp
+        ? invite.fp
+        : [...roomMessages.values()].find(r => r.type === "announce" && r.channelId === channelId && r.keyId === keyId && r.fp)?.fp;
+    state.joins[joinId] = { channelId, keyId, fp, privateJwk, kemSeed, created: Date.now() };
     await save();
     sendMessage(channelId, { content: `🔑 SC1J.${keyId}.${joinId}.${publicKey}` }, false);
     notify({ title: isPrivateChat(channelId) ? "Asked to join – a member who is online lets you in automatically" : "Asked to join – a member has to let you in", kind: "info", app: "Unter das OS" });
@@ -279,15 +290,17 @@ export const isJoining = (channelId: string) => Object.values(state.joins).some(
 
 // ---------------------------------------------------------------- Creating rooms
 
-function announce(channelId: string, keyId: string) {
-    sendMessage(channelId, { content: `🔑 SC1R.${keyId}` }, false);
+async function announce(channelId: string, keyId: string) {
+    const key = getKeyBytes(keyId);
+    const fp = key ? `.${await keyFingerprint(key)}` : "";
+    sendMessage(channelId, { content: `🔑 SC1R.${keyId}${fp}` }, false);
 }
 
 /** Posts the room announce again – for people who missed it (it never arrived, or they got SecretChat later) */
 export function reannounce(channelId: string) {
     const room = state.rooms[channelId];
     if (!room) return;
-    announce(channelId, room.keyId);
+    void announce(channelId, room.keyId);
 }
 
 /** A group DM you created – you can delete it for everyone */
@@ -353,7 +366,7 @@ export async function makeRoom(channelId: string, name: string, keyId?: string) 
         id = record.id;
     }
     await addRoom(channelId, id, name);
-    announce(channelId, id);
+    await announce(channelId, id);
 }
 
 /** Creates a new group DM with these friends (a DM for one friend) and makes it a room */
@@ -410,7 +423,7 @@ function shouldPing(channelId: string) {
 
 async function onInvited(msg: RoomMessage, ping: boolean) {
     if (state.invites[msg.channelId]) return;
-    await addInvite({ channelId: msg.channelId, keyId: msg.keyId!, from: msg.authorId, created: Date.now() });
+    await addInvite({ channelId: msg.channelId, keyId: msg.keyId!, fp: msg.fp, from: msg.authorId, created: Date.now() });
     if (!ping || !settings.store.roomPings) return;
     playPing();
     showNotification({

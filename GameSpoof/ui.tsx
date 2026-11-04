@@ -55,7 +55,12 @@ export const SettingsPanel = ErrorBoundary.wrap(() => {
 
     useEffect(() => {
         if (!query.trim() || games) return;
-        loadDetectable().then(setGames, e => setError(String(e?.message ?? e)));
+        // Each new search retries, so an old failure must not stick
+        setError(null);
+        loadDetectable().then(g => {
+            setError(null);
+            setGames(g);
+        }, e => setError(String(e?.message ?? e)));
     }, [query]);
 
     const results = useMemo(() => {

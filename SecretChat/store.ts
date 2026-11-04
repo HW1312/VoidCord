@@ -4,7 +4,7 @@
  */
 
 import * as DataStore from "@api/DataStore";
-import { useEffect, useReducer } from "@webpack/common";
+import { showToast, useEffect, useReducer } from "@webpack/common";
 
 import { fromB64, keyIdOf, safetyCode, toB64 } from "./crypto";
 
@@ -45,6 +45,8 @@ export interface Room {
 export interface Invite {
     channelId: string;
     keyId: string;
+    /** Full key fingerprint from the announce (rooms announced by older versions have none) */
+    fp?: string;
     from: string;
     created: number;
 }
@@ -53,6 +55,8 @@ export interface Invite {
 export interface PendingJoin {
     channelId: string;
     keyId: string;
+    /** The key we get must have this fingerprint (if the announce had one) */
+    fp?: string;
     privateJwk: JsonWebKey;
     kemSeed?: string;
     /** Our join message – deleted once we got the key */
@@ -181,10 +185,26 @@ export async function renameKey(id: string, name: string) {
 
 // ---------------------------------------------------------------- Chats
 
+/** A secret room's key always wins: a room must never fall back to plain text or switch to a key the others don't have */
 export const channelKey = (channelId: string) => {
-    const id = state.channels[channelId];
+    const room = state.rooms[channelId];
+    const id = room && keyBytes.has(room.keyId) ? room.keyId : state.channels[channelId];
     return id && keyBytes.has(id) ? getKey(id) : undefined;
 };
+
+/** The room key of this chat, if it is a secret room whose key we have */
+const roomKeyId = (channelId: string) => {
+    const room = state.rooms[channelId];
+    return room && keyBytes.has(room.keyId) ? room.keyId : null;
+};
+
+function refuseRoomChange(channelId: string, keyId: string | null) {
+    const roomKey = roomKeyId(channelId);
+    if (!roomKey || keyId === roomKey) return false;
+    state.channels[channelId] = roomKey;
+    showToast({ text: "Secret rooms always stay encrypted with their room key – leave the room first to change it", variant: "critical" });
+    return true;
+}
 
 /** Drops our open requests to this user (e.g. the request message was deleted) */
 export async function cancelPending(userId: string) {
@@ -193,6 +213,7 @@ export async function cancelPending(userId: string) {
 }
 
 export async function setChannelKey(channelId: string, keyId: string | null) {
+    if (refuseRoomChange(channelId, keyId)) return;
     if (keyId) {
         state.channels[channelId] = keyId;
         state.lastUsed[channelId] = keyId;
@@ -204,6 +225,8 @@ export async function setChannelKey(channelId: string, keyId: string | null) {
 
 /** Right-click on the chat bar button: off ↔ the key used last (or the only key) */
 export async function toggleChannel(channelId: string) {
+    const roomKey = roomKeyId(channelId);
+    if (roomKey) return refuseRoomChange(channelId, null), roomKey;
     if (state.channels[channelId]) return setChannelKey(channelId, null), null;
     const id = state.lastUsed[channelId] && keyBytes.has(state.lastUsed[channelId])
         ? state.lastUsed[channelId]

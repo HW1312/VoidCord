@@ -292,9 +292,6 @@ function setOverride(o: Override, on: boolean) {
 
 // ---------------------------------------------------------------- Uploads
 
-const withTimeout = <T,>(p: Promise<T>, ms: number) =>
-    Promise.race([p, new Promise<null>(r => setTimeout(() => r(null), ms))]);
-
 /*
  * Discord uploads attachments as soon as they're added to the message draft (CloudUpload.upload()),
  * not when the message is sent. Editing / metadata stripping therefore has to happen right before
@@ -345,10 +342,21 @@ async function editUpload(upload: CloudUpload) {
 
 async function stripUpload(upload: CloudUpload, found: Set<string>) {
     const { file } = upload.item;
-    const result = await withTimeout(stripMetadata(file, upload.filename ?? file.name), 15_000).catch(e => {
-        logger.error(`Failed to strip metadata from "${file.name}"`, e);
-        return null;
+    const name = upload.filename ?? file.name;
+    // null from stripMetadata = nothing to remove; a timeout or an error must not look like that
+    const TIMEOUT = Symbol("timeout");
+    const result = await Promise.race([
+        stripMetadata(file, name),
+        new Promise<typeof TIMEOUT>(r => setTimeout(() => r(TIMEOUT), 15_000))
+    ]).catch((e: unknown) => {
+        logger.error(`Failed to strip metadata from "${name}"`, e);
+        return e instanceof Error ? e : new Error(String(e));
     });
+    if (result === TIMEOUT || result instanceof Error) {
+        // The upload can't wait forever – but say clearly that the original (with its metadata) goes out
+        opsecNotify(`OpSec: Couldn't remove the metadata from "${name}" (${result === TIMEOUT ? "took too long" : "error"}) – it is sent unchanged. Remove the file from the message if it may contain a location.`, "error");
+        return false;
+    }
     if (!result) return false;
     setUploadFile(upload, result.file);
     result.found.forEach(f => found.add(f));

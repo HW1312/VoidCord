@@ -220,6 +220,8 @@ export function RoomCard({ message }: { message: Message; }) {
         text = s.joins[msg.joinId!] ? "Waiting for a member to let you in …" : "You asked to join";
     } else if (isAnswered(msg.joinId!)) {
         text = `${userName(msg.authorId)} was let in`;
+        // Anyone in the chat can post an answer – if theirs was fake, a member can still hand out the real key
+        if (canLetIn(msg)) button = <Button small variant="gray" onClick={() => letIn(msg, true)}>Let in again</Button>;
     } else if (canLetIn(msg)) {
         text = `${userName(msg.authorId)} wants to join`;
         button = <Button small onClick={() => letIn(msg, true)}>Let in</Button>;

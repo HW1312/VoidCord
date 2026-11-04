@@ -24,13 +24,15 @@ let active = 0;
 const queue: (() => void)[] = [];
 
 async function withSlot<T>(fn: () => Promise<T>): Promise<T> {
+    // A woken waiter inherits the slot of the one that finished, so nobody can slip in between
     if (active >= MAX_PARALLEL) await new Promise<void>(r => queue.push(r));
-    active++;
+    else active++;
     try {
         return await fn();
     } finally {
-        active--;
-        queue.shift()?.();
+        const next = queue.shift();
+        if (next) next();
+        else active--;
     }
 }
 

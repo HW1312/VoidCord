@@ -7,7 +7,7 @@ import { copyToClipboard } from "@utils/clipboard";
 import { insertTextIntoChatInputBox, sendMessage } from "@utils/discord";
 import { Logger } from "@utils/Logger";
 import type { Channel, Message } from "@vencord/discord-types";
-import { ChannelStore, MessageActions, RestAPI, SelectedChannelStore, showToast } from "@webpack/common";
+import { ChannelStore, MessageActions, MessageStore, RestAPI, SelectedChannelStore, showToast } from "@webpack/common";
 
 import { notify } from "../_ui";
 import { canDelete, clear, displayName, formatFullDate, getChannel, getSelectedMessages, messageDate, messagesToQuote, messagesToText, readableContent, remove, setBusy, state } from "./store";
@@ -51,10 +51,10 @@ export async function copySelected() {
 
 /** Deletes the selected messages the user is allowed to delete, one after another */
 export async function deleteSelected(messages: Message[], delay: number) {
-    const channel = getChannel();
-    const { channelId } = state;
+    // Each message's own channel: the selection may have moved to another channel while the confirm dialog was open
+    const channelId = messages[0]?.channel_id;
     if (!channelId) return;
-    const targets = messages.filter(m => canDelete(m, channel));
+    const targets = messages.filter(m => m.channel_id && canDelete(m, ChannelStore.getChannel(m.channel_id)));
     if (!targets.length) return;
 
     const busy = { label: "Deleting", done: 0, total: targets.length, cancelled: false };
@@ -63,15 +63,15 @@ export async function deleteSelected(messages: Message[], delay: number) {
 
     for (const m of targets) {
         if (busy.cancelled) break;
-        let ok = await deleteOne(channelId, m.id);
+        let ok = await deleteOne(m.channel_id, m.id);
         if (!ok && !busy.cancelled) {
             // Likely rate limited – wait and try once more
             await sleep(3000);
-            ok = await deleteOne(channelId, m.id);
+            ok = await deleteOne(m.channel_id, m.id);
         }
         if (!ok) failed++;
         busy.done++;
-        if (ok) remove(channelId, [m.id]);
+        if (ok) remove(m.channel_id, [m.id]);
         // Same object: Stop/Cancel set busy.cancelled on it
         setBusy(busy);
         if (busy.done < busy.total && !busy.cancelled) await sleep(delay);
@@ -94,8 +94,8 @@ async function deleteOne(channelId: string, messageId: string) {
             await RestAPI.del({ url: `/channels/${channelId}/messages/${messageId}` });
             return true;
         } catch (e2: any) {
-            // 404: already gone
-            if (e2?.status === 404) return true;
+            // 404 only counts as "already gone" if Discord removed it too, otherwise the count would lie
+            if (e2?.status === 404 && !MessageStore.getMessage(channelId, messageId)) return true;
             logger.error("Couldn't delete message", messageId, e2);
             return false;
         }
@@ -121,11 +121,13 @@ export async function forwardSelected(target: Channel, mode: ForwardMode, delay:
     setBusy(busy);
     let fallbacks = 0;
     let failed = 0;
+    const handled: string[] = [];
 
     try {
         if (mode === "text") {
             failed += await sendAsText(target, source, messages) ? 0 : 1;
             busy.done = 1;
+            handled.push(...messages.map(m => m.id));
         } else {
             for (const m of messages) {
                 if (busy.cancelled) break;
@@ -135,6 +137,7 @@ export async function forwardSelected(target: Channel, mode: ForwardMode, delay:
                     if (!await sendAsText(target, source, [m])) failed++;
                 }
                 busy.done++;
+                handled.push(m.id);
                 setBusy(busy);
                 if (busy.done < busy.total && !busy.cancelled) await sleep(delay);
             }
@@ -144,10 +147,16 @@ export async function forwardSelected(target: Channel, mode: ForwardMode, delay:
     }
 
     const where = target.name ? `#${target.name}` : "the conversation";
-    if (failed) notify({ app: "MessageSelect", kind: "error", title: `Forwarding to ${where}: ${failed} failed` });
+    if (busy.cancelled && busy.done < busy.total) notify({ app: "MessageSelect", kind: "info", title: `Forwarding to ${where} stopped after ${busy.done} of ${busy.total}${failed ? `, ${failed} failed` : ""}` });
+    else if (failed) notify({ app: "MessageSelect", kind: "error", title: `Forwarding to ${where}: ${failed} failed` });
     else if (fallbacks) notify({ app: "MessageSelect", kind: "success", title: `Forwarded to ${where} (${fallbacks} as text)` });
     else notify({ app: "MessageSelect", kind: "success", title: `Forwarded to ${where}` });
-    clear();
+
+    // The user may have started a new selection meanwhile - only drop the messages that were forwarded
+    if (state.channelId === source.id) {
+        if (!state.busy && [...state.ids].every(id => handled.includes(id))) clear();
+        else remove(source.id, handled);
+    }
 }
 
 async function forwardNative(target: Channel, source: Channel, m: Message) {

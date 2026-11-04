@@ -1562,6 +1562,12 @@ function ChatWindowInner({ channelId: initialChannelId, windowKey, sidebar: Cust
     const [profile, setProfile] = useState<ProfileTarget | null>(null);
     const [stream, setStream] = useState<StreamTarget | null>(null);
     const [dockWidth, setDockWidth] = useDockWidth(rootRef);
+    // A stream window may try to dock back after this window closed
+    const mounted = useRef(true);
+    useEffect(() => {
+        mounted.current = true;
+        return () => { mounted.current = false; };
+    }, []);
     const channelRef = useRef(channelId);
     channelRef.current = channelId;
     const closeProfile = useCallback(() => setProfile(null), []);
@@ -1679,7 +1685,11 @@ function ChatWindowInner({ channelId: initialChannelId, windowKey, sidebar: Cust
                             onClose={() => setStream(null)}
                             onPopout={() => {
                                 const t = stream;
-                                openStreamWindow(t, () => setStream(t));
+                                openStreamWindow(t, () => {
+                                    if (!mounted.current) return false;
+                                    setStream(t);
+                                    return true;
+                                });
                                 setStream(null);
                             }}
                         />

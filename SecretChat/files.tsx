@@ -240,6 +240,11 @@ export function interceptUpload(files: ArrayLike<File> | null, channel: Channel 
 
 /** ChatPopout windows: their own file sending, encrypted in chats with a key. true = handled */
 export function sendFilesOverride(channel: Channel, list: File[], messageReference?: unknown) {
+    // Same guard as interceptUpload: before the keyring loaded, an encrypted chat looks like a plain one
+    if (!isLoaded()) {
+        notify({ title: "Unter das OS is still loading its keys – try again in a second", kind: "error", app: "Unter das OS" });
+        return true;
+    }
     if (!channelKey(channel.id)) return false;
     void sendEncryptedFiles(channel, list, messageReference);
     return true;

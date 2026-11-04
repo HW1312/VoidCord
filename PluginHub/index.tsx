@@ -163,6 +163,7 @@ const Native = VencordNative.pluginHelpers.PluginHub as PluginNative<typeof impo
 const THEME_CHECK_FIRST = 20_000;
 const THEME_CHECK_EVERY = 30 * 60_000;
 let themeTimer: ReturnType<typeof setTimeout> | undefined;
+let running = false;
 
 /** Installed Theme Hub themes update themselves (from the repo, without a VoidCord update). Returns how many did. */
 export async function updateThemes() {
@@ -184,7 +185,8 @@ function scheduleThemeUpdates(delay: number) {
     clearTimeout(themeTimer);
     themeTimer = setTimeout(async () => {
         await updateThemes();
-        scheduleThemeUpdates(THEME_CHECK_EVERY);
+        // stop() may have run while updating
+        if (running) scheduleThemeUpdates(THEME_CHECK_EVERY);
     }, delay);
 }
 
@@ -216,10 +218,12 @@ export default definePlugin({
 
     start() {
         applyPerfDefaults();
+        running = true;
         scheduleThemeUpdates(THEME_CHECK_FIRST);
     },
 
     stop() {
+        running = false;
         clearTimeout(themeTimer);
     },
 

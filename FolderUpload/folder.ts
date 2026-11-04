@@ -129,7 +129,8 @@ export async function scanFolder(src: FolderSource, useGitignore: boolean): Prom
                 scan.ignored++;
                 continue;
             }
-            if (scan.files.length + scan.dirs.length >= MAX_ENTRIES) {
+            // One entry stays free for the top folder zipFolder adds
+            if (scan.files.length + scan.dirs.length >= MAX_ENTRIES - 1) {
                 throw new Error(`More than ${MAX_ENTRIES.toLocaleString("en-US")} files – too many for a zip`);
             }
             if (e.dir) {

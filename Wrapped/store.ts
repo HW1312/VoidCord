@@ -114,6 +114,14 @@ function prune() {
     const min = dayKey(cutoff);
     for (const key of Object.keys(data.days))
         if (key < min) delete data.days[key];
+
+    // Names are only shown for ids in the counters – drop the rest, or the cache grows forever
+    const used = new Set<string>();
+    for (const day of Object.values(data.days))
+        for (const field of NAMED_FIELDS)
+            for (const id of Object.keys(day[field] ?? {})) used.add(id);
+    for (const id of Object.keys(data.names))
+        if (!used.has(id)) delete data.names[id];
 }
 
 // ---------------------------------------------------------------- Mutation helpers
@@ -130,6 +138,9 @@ export function addHour(day: DayStats, field: "msgHours" | "voiceHours" | "activ
 }
 
 type CounterField = Exclude<{ [K in keyof DayStats]-?: DayStats[K] extends Counter | undefined ? K : never }[keyof DayStats], undefined>;
+
+/** Counters keyed by user / server / channel id (games are keyed by name) */
+const NAMED_FIELDS: CounterField[] = ["msgPlaces", "msgChannels", "dmSent", "dmReceived", "voicePlaces", "voiceChannels", "voiceWith"];
 
 export function count(day: DayStats, field: CounterField, id: string, amount: number) {
     const c = (day[field] ??= {}) as Counter;
@@ -161,7 +172,14 @@ function mergeInto(a: any, b: any) {
     }
 }
 
-export async function loadStats() {
+let loading: Promise<void> | undefined;
+
+/** Loads once per session: on a later start() the data in memory already contains the stored copy, merging again would double it */
+export function loadStats() {
+    return loading ??= load();
+}
+
+async function load() {
     try {
         const stored = await DataStore.get<StatsData>(KEY);
         if (stored?.days) {

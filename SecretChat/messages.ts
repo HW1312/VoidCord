@@ -440,7 +440,9 @@ export function retryLocked() {
 // ---------------------------------------------------------------- Outgoing
 
 /** Already encrypted, or a SecretChat protocol message – sent as it is */
-const isPrepared = (content: string) => content.startsWith("🔑 SC1") || parseMessage(content) != null;
+/** Protocol messages (SC1H/A/N/D/R/J/K/T…) are one token without spaces – normal text that only starts with "🔑 SC1" is encrypted */
+const PROTOCOL_RE = /^🔑 SC1[A-Z]\.[0-9A-Za-z_.~-]+$/;
+const isPrepared = (content: string) => PROTOCOL_RE.test(content) || parseMessage(content) != null;
 
 /** Content to send in this chat: the same, encrypted, or null = don't send it at all */
 function outgoing(channelId: string, content: string): string | null {
@@ -474,7 +476,16 @@ function outgoing(channelId: string, content: string): string | null {
 /** Edits of an encrypted message are encrypted again with the same key. null = don't save the edit */
 function outgoingEdit(messageId: string, content: string): string | null {
     const keyId = decrypted.get(messageId);
-    if (!keyId || isPrepared(content)) return content;
+    if (isPrepared(content)) return content;
+    if (!keyId) {
+        // An encrypted message we can't show right now (emergency stop on, or sent with a key this device lacks):
+        // saving the edit would put the new text into Discord readable – refuse it instead
+        if (encryptedSeen.has(messageId)) {
+            notify({ title: "This message is encrypted but can't be decrypted here right now – the edit wasn't saved, so it doesn't go out readable", kind: "error", app: "Unter das OS" });
+            return null;
+        }
+        return content;
+    }
     const key = getKeyBytes(keyId);
     const me = myId();
     if (!key || !me) {

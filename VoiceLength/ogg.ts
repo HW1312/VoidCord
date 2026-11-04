@@ -168,8 +168,11 @@ export async function withLength(file: File, seconds: number, mode: FillMode = "
         return true;
     };
 
-    // The recording itself
-    for (const p of packets) if (!push(p)) break;
+    // The recording itself – only up to the chosen length: page granules must never go down, so a recording
+    // longer than the length can't be written in full and then "shortened" by the last page (invalid Ogg)
+    for (const p of packets) {
+        if (granule + BigInt(packetSamples(p)) > total || !push(p)) break;
+    }
 
     if (mode === "silence") {
         // 120 ms of nothing: CELT 20 ms config, same mono/stereo flag, code 3 with 6 empty frames

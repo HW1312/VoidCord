@@ -216,6 +216,8 @@ function onKeyDown(e: KeyboardEvent) {
     // Any other key: it was a shortcut, not a peek
     cancelHold();
     tainted = true;
+    // Fast typing: put the held-back character in first, before this key's own one
+    if (heldChar && !state.hit) typeHeldChar(heldChar.target, heldChar.char);
     heldChar = null;
     if (!state.pinned) closePeek();
 }

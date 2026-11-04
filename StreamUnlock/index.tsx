@@ -16,6 +16,8 @@ import definePlugin, { OptionType } from "@utils/types";
 import { Button, Note } from "../_ui";
 import { openSystemSettings, startDebug, stopDebug } from "./debug";
 
+let started = false;
+
 const EXTRA_FPS = [75, 90, 120, 144, 240, 360];
 const RESOLUTIONS = [0, 1440, 1080, 720, 480];
 
@@ -57,7 +59,11 @@ const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         description: "Stream debugger: a small panel with the real FPS (captured / encoded / received), resolution, codec and bitrate while you stream or watch – handy to check the settings above",
         default: false,
-        onChange: on => on ? startDebug() : stopDebug()
+        // Only while the plugin runs - the setting can be changed while it's disabled
+        onChange: on => {
+            if (!on) stopDebug();
+            else if (started) startDebug();
+        }
     }
 });
 
@@ -113,10 +119,12 @@ export default definePlugin({
     extraQualities: RESOLUTIONS.flatMap(resolution => EXTRA_FPS.map(fps => ({ resolution, fps }))),
 
     start() {
+        started = true;
         if (settings.store.debug) startDebug();
     },
 
     stop() {
+        started = false;
         stopDebug();
     },
 

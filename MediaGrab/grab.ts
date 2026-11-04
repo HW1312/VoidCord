@@ -78,10 +78,18 @@ function uploadLimit() {
 }
 
 /** Uploads the file and sends it as its own message (like Voice Messages does) */
-function sendFile(file: File, channelId: string, reply?: Message["messageReference"]) {
+/** abort: set by sendFile – cancels the upload, and the message is never posted */
+interface SendControl { cancelled: boolean; abort?: () => void; }
+
+function sendFile(file: File, channelId: string, reply: Message["messageReference"] | undefined, control: SendControl) {
     return new Promise<void>((resolve, reject) => {
         const upload = new CloudUpload({ file, isThumbnail: false, platform: CloudUploadPlatform.WEB }, channelId);
+        control.abort = () => {
+            try { (upload as any).cancel?.(); } catch { }
+            reject(new Error("Cancelled"));
+        };
         upload.on("complete", () => {
+            if (control.cancelled) return reject(new Error("Cancelled"));
             RestAPI.post({
                 url: Constants.Endpoints.MESSAGES(channelId),
                 body: {
@@ -251,10 +259,12 @@ export async function grab(req: GrabRequest) {
     if (isSoundLink(req.url)) req = { ...req, kind: "audio" };
     let jobId: string | null = null;
     let cancelled = false;
+    const send: SendControl = { cancelled: false };
     const label = req.kind === "audio" ? "MP3" : "Video";
     const card = createCard(`${label}: ${shortUrl(req.url)}`, () => {
-        cancelled = true;
+        cancelled = send.cancelled = true;
         if (jobId) Native.cancelGrab(jobId);
+        send.abort?.();
     });
     card.update("Starting …", -1);
 
@@ -318,17 +328,21 @@ export async function grab(req: GrabRequest) {
         // ---- Into the chat (GofileUpload takes over if the file is too large)
         let sent = false;
         if (req.toChat && req.channel) {
+            // Cancel also counts after the download: nothing goes into the chat anymore
+            if (cancelled) throw new Error("Cancelled");
             card.update("Adding to the chat …", -1);
             const bytes = await Native.readResult(id);
+            if (cancelled) throw new Error("Cancelled");
             const ext = fileName.split(".").pop()!.toLowerCase();
             const file = new File([bytes as BlobPart], fileName, { type: MIME[ext] ?? "application/octet-stream" });
             // Too large to send directly → the normal way, so GofileUpload can turn it into a link
             if (req.sendNow && file.size <= uploadLimit()) {
                 card.update("Sending …", -1);
                 try {
-                    await sendFile(file, req.channel.id, req.reply);
+                    await sendFile(file, req.channel.id, req.reply, send);
                     sent = true;
                 } catch (e) {
+                    if (cancelled) throw e;
                     // Usually Discord rejecting the size (e.g. the limit is set too high) → let GofileUpload handle it
                     logger.warn("Direct send failed, handing the file to the normal upload", e);
                     UploadHandler.promptToUpload([file], req.channel, DraftType.ChannelMessage);

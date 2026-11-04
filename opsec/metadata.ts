@@ -368,6 +368,136 @@ async function stripMp4(file: File, found: Set<string>): Promise<BlobPart[] | nu
     return parts;
 }
 
+// ---------------------------------------------------------------- HEIC / HEIF / AVIF
+
+/** ftyp brands of still images in the ISO box format – their top-level "meta" box IS the image, never blank it */
+const HEIF_BRANDS = new Set(["heic", "heix", "heim", "heis", "hevc", "hevx", "mif1", "mif2", "msf1", "avif", "avis", "avio"]);
+
+async function isHeif(file: File) {
+    const h = await readBytes(file, 0, 64);
+    const dv = new DataView(h.buffer);
+    const size = Math.min(dv.getUint32(0), h.length);
+    for (let i = 8; i + 4 <= size; i += 4) {
+        if (i === 12) continue; // minor version
+        if (HEIF_BRANDS.has(ascii(h, i, 4))) return true;
+    }
+    return false;
+}
+
+/*
+ * In HEIF the EXIF and XMP data are separate "items": iinf names them, iloc says where their bytes are (usually in
+ * mdat). Their bytes are overwritten in place – EXIF with an empty but valid TIFF block, XMP with spaces – so
+ * the file keeps its exact layout and every offset stays valid.
+ */
+async function stripHeif(file: File, found: Set<string>): Promise<BlobPart[] | null> {
+    let metaBox: Box | null = null;
+    for (let i = 0; i + 8 <= file.size;) {
+        const h = await readBytes(file, i, 16);
+        const dv = new DataView(h.buffer);
+        let size = dv.getUint32(0);
+        let header = 8;
+        if (size === 1) { size = dv.getUint32(8) * 2 ** 32 + dv.getUint32(12); header = 16; }
+        else if (size === 0) size = file.size - i;
+        if (size < header) return null;
+        if (ascii(h, 4, 4) === "meta") { metaBox = { type: "meta", start: i, size, header }; break; }
+        i += size;
+    }
+    if (!metaBox || metaBox.size > 16 * 1024 * 1024) return null;
+
+    const buf = await readBytes(file, metaBox.start, metaBox.size);
+    const dv = new DataView(buf.buffer);
+    // meta is a full box: 4 bytes version/flags before the children
+    const children = parseBoxes(dv, metaBox.header + 4, metaBox.size);
+    if (!children) return null;
+
+    const kinds = new Map<number, "exif" | "xmp">();
+    const iinf = children.find(b => b.type === "iinf");
+    if (iinf) {
+        const v = buf[iinf.start + iinf.header];
+        const first = iinf.start + iinf.header + 4 + (v === 0 ? 2 : 4);
+        for (const infe of parseBoxes(dv, first, iinf.start + iinf.size) ?? []) {
+            if (infe.type !== "infe") continue;
+            let p = infe.start + infe.header;
+            const iv = buf[p];
+            if (iv < 2) continue;
+            p += 4;
+            const id = iv === 2 ? dv.getUint16(p) : dv.getUint32(p);
+            p += (iv === 2 ? 2 : 4) + 2;
+            const type = ascii(buf, p, 4);
+            p += 4;
+            const end = infe.start + infe.size;
+            while (p < end && buf[p] !== 0) p++; // item name
+            p++;
+            if (type === "Exif") kinds.set(id, "exif");
+            else if (type === "mime") {
+                let q = p;
+                while (q < end && buf[q] !== 0) q++;
+                if (/rdf\+xml|xmp/i.test(ascii(buf, p, q - p))) kinds.set(id, "xmp");
+            }
+        }
+    }
+    if (!kinds.size) return null;
+
+    const iloc = children.find(b => b.type === "iloc");
+    if (!iloc) return null;
+    let p = iloc.start + iloc.header;
+    const v = buf[p];
+    p += 4;
+    const offSize = buf[p] >> 4, lenSize = buf[p] & 15, baseSize = buf[p + 1] >> 4, idxSize = v >= 1 ? buf[p + 1] & 15 : 0;
+    p += 2;
+    const readN = (n: number) => {
+        const x = n === 0 ? 0 : n === 4 ? dv.getUint32(p) : n === 8 ? dv.getUint32(p) * 2 ** 32 + dv.getUint32(p + 4) : NaN;
+        p += n;
+        return x;
+    };
+    const count = v < 2 ? dv.getUint16(p) : dv.getUint32(p);
+    p += v < 2 ? 2 : 4;
+
+    const replacements: { start: number; bytes: Bytes; }[] = [];
+    for (let n = 0; n < count; n++) {
+        const id = v < 2 ? dv.getUint16(p) : dv.getUint32(p);
+        p += v < 2 ? 2 : 4;
+        let method = 0;
+        if (v >= 1) { method = dv.getUint16(p) & 15; p += 2; }
+        const dataRef = dv.getUint16(p);
+        p += 2;
+        const base = readN(baseSize);
+        const extents = dv.getUint16(p);
+        p += 2;
+        let first = true;
+        for (let e = 0; e < extents; e++) {
+            if (idxSize) readN(idxSize);
+            const off = readN(offSize), len = readN(lenSize);
+            const kind = kinds.get(id);
+            // Only plain file offsets (method 0, same file); length 0 = "to the end", never touched
+            if (!kind || method !== 0 || dataRef !== 0 || !len || Number.isNaN(off + len + base)) continue;
+            const start = base + off;
+            if (start + len > file.size) return null;
+            const bytes = new Uint8Array(len).fill(kind === "xmp" ? 0x20 : 0) as Bytes;
+            // EXIF item = 4-byte offset to the TIFF header, then TIFF: an empty one ("MM", 42, first IFD at 8, 0 entries)
+            if (kind === "exif" && first && len >= 18) bytes.set([0, 0, 0, 0, 0x4D, 0x4D, 0, 0x2A, 0, 0, 0, 8, 0, 0, 0, 0, 0, 0]);
+            first = false;
+            replacements.push({ start, bytes });
+            found.add(kind === "exif" ? "EXIF data" : "XMP data");
+        }
+    }
+    if (!replacements.length) return null;
+
+    replacements.sort((a, b) => a.start - b.start);
+    for (let i = 1; i < replacements.length; i++) {
+        if (replacements[i].start < replacements[i - 1].start + replacements[i - 1].bytes.length) return null;
+    }
+    const parts: BlobPart[] = [];
+    let pos = 0;
+    for (const r of replacements) {
+        if (r.start > pos) parts.push(file.slice(pos, r.start));
+        parts.push(r.bytes);
+        pos = r.start + r.bytes.length;
+    }
+    if (pos < file.size) parts.push(file.slice(pos));
+    return parts;
+}
+
 // ---------------------------------------------------------------- Entry point
 
 const MAX_IMAGE_SIZE = 100 * 1024 * 1024;
@@ -387,7 +517,8 @@ export async function stripMetadata(file: File, name = file.name): Promise<Strip
         const b = new Uint8Array(await file.arrayBuffer());
         parts = isJpeg ? stripJpeg(b, found) : isPng ? stripPng(b, found) : stripWebp(b, found);
     } else if (isMp4) {
-        parts = await stripMp4(file, found);
+        // HEIC / AVIF also start with ftyp – the MP4 path would blank the image itself
+        parts = await isHeif(file) ? await stripHeif(file, found) : await stripMp4(file, found);
     }
 
     if (!parts) return null;

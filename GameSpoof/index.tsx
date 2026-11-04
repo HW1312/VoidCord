@@ -103,7 +103,8 @@ export function startGame(app: Detectable) {
     running.clear();
     running.set(app.id, { app, game });
     setDebugGame(game);
-    settings.store.recent = [app, ...settings.store.recent.filter(a => a.id !== app.id)].slice(0, 8).map(a => ({ ...a }));
+    // Deep plain copy – nested arrays (aliases) read from the store are proxies, and writing those back breaks every settings save
+    settings.store.recent = JSON.parse(JSON.stringify([app, ...settings.store.recent.filter(a => a.id !== app.id)].slice(0, 8)));
     logger.info("Started", app.name);
     emit();
 }

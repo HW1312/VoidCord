@@ -97,6 +97,11 @@ export function toggleProtected(channelId: string, value = !isProtectedId(channe
     settings.store.protectedIds = list;
 }
 
+/** Live check (protection list + PinDMs pin) - DmEntry.protected is only a snapshot */
+export function isProtectedNow(channelId: string) {
+    return isProtectedId(channelId) || (settings.store.protectPinned && getPinnedMap().has(channelId));
+}
+
 // ---------------------------------------------------------------- DMs
 
 export type DmGroup = "active" | "groups" | "quiet" | "asleep" | "never";
@@ -189,7 +194,7 @@ export function collectDms(): DmEntry[] {
 /** Closes a 1:1 DM (history is kept). Groups are deliberately rejected here. */
 export async function closeDm(entry: DmEntry, token?: CancelToken, onRateLimit?: (s: number) => void) {
     if (entry.isGroup) throw new Error("Groups are not closed via bulk actions");
-    if (entry.protected) throw new Error("Protected");
+    if (entry.protected || isProtectedNow(entry.id)) throw new Error("Protected");
     await api("del", { url: `/channels/${entry.id}` }, {
         token,
         interval: INTERVAL.channel,

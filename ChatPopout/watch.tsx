@@ -224,7 +224,7 @@ export function StreamDock({ target, width, onResize, onClose, onPopout }: {
 
 const windowKey = (t: StreamTarget) => WINDOW_PREFIX + t.userId;
 
-function StreamWindow({ target, windowKey: key, onDock }: { target: StreamTarget; windowKey: string; onDock?(): void; }) {
+function StreamWindow({ target, windowKey: key, onDock }: { target: StreamTarget; windowKey: string; onDock?(): boolean; }) {
     const rootRef = useRef<HTMLDivElement>(null);
     usePopoutDocument(rootRef, `${displayName(target.userId, target.guildId)} – Stream`);
     const pinned = useStateFromStores([PopoutWindowStore], () => PopoutWindowStore.getIsAlwaysOnTop(key));
@@ -240,10 +240,11 @@ function StreamWindow({ target, windowKey: key, onDock }: { target: StreamTarget
     useAspectLock(rootRef);
 
     const dock = onDock && (() => {
-        docking.current = true;
+        // Only skip stopWatching when an open chat window really took the stream
         try {
-            onDock();
+            docking.current = onDock();
         } catch (e) {
+            docking.current = false;
             log.error("Couldn't dock stream", e);
         }
         PopoutActions.close(key);
@@ -286,7 +287,7 @@ function StreamWindow({ target, windowKey: key, onDock }: { target: StreamTarget
     );
 }
 
-export function openStreamWindow(t: StreamTarget, onDock?: () => void) {
+export function openStreamWindow(t: StreamTarget, onDock?: () => boolean) {
     inWindow.add(t.streamKey);
     try {
         PopoutActions.open(windowKey(t), k => (

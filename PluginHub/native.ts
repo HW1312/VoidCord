@@ -41,7 +41,7 @@ function isNewer(a: string | null, b: string | null) {
 }
 
 async function fetchRemote(id: string, fileName: string) {
-    const res = await fetch(`${RAW}/${encodeURIComponent(id)}/${encodeURIComponent(fileName)}`, { cache: "no-store" });
+    const res = await fetch(`${RAW}/${encodeURIComponent(id)}/${encodeURIComponent(fileName)}`, { cache: "no-store", signal: AbortSignal.timeout(30_000) });
     if (!res.ok) throw new Error(`GitHub: HTTP ${res.status}`);
     const css = await res.text();
     if (css.length > MAX_BYTES) throw new Error("Theme too large");
