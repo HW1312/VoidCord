@@ -34,6 +34,12 @@ export const decrypted = new Map<string, string>();
 /** Encrypted messages without a matching key – retried when a key is added */
 const locked = new Map<string, { channelId: string; authorId: string; raw: string; }>();
 
+/** Key id a message we can't read was sent with (for the hover hint) */
+export const lockedKeyId = (messageId: string) => {
+    const e = locked.get(messageId);
+    return e ? parseMessage(e.raw)?.keyId : undefined;
+};
+
 // ---------------------------------------------------------------- Handshake messages
 
 /**

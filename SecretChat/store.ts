@@ -277,9 +277,12 @@ export const channelKey = (channelId: string) => {
     // sending is refused instead of going out readable)
     const vault = vaultOfChannel(channelId);
     if (vault) return vaultRecord(vault);
+    // The key chosen for the chat wins (a chat can also be listed as a room with an older key – forcing that one
+    // made both sides use different keys). The room key only steps in when no key is chosen: a room never goes plain.
+    const chosen = state.channels[channelId];
+    if (chosen && keyBytes.has(chosen)) return getKey(chosen);
     const room = state.rooms[channelId];
-    const id = room && keyBytes.has(room.keyId) ? room.keyId : state.channels[channelId];
-    return id && keyBytes.has(id) ? getKey(id) : undefined;
+    return room && keyBytes.has(room.keyId) ? getKey(room.keyId) : undefined;
 };
 
 /** The room key of this chat, if it is a secret room whose key we have */
@@ -293,10 +296,9 @@ function refuseRoomChange(channelId: string, keyId: string | null) {
         showToast({ text: "This channel belongs to your vault – choose its channels with right-click on the server → Vault", variant: "critical" });
         return true;
     }
-    const roomKey = roomKeyId(channelId);
-    if (!roomKey || keyId === roomKey) return false;
-    state.channels[channelId] = roomKey;
-    showToast({ text: "Secret rooms always stay encrypted with their room key – leave the room first to change it", variant: "critical" });
+    // Rooms can't be turned off (that would send plain text) – switching to another key stays allowed
+    if (keyId !== null || !roomKeyId(channelId)) return false;
+    showToast({ text: "Secret rooms always stay encrypted – leave the room first to turn encryption off", variant: "critical" });
     return true;
 }
 
@@ -322,7 +324,7 @@ export async function toggleChannel(channelId: string) {
     const vault = vaultOfChannel(channelId);
     if (vault) return refuseRoomChange(channelId, null), vault.keyId;
     const roomKey = roomKeyId(channelId);
-    if (roomKey) return refuseRoomChange(channelId, null), roomKey;
+    if (roomKey) return refuseRoomChange(channelId, null), channelKey(channelId)?.id ?? roomKey;
     if (state.channels[channelId]) return setChannelKey(channelId, null), null;
     const id = state.lastUsed[channelId] && keyBytes.has(state.lastUsed[channelId])
         ? state.lastUsed[channelId]

@@ -1,9 +1,9 @@
 /*
  * SecretChat – Vaults: a server (e.g. an empty one you made) where only you can read the messages and files.
- * The key is in a key file (keep it on a USB stick) protected with a password. It is never saved on this PC:
+ * The key is in a key file (keep it on a USB stick) – the file alone unlocks it. It is never saved on this PC:
  * unlocking puts it into memory, locking or quitting Discord forgets it. Someone with your Discord account –
- * or Discord itself – only sees random characters. Lose the key file or the password and the vault is gone.
- * Key file format: see vaultfile.ts (binary, reveals nothing without the password).
+ * or Discord itself – only sees random characters. Lose every copy of the key file and the vault is gone.
+ * Key file format: see vaultfile.ts (binary, nothing readable inside).
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
@@ -19,7 +19,7 @@ import { forgetFiles } from "./files";
 import { LOCK_ICON, UNLOCK_ICON } from "./icons";
 import { relockKey, retryLocked } from "./messages";
 import { addVault, getKeyBytes, getVault, isVaultUnlocked, lockVault, removeVault, setVaultChannel, unlockVault, useStore, Vault } from "./store";
-import { makeKeyFile, MAX_FILE, MIN_PASSWORD, openKeyFile } from "./vaultfile";
+import { makeKeyFile, MAX_FILE, openKeyFile, PasswordNeeded } from "./vaultfile";
 
 const logger = new Logger("SecretChat");
 const Native = VencordNative.pluginHelpers["Unter das OS"] as PluginNative<typeof import("./native")> | undefined;
@@ -73,33 +73,20 @@ function serverChannels(guildId: string): Channel[] {
 
 // ---------------------------------------------------------------- Windows
 
-function PasswordFields({ password, setPassword, repeat, setRepeat }: { password: string; setPassword(v: string): void; repeat?: string; setRepeat?(v: string): void; }) {
-    return (
-        <>
-            <Row title="Password" trailing={<TextField type="password" value={password} onChange={setPassword} placeholder={`At least ${MIN_PASSWORD} characters`} autoFocus />} />
-            {setRepeat && <Row title="Repeat" trailing={<TextField type="password" value={repeat ?? ""} onChange={setRepeat} placeholder="Same password again" />} />}
-        </>
-    );
-}
-
 /** Makes a new key, saves it as a key file and turns the server into a vault */
 function CreateWindow({ guildId, close }: { guildId: string; close(): void; }) {
-    const [password, setPassword] = useState("");
-    const [repeat, setRepeat] = useState("");
     const [understood, setUnderstood] = useState(false);
     const [busy, setBusy] = useState(false);
     const name = serverName(guildId);
 
-    const problem = password.length < MIN_PASSWORD ? `The password needs at least ${MIN_PASSWORD} characters`
-        : password !== repeat ? "The passwords are different"
-            : !understood ? "Confirm that you understood how the vault works" : "";
+    const problem = !understood ? "Confirm that you understood how the vault works" : "";
 
     const create = async () => {
         if (problem || busy) return;
         setBusy(true);
         try {
             const key = randomBytes(32);
-            if (!await saveKeyFile(await makeKeyFile(guildId, name, key, password))) return;
+            if (!await saveKeyFile(await makeKeyFile(guildId, name, key))) return;
             await addVault({ guildId, keyId: await keyIdOf(key), fp: await keyFingerprint(key), name, created: Date.now() }, key);
             retryLocked();
             showToast({ text: `“${name}” is now a vault – unlocked until you lock it or quit Discord`, variant: "success" });
@@ -125,16 +112,13 @@ function CreateWindow({ guildId, close }: { guildId: string; close(): void; }) {
             </Note>
             <Note>
                 Everything you send in this server is encrypted on your PC – your Discord account, someone who hacks it, and Discord
-                itself only see random characters. The key is saved in a key file (save it on a USB stick) and protected with a password.
-                It is never stored on this PC.
+                itself only see random characters. The key is saved in a key file (save it on a USB stick) and never stored on this PC.
+                To unlock, you only choose the key file.
             </Note>
-            <Section title="Password" footer="Needed with the key file every time you unlock. A long sentence is easy to remember and hard to guess.">
-                <PasswordFields password={password} setPassword={setPassword} repeat={repeat} setRepeat={setRepeat} />
-            </Section>
             <Section footer="Channel names, times and file sizes stay visible – only the content is encrypted. Big files (over your upload limit) go to Catbox / Gofile, encrypted.">
                 <ToggleRow
                     title="I understand"
-                    subtitle="Without the key file AND the password, nobody – not even me – can ever read this vault again. I'll keep a second copy of the key file."
+                    subtitle="The key file is the key: whoever has it can read this vault, and without it nobody ever can again. I'll keep it safe and keep a second copy."
                     checked={understood}
                     onChange={setUnderstood}
                 />
@@ -143,35 +127,22 @@ function CreateWindow({ guildId, close }: { guildId: string; close(): void; }) {
     );
 }
 
-/** Key file + password → key in memory. Also re-adds a vault from its key file (e.g. on another PC). */
+/** Key file → key in memory (older key files also ask for their password). Also re-adds a vault, e.g. on another PC. */
 function UnlockWindow({ guildId, close }: { guildId: string; close(): void; }) {
     const [file, setFile] = useState<{ name: string; data: Uint8Array; } | null>(null);
+    const [needsPassword, setNeedsPassword] = useState(false);
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
     const [busy, setBusy] = useState(false);
     const vault = getVault(guildId);
     const name = serverName(guildId);
 
-    const choose = async () => {
-        setError("");
-        const picked = await pickKeyFile();
-        if (!picked) return;
-        try {
-            // The file reveals nothing – whether it fits this server is only known after the password
-            if (picked.size > MAX_FILE) throw new Error("That's not a vault key file");
-            setFile({ name: picked.name, data: new Uint8Array(await picked.arrayBuffer()) });
-        } catch (e: any) {
-            setFile(null);
-            setError(String(e?.message ?? e));
-        }
-    };
-
-    const unlock = async () => {
-        if (!file || !password || busy) return;
+    const unlock = async (data: Uint8Array, pw?: string) => {
+        if (busy) return;
         setBusy(true);
         setError("");
         try {
-            const opened = await openKeyFile(file.data, password);
+            const opened = await openKeyFile(data, pw);
             if (opened.server !== guildId) throw new Error(`This key file belongs to another server (“${opened.name}”)`);
             if (vault && opened.keyId !== vault.keyId) throw new Error("This key file belongs to another vault of this server");
             if (vault) await unlockVault(guildId, opened.key);
@@ -180,10 +151,28 @@ function UnlockWindow({ guildId, close }: { guildId: string; close(): void; }) {
             showToast({ text: `Vault “${name}” unlocked`, variant: "success" });
             close();
         } catch (e: any) {
-            setError(String(e?.message ?? e));
+            if (e instanceof PasswordNeeded) setNeedsPassword(true);
+            else setError(String(e?.message ?? e));
         } finally {
             setBusy(false);
         }
+    };
+
+    const choose = async () => {
+        setError("");
+        const picked = await pickKeyFile();
+        if (!picked) return;
+        if (picked.size > MAX_FILE) {
+            setFile(null);
+            setError("That's not a vault key file");
+            return;
+        }
+        const data = new Uint8Array(await picked.arrayBuffer());
+        setFile({ name: picked.name, data });
+        setNeedsPassword(false);
+        setPassword("");
+        // Key files without a password unlock right away
+        void unlock(data);
     };
 
     return (
@@ -191,16 +180,24 @@ function UnlockWindow({ guildId, close }: { guildId: string; close(): void; }) {
             header={{ app: "Unter das OS", title: vault ? "Unlock vault" : "Open vault key file", subtitle: name, icon: UNLOCK_ICON, iconColor: "green" }}
             onClose={close}
             notice={error || undefined}
-            actions={[{ label: "Cancel", variant: "gray", onClick: close }, { label: busy ? "Unlocking …" : "Unlock", disabled: !file || !password || busy, onClick: unlock }]}
+            actions={needsPassword
+                ? [{ label: "Cancel", variant: "gray", onClick: close }, { label: busy ? "Unlocking …" : "Unlock", disabled: !file || !password || busy, onClick: () => file && void unlock(file.data, password) }]
+                : [{ label: "Cancel", variant: "gray", onClick: close }]}
         >
             <Section title="Key file" footer="The key stays only in memory – until you lock the vault or quit Discord.">
-                <Row title={file ? file.name : "No file chosen"} subtitle={file ? "Vault key file" : "Plug in your USB stick and choose the file"} trailing={<Button small variant="gray" onClick={choose}>Choose …</Button>} />
+                <Row
+                    title={file ? file.name : "No file chosen"}
+                    subtitle={busy ? "Unlocking …" : file ? "Vault key file" : "Plug in your USB stick and choose the file"}
+                    trailing={<Button small onClick={choose} disabled={busy}>Choose …</Button>}
+                />
             </Section>
-            <Section title="Password">
-                <div onKeyDown={e => { if (e.key === "Enter") void unlock(); }}>
-                    <PasswordFields password={password} setPassword={setPassword} />
-                </div>
-            </Section>
+            {needsPassword && (
+                <Section title="Password" footer="This is an older key file with a password. Unlock it once, then save a new key file in the vault settings – that one needs no password.">
+                    <div onKeyDown={e => { if (e.key === "Enter" && file && password) void unlock(file.data, password); }}>
+                        <Row title="Password" trailing={<TextField type="password" value={password} onChange={setPassword} autoFocus />} />
+                    </div>
+                </Section>
+            )}
         </Sheet>
     );
 }
@@ -209,9 +206,6 @@ function UnlockWindow({ guildId, close }: { guildId: string; close(): void; }) {
 function VaultWindow({ guildId, close }: { guildId: string; close(): void; }) {
     useStore();
     const vault = getVault(guildId);
-    const [copyPassword, setCopyPassword] = useState("");
-    const [copyRepeat, setCopyRepeat] = useState("");
-    const [copyOpen, setCopyOpen] = useState(false);
     if (!vault) return null;
     const unlocked = isVaultUnlocked(vault);
     const channels = serverChannels(guildId);
@@ -220,12 +214,7 @@ function VaultWindow({ guildId, close }: { guildId: string; close(): void; }) {
         const key = getKeyBytesOf(vault);
         if (!key) return;
         try {
-            if (await saveKeyFile(await makeKeyFile(guildId, vault.name, key, copyPassword))) {
-                showToast({ text: "Key file saved", variant: "success" });
-                setCopyOpen(false);
-                setCopyPassword("");
-                setCopyRepeat("");
-            }
+            if (await saveKeyFile(await makeKeyFile(guildId, vault.name, key))) showToast({ text: "Key file saved", variant: "success" });
         } catch (e: any) {
             showToast({ text: `Couldn't save the key file: ${e?.message ?? e}`, variant: "critical" });
         }
@@ -245,8 +234,6 @@ function VaultWindow({ guildId, close }: { guildId: string; close(): void; }) {
         await removeVault(guildId);
         close();
     };
-
-    const copyProblem = copyPassword.length < MIN_PASSWORD ? `At least ${MIN_PASSWORD} characters` : copyPassword !== copyRepeat ? "The passwords are different" : "";
 
     return (
         <Sheet
@@ -271,15 +258,8 @@ function VaultWindow({ guildId, close }: { guildId: string; close(): void; }) {
                     />
                 )) : <Row title="No channels" subtitle="Create a channel in the server first" />}
             </Section>
-            <Section title="Key file" footer="Keep two copies (e.g. two USB sticks). A new key file can have a new password – old key files keep working with their old password.">
-                {!copyOpen
-                    ? <Row title="Save another key file" subtitle={unlocked ? "A backup, or one with a new password" : "Unlock the vault first"} trailing={<Button small variant="gray" disabled={!unlocked} onClick={() => setCopyOpen(true)}>Save …</Button>} />
-                    : (
-                        <>
-                            <PasswordFields password={copyPassword} setPassword={setCopyPassword} repeat={copyRepeat} setRepeat={setCopyRepeat} />
-                            <Row title={copyProblem || "Ready"} trailing={<Button small disabled={!!copyProblem || !unlocked} onClick={saveCopy}>Save key file</Button>} />
-                        </>
-                    )}
+            <Section title="Key file" footer="Keep two copies (e.g. two USB sticks) somewhere safe – whoever has a copy can read the vault. Older key files with a password keep working.">
+                <Row title="Save another key file" subtitle={unlocked ? "A backup copy (no password needed)" : "Unlock the vault first"} trailing={<Button small variant="gray" disabled={!unlocked} onClick={saveCopy}>Save …</Button>} />
             </Section>
             <Section>
                 <Row title="Stop using as vault" subtitle="Messages stay encrypted" trailing={<Button small variant="gray" color="red" onClick={stop}>Stop …</Button>} />

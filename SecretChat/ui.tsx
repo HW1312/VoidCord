@@ -19,7 +19,7 @@ import { RoomCard } from "./area";
 import { LOCK_ICON, SHIELD_ICON, UNLOCK_ICON, USERS_ICON } from "./icons";
 import { SecretLogo } from "./logo";
 import { keyFromPassword, randomBytes } from "./crypto";
-import { acceptHandshake, cancelRequest, chatsWithKey, declineHandshake, decrypted, deleteKeyForBoth, handshakes, keyDeletes, retryLocked, startHandshake } from "./messages";
+import { acceptHandshake, cancelRequest, chatsWithKey, declineHandshake, decrypted, deleteKeyForBoth, handshakes, keyDeletes, lockedKeyId, retryLocked, startHandshake } from "./messages";
 import { chatLabel, makeRoom, pruneStale, roomMessages } from "./rooms";
 import { settings } from "./settings";
 import { addKey, channelKey, deleteKey, getKey, inviteCode, KeyRecord, parseInviteCode, renameKey, setChannelKey, toggleChannel, useStore } from "./store";
@@ -449,7 +449,18 @@ export async function importCode(text: string, channelId?: string) {
 export function LockDecoration({ message }: { message: Message; }) {
     useStore();
     const keyId = decrypted.get(message.id);
-    if (!keyId || !settings.store.showLockIcon) return null;
+    if (!settings.store.showLockIcon) return null;
+    if (!keyId) {
+        // Can't read it: say which key it needs and which one this chat uses – shows a key mix-up right away
+        const needed = lockedKeyId(message.id);
+        if (!needed) return null;
+        const mine = channelKey(message.channel_id);
+        return (
+            <Tooltip text={`Sent with key ${needed} – you don't have it.${mine ? ` This chat uses “${mine.name}” (${mine.id}).` : ""}`}>
+                {p => <span {...p} className={cl("deco")} style={{ opacity: 0.5 }}><LockIcon width={14} height={14} /></span>}
+            </Tooltip>
+        );
+    }
     const k = getKey(keyId);
     return (
         <Tooltip text={k ? `Encrypted · ${k.name}` : "Encrypted"}>
