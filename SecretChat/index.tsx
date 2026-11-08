@@ -13,7 +13,7 @@ import { migratePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Logger } from "@utils/Logger";
 import definePlugin from "@utils/types";
-import { User } from "@vencord/discord-types";
+import { Message, User } from "@vencord/discord-types";
 import { ChannelStore, FluxDispatcher, Menu, SelectedChannelStore, UserStore } from "@webpack/common";
 
 import { notify, titleBarSlot } from "../_ui";
@@ -101,6 +101,15 @@ export default definePlugin({
             }
         },
         {
+            // Message content (every message, also grouped ones without a name): lock in front of encrypted text.
+            // MessageLogger and RoleColorEverywhere patch the same spot – the gap allows their additions.
+            find: ".SEND_FAILED,",
+            replacement: {
+                match: /(?<=\]:(\i)\.isUnsupported.{0,120}?,children:\[)/,
+                replace: "$self.renderContentLock($1),"
+            }
+        },
+        {
             // Start of every attachment upload (also hooked by OpSec and VoiceLength) – voice messages in encrypted
             // chats are taken out here before anything is uploaded
             find: ".tryConvertToJpeg({file:",
@@ -118,6 +127,9 @@ export default definePlugin({
     renderVaultBadge: (guild: { id?: string; } | null) => guild?.id
         ? <ErrorBoundary key="vc-secretchat-vault" noop><VaultBadge guildId={guild.id} /></ErrorBoundary>
         : null,
+    renderContentLock: (message: Message | null) => message?.id
+        ? <ErrorBoundary key="vc-secretchat-lock" noop><LockDecoration message={message} /></ErrorBoundary>
+        : null,
 
     contextMenus: {
         "user-context": userContext,
@@ -132,7 +144,6 @@ export default definePlugin({
     onBeforeMessageSend: onBeforeSend,
     onBeforeMessageEdit: onBeforeEdit,
 
-    renderMessageDecoration: props => <LockDecoration message={props.message} />,
     renderMessageAccessory: props => (
         <>
             <MessageCard message={props.message} />

@@ -14,7 +14,7 @@ export const settings = definePluginSettings({
     },
     showLockIcon: {
         type: OptionType.BOOLEAN,
-        description: "Show a small lock next to the name on decrypted messages",
+        description: "Show a small lock in front of encrypted messages",
         default: true
     },
     showServerListIcon: {

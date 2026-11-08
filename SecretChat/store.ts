@@ -285,6 +285,8 @@ export const channelKey = (channelId: string) => {
     return room && keyBytes.has(room.keyId) ? getKey(room.keyId) : undefined;
 };
 
+const isOneToOne = (channelId: string) => !!ChannelStore.getChannel(channelId)?.isDM?.();
+
 /** The room key of this chat, if it is a secret room whose key we have */
 const roomKeyId = (channelId: string) => {
     const room = state.rooms[channelId];
@@ -296,8 +298,9 @@ function refuseRoomChange(channelId: string, keyId: string | null) {
         showToast({ text: "This channel belongs to your vault – choose its channels with right-click on the server → Vault", variant: "critical" });
         return true;
     }
-    // Rooms can't be turned off (that would send plain text) – switching to another key stays allowed
-    if (keyId !== null || !roomKeyId(channelId)) return false;
+    // Group rooms can't be turned off (the others expect encryption) – switching to another key stays allowed.
+    // A 1:1 DM is only the two of you, so turning it off there is always your choice.
+    if (keyId !== null || !roomKeyId(channelId) || isOneToOne(channelId)) return false;
     showToast({ text: "Secret rooms always stay encrypted – leave the room first to turn encryption off", variant: "critical" });
     return true;
 }
@@ -315,6 +318,11 @@ export async function setChannelKey(channelId: string, keyId: string | null) {
         state.lastUsed[channelId] = keyId;
     } else {
         delete state.channels[channelId];
+        // A 1:1 DM listed as a room: drop it from the rooms too, else the room key would keep encrypting
+        if (state.rooms[channelId] && isOneToOne(channelId)) {
+            delete state.rooms[channelId];
+            if (!state.left.includes(channelId)) state.left.push(channelId);
+        }
     }
     await save();
 }
@@ -324,8 +332,8 @@ export async function toggleChannel(channelId: string) {
     const vault = vaultOfChannel(channelId);
     if (vault) return refuseRoomChange(channelId, null), vault.keyId;
     const roomKey = roomKeyId(channelId);
-    if (roomKey) return refuseRoomChange(channelId, null), channelKey(channelId)?.id ?? roomKey;
-    if (state.channels[channelId]) return setChannelKey(channelId, null), null;
+    if (roomKey && !isOneToOne(channelId)) return refuseRoomChange(channelId, null), channelKey(channelId)?.id ?? roomKey;
+    if (state.channels[channelId] || roomKey) return await setChannelKey(channelId, null), null;
     const id = state.lastUsed[channelId] && keyBytes.has(state.lastUsed[channelId])
         ? state.lastUsed[channelId]
         : state.keys.length === 1 ? state.keys[0].id : null;

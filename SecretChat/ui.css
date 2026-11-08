@@ -9,11 +9,13 @@
     color: var(--vc-ui-green);
 }
 
+/* Lock in front of encrypted messages: inline (not inline-flex) so it flows with the text – 14px icon + 5px gap */
 .vc-secretchat-deco {
-    display: inline-flex;
-    margin-left: 4px;
-    color: var(--vc-ui-green);
-    vertical-align: -2px;
+    display: inline;
+    padding-left: 19px;
+    background-color: var(--vc-ui-green);
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 11h14a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2z'/%3E%3Cpath d='M7 11V7a5 5 0 0 1 10 0v4'/%3E%3C/svg%3E") left center / 14px 14px no-repeat;
+    user-select: none;
 }
 
 .vc-secretchat-card {
@@ -350,6 +352,12 @@
     vertical-align: 2px;
 }
 
+/* Chat window: a bit wider than Discord's small modal (440px), so name, safety code and badge fit on one line */
+.vc-secretchat-chat-window {
+    width: 500px !important;
+    max-width: calc(100vw - 32px) !important;
+}
+
 .vc-secretchat-key-on {
     background: var(--vc-ui-group-active);
 }
@@ -389,9 +397,12 @@
     font-size: 11px;
     font-variant-numeric: tabular-nums;
     letter-spacing: 0.04em;
+    white-space: nowrap;
 }
 
 .vc-secretchat-pq {
+    display: inline-block;
+    white-space: nowrap;
     margin-left: 8px;
     padding: 1px 6px;
     border: 1px solid color-mix(in srgb, var(--vc-ui-green) 30%, transparent);

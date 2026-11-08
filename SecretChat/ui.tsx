@@ -430,7 +430,7 @@ function ChatWindow({ channel, close }: { channel: Channel; close(): void; }) {
 
 export function openChatModal(channel: Channel) {
     void pruneStale();
-    openWindow(close => <ChatWindow channel={channel} close={close} />, { size: "small" });
+    openWindow(close => <ChatWindow channel={channel} close={close} />, { size: "small", className: cl("chat-window") });
 }
 
 export async function importCode(text: string, channelId?: string) {
@@ -445,7 +445,13 @@ export async function importCode(text: string, channelId?: string) {
 
 // ---------------------------------------------------------------- On messages
 
-/** Lock next to the name of decrypted messages */
+/**
+ * The lock is a plain inline span (icon = CSS mask, see .vc-secretchat-deco) holding a word joiner – no own box like an
+ * svg, so the line can't break between lock and text: a long word wraps behind the lock instead of below it.
+ */
+const NO_BREAK = "⁠";
+
+/** Lock in front of the text of encrypted messages (plain messages get nothing) */
 export function LockDecoration({ message }: { message: Message; }) {
     useStore();
     const keyId = decrypted.get(message.id);
@@ -457,14 +463,14 @@ export function LockDecoration({ message }: { message: Message; }) {
         const mine = channelKey(message.channel_id);
         return (
             <Tooltip text={`Sent with key ${needed} – you don't have it.${mine ? ` This chat uses “${mine.name}” (${mine.id}).` : ""}`}>
-                {p => <span {...p} className={cl("deco")} style={{ opacity: 0.5 }}><LockIcon width={14} height={14} /></span>}
+                {p => <span {...p} className={cl("deco")} style={{ opacity: 0.5 }}>{NO_BREAK}</span>}
             </Tooltip>
         );
     }
     const k = getKey(keyId);
     return (
         <Tooltip text={k ? `Encrypted · ${k.name}` : "Encrypted"}>
-            {p => <span {...p} className={cl("deco")}><LockIcon width={14} height={14} /></span>}
+            {p => <span {...p} className={cl("deco")}>{NO_BREAK}</span>}
         </Tooltip>
     );
 }
