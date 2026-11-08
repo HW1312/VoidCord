@@ -1,0 +1,68 @@
+/* CopyAll – the floating copy button. The layer itself lets every click through; only the button takes them. */
+
+#vc-copyall-layer {
+    position: fixed;
+    inset: 0;
+    z-index: 1002;
+    pointer-events: none;
+}
+
+.vc-copyall-button {
+    position: fixed;
+    pointer-events: auto;
+    border-radius: 8px;
+    animation: vc-copyall-in 0.14s var(--vc-ui-ease, ease-out);
+}
+
+/* On pictures and code blocks: a small dark glass plate, so the icon stays readable on any background */
+.vc-copyall-on-media {
+    background: color-mix(in srgb, #000 55%, transparent);
+    backdrop-filter: blur(8px);
+}
+
+.vc-copyall-on-media .vc-ui-icon-btn {
+    color: #e8e8ea;
+}
+
+.vc-copyall-on-media .vc-ui-icon-btn:hover:not(:disabled) {
+    color: #fff;
+}
+
+/* Text copy button at the end of the message text: inline in the text flow, shown while the message is hovered
+   (and while its check is showing). The kit's copy / check animation runs on the svg inside. */
+.vc-copyall-inline {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 20px;
+    margin-left: 4px;
+    padding: 0;
+    border: 0;
+    border-radius: 5px;
+    background: none;
+    color: var(--vc-ui-dim, var(--text-muted));
+    vertical-align: -4px;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.15s, color 0.15s, background-color 0.15s;
+    user-select: none;
+}
+
+[id^="chat-messages-"]:hover .vc-copyall-inline,
+.vc-copyall-inline:focus-visible,
+.vc-copyall-inline-copied {
+    opacity: 1;
+}
+
+.vc-copyall-inline:hover {
+    color: var(--vc-ui-title, var(--header-primary));
+    background: color-mix(in srgb, currentColor 10%, transparent);
+}
+
+@keyframes vc-copyall-in {
+    from {
+        opacity: 0;
+        transform: scale(0.85);
+    }
+}

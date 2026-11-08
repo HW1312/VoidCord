@@ -47,6 +47,12 @@ export const APP_GLYPHS: Record<string, AppGlyph> = {
         base: ["M21 13v2a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h7"],
         accent: ["M16 3h5v5", "m21 3-7 7"]
     },
+    // two sheets: the copy
+    CopyAll: {
+        color: "teal",
+        base: ["M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"],
+        accent: [rect(8, 8, 14, 14, 2)]
+    },
     // short videos on a phone
     DoomScroll: {
         color: "pink",
