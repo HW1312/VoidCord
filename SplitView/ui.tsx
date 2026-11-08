@@ -291,7 +291,7 @@ function OpenPanels({ footer }: { footer?: string; }) {
 // ---------------------------------------------------------------- Settings
 
 export const SettingsPanel = ErrorBoundary.wrap(() => {
-    const s = settings.use(["showTitleBarButton", "shortcut", "dragDrop", "showTyping"]);
+    const s = settings.use(["shortcut", "dragDrop", "showTyping"]);
 
     return (
         <Sheet embedded header={{ title: "SplitView", subtitle: "Up to two more channels next to the main window", icon: SPLIT_PATH, iconColor: ICON_COLOR }}>
@@ -300,7 +300,6 @@ export const SettingsPanel = ErrorBoundary.wrap(() => {
                 title="Options"
                 footer={'Open by right-clicking a channel/DM → "Open in SplitView", by dragging a channel to the right edge or with Ctrl + Shift + S. Messages in the panels are not marked as read.'}
             >
-                <ToggleRow title="Show icon in the title bar" checked={s.showTitleBarButton} onChange={v => settings.store.showTitleBarButton = v} />
                 <ToggleRow title="Ctrl + Shift + S opens the current channel" checked={s.shortcut} onChange={v => settings.store.shortcut = v} />
                 <ToggleRow title="Open channels via drag & drop" checked={s.dragDrop} onChange={v => settings.store.dragDrop = v} />
                 <ToggleRow title="Show who is currently typing" checked={s.showTyping} onChange={v => settings.store.showTyping = v} />
@@ -325,12 +324,10 @@ function PopoutPanel() {
 }
 
 function TitleBarButton() {
-    const { showTitleBarButton, visible, panels } = settings.use(["showTitleBarButton", "visible", "panels"]);
+    const { visible, panels } = settings.use(["visible", "panels"]);
     const count = parsePanels(panels).length;
     const buttonRef = useRef(null);
     const [show, setShow] = useState(false);
-
-    if (!showTitleBarButton) return null;
 
     return (
         <Popout

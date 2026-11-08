@@ -25,15 +25,6 @@ export interface Config {
     anonymizeFilenames: boolean;
     /** Image editor (redact, crop …) before upload */
     uploadEditor: boolean;
-
-    // Screen
-    contentProtection: boolean;
-    curtainOnBlur: boolean;
-    panicHotkey: boolean;
-
-    // Streaming
-    /** Streaming protection: blur DMs, hide servers/channels, mute notifications while you stream */
-    screenshareGuard: boolean;
 }
 
 export type ConfigKey = keyof Config;
@@ -52,14 +43,7 @@ const STANDARD: Config = {
 
     stripMetadata: true,
     anonymizeFilenames: true,
-    uploadEditor: false,
-
-    contentProtection: false,
-    curtainOnBlur: false,
-    panicHotkey: true,
-
-    // Only applies while you stream – otherwise harmless
-    screenshareGuard: true
+    uploadEditor: false
 };
 
 const PARANOID: Config = {
@@ -67,8 +51,6 @@ const PARANOID: Config = {
     silentTyping: true,
     invisibleStatus: true,
     confirmExternalLinks: true,
-    contentProtection: true,
-    curtainOnBlur: true,
     uploadEditor: true
 };
 

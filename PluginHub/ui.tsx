@@ -13,7 +13,7 @@ import { Plugin } from "@utils/types";
 import { findComponentByCodeLazy } from "@webpack";
 import { useMemo, useState } from "@webpack/common";
 
-import { AppArtwork, appArtwork, Badge, Button, Empty, Icon, IconButton, ICONS, Note, openWindow, Row, SearchField, Section, Segmented, Sheet, strokeIcon, Toggle, ToggleRow } from "../_ui";
+import { AppArtwork, appArtwork, Badge, Button, Empty, Icon, IconButton, ICONS, Note, openWindow, Row, SearchField, Section, Segmented, Sheet, strokeIcon, Toggle } from "../_ui";
 import logo from "file://logo.png?base64";
 import { getOwnPlugins, isEnabled, isNew, isTesting, markTried, needsRestart, setEnabled, settings } from "./index";
 import { hubThemes, ThemesTab } from "./themes";
@@ -105,7 +105,7 @@ export function openInfoModal(plugin: Plugin) {
 
 function Hub({ embedded, onClose }: { embedded?: boolean; onClose?(): void; }) {
     useSettings(["plugins.*"] as any);
-    const { sort, tab, showTitleBarButton } = settings.use(["sort", "tab", "showTitleBarButton"]);
+    const { sort, tab } = settings.use(["sort", "tab"]);
     const [query, setQuery] = useState("");
 
     const all = useMemo(getOwnPlugins, [sort]);
@@ -175,18 +175,6 @@ function Hub({ embedded, onClose }: { embedded?: boolean; onClose?(): void; }) {
                     </Section>
                 </>
             )}
-
-            {embedded && (
-                <Section title="Options">
-                    <ToggleRow
-                        icon={GRID_PATH}
-                        color="indigo"
-                        title="Show icon in the title bar"
-                        checked={showTitleBarButton}
-                        onChange={v => settings.store.showTitleBarButton = v}
-                    />
-                </Section>
-            )}
         </Sheet>
     );
 }
@@ -202,9 +190,6 @@ export function openHubModal() {
 // ---------------------------------------------------------------- Title bar
 
 function TitleBarButton() {
-    const { showTitleBarButton } = settings.use(["showTitleBarButton"]);
-    if (!showTitleBarButton) return null;
-
     return (
         <HeaderBarIcon
             className="vc-pluginhub-tb"

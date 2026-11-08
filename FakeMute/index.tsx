@@ -49,12 +49,6 @@ export const settings = definePluginSettings({
         default: true,
         hidden: true,
         onChange: v => { if (!v) clearDetections(); }
-    },
-    showTitleBarButton: {
-        type: OptionType.BOOLEAN,
-        description: "Show icon in the title bar",
-        default: true,
-        hidden: true
     }
 });
 
@@ -181,7 +175,9 @@ const plugin = definePlugin({
         },
         {
             // Voice user icons (channel list etc.): blue mute/deafen icon for users detected as faking it
-            find: 'location:"VoiceUserIcons"',
+            // (2026-11: Discord dropped location:"VoiceUserIcons"; the mute / deafen icons are now built in an inner
+            // function of the same component – it sees vcFakeFlags, declared right after the props are read)
+            find: '"soundboard-mute"',
             replacement: [
                 {
                     // Discord now takes your own icons from your real (local) state – show the faked one again
@@ -189,8 +185,9 @@ const plugin = definePlugin({
                     replace: "$1=$self.useFakeSelf($1);"
                 },
                 {
-                    match: /user:(\i),(?=[^}]{0,80}\}=\i,)(.{0,400}?location:"VoiceUserIcons"\}\),)/,
-                    replace: "user:$1,$2vcFakeFlags=$self.useFakeFlags($1?.id),"
+                    // Hook before the component's early "collapsed / disabled" return
+                    match: /(let\{className:\i,mute:\i,localMute:[^}]{0,600}?user:(\i),[^}]{0,200}\}=\i;)/,
+                    replace: "$1let vcFakeFlags=$self.useFakeFlags($2?.id);"
                 },
                 {
                     match: /(\{\[\i\.\i\]:\i)(?=\}\),color:"currentColor"\}\);\i\.push\(\(0,\i\.jsx\)\(\i\.\i,\{text:[^}]{0,200}?,children:\i\},"mute"\)\))/,

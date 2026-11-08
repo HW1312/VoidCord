@@ -33,11 +33,6 @@ export const settings = definePluginSettings({
         default: "",
         hidden: true
     },
-    showTitleBarButton: {
-        type: OptionType.BOOLEAN,
-        description: "Show the Unter das OS icon in the title bar at the top (next to Back / Forward)",
-        default: true
-    },
     transferChannel: {
         type: OptionType.STRING,
         description: "Group only you are in, used to send your keys to your phone",

@@ -56,15 +56,6 @@ const settings = definePluginSettings({
         description: "Compress images that are too large instead of uploading them to Gofile (animated images are never compressed)",
         default: true
     },
-    compressFormat: {
-        type: OptionType.SELECT,
-        description: "Format for compressed images",
-        options: [
-            { label: "Automatic (JPEG, WebP for images with transparency)", value: "auto", default: true },
-            { label: "Always JPEG", value: "jpeg" },
-            { label: "Always WebP", value: "webp" }
-        ]
-    },
     compressQuality: {
         type: OptionType.SLIDER,
         description: "Highest quality to try when compressing (%) – lower values are only used if needed",
@@ -76,11 +67,6 @@ const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         description: "Try Catbox first for files up to 200 MB (direct download links) – Gofile becomes the fallback",
         default: false
-    },
-    stripMetadata: {
-        type: OptionType.BOOLEAN,
-        description: "Strip metadata (GPS, device, capture time …) from images & videos before uploading",
-        default: true
     },
     randomizeName: {
         type: OptionType.BOOLEAN,
@@ -252,17 +238,15 @@ async function sendToHost(jobId: string, host: Host, file: File, folder: GofileF
     }
 }
 
+/** Metadata (GPS, device, capture time …) is always stripped – the link is public, and stripping is lossless */
 async function prepareFile(file: File) {
-    const { stripMetadata: strip, randomizeName } = settings.store;
-    const name = randomizeName ? randomFilename(file.name) : file.name;
-    if (strip) {
-        try {
-            const result = await stripMetadata(file, name);
-            if (result) return result.file;
-        } catch (e) {
-            logger.error("Failed to strip metadata from", file.name, e);
-            throw new Error("Could not strip metadata – not uploaded");
-        }
+    const name = settings.store.randomizeName ? randomFilename(file.name) : file.name;
+    try {
+        const result = await stripMetadata(file, name);
+        if (result) return result.file;
+    } catch (e) {
+        logger.error("Failed to strip metadata from", file.name, e);
+        throw new Error("Could not strip metadata – not uploaded");
     }
     return name === file.name ? file : new File([file], name, { type: file.type, lastModified: file.lastModified });
 }
@@ -307,7 +291,7 @@ async function uploadFiles(files: File[], channel: Channel) {
         for (const original of files) {
             if (handle.cancelled) throw new CancelledError("Cancelled");
 
-            card.update(settings.store.stripMetadata ? "Stripping metadata …" : "Preparing …", sentBefore / total);
+            card.update("Stripping metadata …", sentBefore / total);
             const file = await prepareFile(original);
             sentNames.push(file.name);
             if (handle.cancelled) throw new CancelledError("Cancelled");
@@ -494,9 +478,9 @@ async function inspectImage(file: File): Promise<ImageInfo | null> {
     return null;
 }
 
+/** JPEG, or WebP for images with transparency (and WebP inputs) */
 function outputType(info: ImageInfo): { mime: string; ext: string; } {
-    const format = settings.store.compressFormat;
-    const webp = format === "webp" || (format !== "jpeg" && (info.alpha || info.kind === "webp"));
+    const webp = info.alpha || info.kind === "webp";
     return webp ? { mime: "image/webp", ext: ".webp" } : { mime: "image/jpeg", ext: ".jpg" };
 }
 
@@ -652,7 +636,7 @@ export default definePlugin({
             find: "Unexpected mismatch between files and file metadata",
             replacement: {
                 // FolderUpload's (/*vcFU*/) and SecretChat's block (/*vcSC*/…/*vcSC*/) may already sit there – they stay first
-                match: /async function \i\((\i),(\i),(\i)\){(?:\/\*vcFU\*\/.*?\/\*vcFU\*\/)?(?:\/\*vcSC\*\/.*?\/\*vcSC\*\/)?(?=let\{filesMetadata:)/,
+                match: /async function(?: \i)?\((\i),(\i),(\i)\){(?:\/\*vcFU\*\/.*?\/\*vcFU\*\/)?(?:\/\*vcSC\*\/.*?\/\*vcSC\*\/)?(?=let\{filesMetadata:)/,
                 replace: "$&{let vcKeep=$self.interceptFiles($1,$2,arguments[3]);if(vcKeep instanceof Promise)vcKeep=await vcKeep;if(vcKeep!=null){if(!vcKeep.length)return;$1=vcKeep}}"
             }
         }

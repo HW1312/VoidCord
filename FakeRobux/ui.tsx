@@ -10,7 +10,7 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { findComponentByCodeLazy } from "@webpack";
 import { useState } from "@webpack/common";
 
-import { Button, classes, confirm, Empty, Field, Icon, Note, openWindow, Pill, Pills, Row, Section, Sheet, Spinner, Stats, TextField, ToggleRow } from "../_ui";
+import { Button, classes, confirm, Empty, Field, Icon, Note, openWindow, Pill, Pills, Row, Section, Sheet, Spinner, Stats, TextField } from "../_ui";
 import { getUser, lookupUser } from "./api";
 import { abbr, fmt, fmtDate, GIFT_PATH, HISTORY_PATH, ROBLOX_PATH, RobloxLogo, Robux, ROBUX_PATH, RobuxIcon, Tabs, THEME, useAsync, UserAvatar } from "./components";
 import { HistoryEntry, MAX_BALANCE, setBalance, settings } from "./index";
@@ -20,7 +20,6 @@ import { SendView } from "./send";
 
 const HeaderBarIcon = findComponentByCodeLazy(".HEADER_BAR_BADGE_BOTTOM,", 'position:"bottom"');
 
-const ICON_COLOR = "gray";
 const BALANCE_PRESETS = [1_000, 10_000, 100_000, 1_000_000, 10_000_000];
 
 const errorText = (e: any) => String(e?.message ?? e).replace(/^Error invoking remote method '[^']+': (Error: )?/, "");
@@ -210,7 +209,7 @@ export function openRobloxWindow() {
 // ---------------------------------------------------------------- Settings
 
 export const SettingsPanel = ErrorBoundary.wrap(() => {
-    const { showTitleBarButton, history } = settings.use(["showTitleBarButton", "history"]);
+    const { history } = settings.use(["history"]);
 
     return (
         <Sheet embedded className={THEME} header={{ title: "Fake Robux", subtitle: "Roblox profile with a balance you choose", iconNode: <RobloxLogo /> }}>
@@ -221,7 +220,6 @@ export const SettingsPanel = ErrorBoundary.wrap(() => {
                 <BalanceEditor />
             </Section>
             <Section>
-                <ToggleRow icon={ROBLOX_PATH} color={ICON_COLOR} title="Show icon in the title bar" checked={showTitleBarButton} onChange={v => settings.store.showTitleBarButton = v} />
                 <Row title="Open Roblox window" leading={<span className="vc-fakerobux-robux-glyph"><Icon path={ROBUX_PATH} size={18} /></span>} onClick={openRobloxWindow} chevron />
                 <Row
                     title="Clear history"
@@ -240,8 +238,7 @@ export const SettingsPanel = ErrorBoundary.wrap(() => {
 // ---------------------------------------------------------------- Title bar
 
 function TitleBarButton() {
-    const { showTitleBarButton, balance } = settings.use(["showTitleBarButton", "balance"]);
-    if (!showTitleBarButton) return null;
+    const { balance } = settings.use(["balance"]);
 
     return (
         <HeaderBarIcon

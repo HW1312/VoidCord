@@ -88,7 +88,7 @@ export default definePlugin({
             // either patch order (its match allows this block, marked /*vcSC*/). FolderUpload's block (/*vcFU*/) stays first.
             find: "Unexpected mismatch between files and file metadata",
             replacement: {
-                match: /(?<=async function \i\((\i),(\i),\i\)\{(?:\/\*vcFU\*\/.*?\/\*vcFU\*\/)?)(?=\{let vcKeep=|let\{filesMetadata:)/,
+                match: /(?<=async function(?: \i)?\((\i),(\i),\i\)\{(?:\/\*vcFU\*\/.*?\/\*vcFU\*\/)?)(?=\{let vcKeep=|let\{filesMetadata:)/,
                 replace: "/*vcSC*/if($self.interceptUpload($1,$2))return;/*vcSC*/"
             }
         },

@@ -56,12 +56,6 @@ export const settings = definePluginSettings({
         default: true,
         hidden: true,
         onChange: (v: boolean) => v && running ? startDividerFix() : stopDividerFix()
-    },
-    showTitleBarButton: {
-        type: OptionType.BOOLEAN,
-        description: "Show icon in the title bar",
-        default: true,
-        hidden: true
     }
 });
 

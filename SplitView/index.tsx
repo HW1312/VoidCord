@@ -48,12 +48,6 @@ export const settings = definePluginSettings({
         default: true,
         hidden: true
     },
-    showTitleBarButton: {
-        type: OptionType.BOOLEAN,
-        description: "Show icon in the title bar",
-        default: true,
-        hidden: true
-    },
     shortcut: {
         type: OptionType.BOOLEAN,
         description: "Ctrl + Shift + S opens the current channel in SplitView",

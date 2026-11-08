@@ -1439,6 +1439,80 @@ video.vc-secretchat-file-media {
     opacity: 1;
 }
 
+/* Decrypted text file: header (name, size, badge, info, copy, save) above the text */
+.vc-secretchat-text {
+    width: min(760px, 100%);
+    margin-top: 4px;
+    border: 1px solid var(--vc-ui-sep);
+    border-radius: 12px;
+    background: var(--vc-ui-group);
+    font-family: var(--vc-ui-font);
+    overflow: hidden;
+}
+
+.vc-secretchat-text-head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px 8px 12px;
+    border-bottom: 1px solid var(--vc-ui-sep);
+}
+
+.vc-secretchat-text-name {
+    min-width: 0;
+    overflow: hidden;
+    color: var(--vc-ui-title);
+    font-size: 14px;
+    font-weight: 500;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.vc-secretchat-text-head .vc-secretchat-file-size {
+    flex: 1;
+    white-space: nowrap;
+}
+
+.vc-secretchat-text-body {
+    max-height: 480px;
+    margin: 0;
+    padding: 10px 12px;
+    overflow: auto;
+    color: var(--vc-ui-text, var(--text-normal));
+    font-family: var(--vc-ui-mono);
+    font-size: 13px;
+    line-height: 1.45;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    user-select: text;
+    /* Custom scrollbar below (::-webkit-scrollbar) – no scrollbar-width / scrollbar-color here: in Chromium those
+       would override it with the plain thin bar */
+}
+
+.vc-secretchat-text-body::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+.vc-secretchat-text-body::-webkit-scrollbar-track,
+.vc-secretchat-text-body::-webkit-scrollbar-corner {
+    background: transparent;
+}
+
+.vc-secretchat-text-body::-webkit-scrollbar-button {
+    display: none;
+}
+
+.vc-secretchat-text-body::-webkit-scrollbar-thumb {
+    border: 3px solid transparent;
+    border-radius: 10px;
+    background: color-mix(in srgb, var(--vc-ui-dim) 40%, transparent) padding-box;
+}
+
+.vc-secretchat-text-body::-webkit-scrollbar-thumb:hover {
+    background: color-mix(in srgb, var(--vc-ui-dim) 70%, transparent) padding-box;
+}
+
 .vc-secretchat-file-card {
     display: flex;
     align-items: center;

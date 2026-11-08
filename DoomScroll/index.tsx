@@ -66,12 +66,6 @@ export const settings = definePluginSettings({
         default: true,
         hidden: true
     },
-    showTitleBarButton: {
-        type: OptionType.BOOLEAN,
-        description: "Show the button in the title bar",
-        default: true,
-        hidden: true
-    },
     lastPlatform: {
         type: OptionType.STRING,
         description: "Last opened feed",

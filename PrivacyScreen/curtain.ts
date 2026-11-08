@@ -1,5 +1,5 @@
 /*
- * OpSec – Icon (crossed-out eye) & privacy curtain (covers the whole window)
+ * PrivacyScreen – Icon (crossed-out eye) & privacy curtain (covers the whole window)
  * The same building block is used for the real curtain and the live preview in the settings.
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
@@ -84,13 +84,13 @@ function iconNode(o: CurtainOptions): Element {
     const custom = o.iconCustom?.trim();
     if (o.icon === "custom" && custom) {
         if (/^https?:\/\/\S+$/i.test(custom)) {
-            const img = el("img", "vc-opsec-curtain-img");
+            const img = el("img", "vc-privacyscreen-curtain-img");
             img.src = custom;
             img.alt = "";
             img.draggable = false;
             return img;
         }
-        return el("span", "vc-opsec-curtain-emoji", [...custom].slice(0, 4).join(""));
+        return el("span", "vc-privacyscreen-curtain-emoji", [...custom].slice(0, 4).join(""));
     }
     const name = o.icon && o.icon !== "custom" && o.icon in CURTAIN_ICONS ? o.icon : "eyeOff";
     return iconSvg(CURTAIN_ICONS[name]);
@@ -102,12 +102,12 @@ function iconNode(o: CurtainOptions): Element {
 let updatePercent = 8 + Math.floor(Math.random() * 25);
 
 function buildUpdate(root: HTMLElement, cleanups: (() => void)[]) {
-    const box = el("div", "vc-opsec-update");
-    const spinner = el("div", "vc-opsec-update-spinner");
+    const box = el("div", "vc-privacyscreen-update");
+    const spinner = el("div", "vc-privacyscreen-update-spinner");
     for (let i = 0; i < 5; i++) spinner.appendChild(el("i"));
-    const title = el("div", "vc-opsec-update-title", "Working on updates");
-    const pct = el("div", "vc-opsec-update-title", `${updatePercent}% complete`);
-    const sub = el("div", "vc-opsec-update-sub", "Don't turn off your PC. This will take a while.");
+    const title = el("div", "vc-privacyscreen-update-title", "Working on updates");
+    const pct = el("div", "vc-privacyscreen-update-title", `${updatePercent}% complete`);
+    const sub = el("div", "vc-privacyscreen-update-sub", "Don't turn off your PC. This will take a while.");
     box.append(spinner, title, pct, sub);
     root.appendChild(box);
 
@@ -124,7 +124,7 @@ function buildUpdate(root: HTMLElement, cleanups: (() => void)[]) {
 const MATRIX_CHARS = "アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワン0123456789ABCDEF";
 
 function buildMatrix(root: HTMLElement, accent: string, cleanups: (() => void)[]) {
-    const canvas = el("canvas", "vc-opsec-matrix");
+    const canvas = el("canvas", "vc-privacyscreen-matrix");
     root.appendChild(canvas);
     const ctx = canvas.getContext("2d")!;
     let drops: number[] = [];
@@ -174,10 +174,10 @@ function buildMatrix(root: HTMLElement, accent: string, cleanups: (() => void)[]
 
 /** Radar: rings, crosshair and a rotating beam */
 function buildRadar(root: HTMLElement) {
-    const radar = el("div", "vc-opsec-radar");
-    radar.append(el("div", "vc-opsec-radar-rings"), el("div", "vc-opsec-radar-sweep"));
+    const radar = el("div", "vc-privacyscreen-radar");
+    radar.append(el("div", "vc-privacyscreen-radar-rings"), el("div", "vc-privacyscreen-radar-sweep"));
     for (let i = 0; i < 4; i++) {
-        const blip = el("i", "vc-opsec-radar-blip");
+        const blip = el("i", "vc-privacyscreen-radar-blip");
         blip.style.setProperty("--x", `${20 + Math.random() * 60}%`);
         blip.style.setProperty("--y", `${20 + Math.random() * 60}%`);
         blip.style.animationDelay = `${Math.random() * 4}s`;
@@ -188,16 +188,16 @@ function buildRadar(root: HTMLElement) {
 
 /** Aurora: slowly drifting, blurred color fields */
 function buildAurora(root: HTMLElement) {
-    const aurora = el("div", "vc-opsec-aurora");
+    const aurora = el("div", "vc-privacyscreen-aurora");
     for (let i = 0; i < 3; i++) aurora.appendChild(el("i"));
     root.appendChild(aurora);
 }
 
 /** Lock screen: large time & date like the Windows lock screen */
 function buildLock(root: HTMLElement, cleanups: (() => void)[]) {
-    const clock = el("div", "vc-opsec-lock");
-    const time = el("div", "vc-opsec-lock-time");
-    const date = el("div", "vc-opsec-lock-date");
+    const clock = el("div", "vc-privacyscreen-lock");
+    const time = el("div", "vc-privacyscreen-lock-time");
+    const date = el("div", "vc-privacyscreen-lock-date");
     clock.append(time, date);
     root.appendChild(clock);
 
@@ -300,15 +300,15 @@ const hexLine = () => `${randHex(8)}  ${Array.from({ length: 8 }, () => randHex(
  * Typing speed and pauses are tuned so one pass through all scenes takes clearly over 10 minutes.
  */
 function buildTerminal(root: HTMLElement, o: CurtainOptions, cleanups: (() => void)[]) {
-    const win = el("div", "vc-opsec-term");
-    const bar = el("div", "vc-opsec-term-bar");
+    const win = el("div", "vc-privacyscreen-term");
+    const bar = el("div", "vc-privacyscreen-term-bar");
     const titleText = o.showText && o.text.trim() ? o.text.trim() : "root@node-7 \u2014 ssh";
     bar.append(el("i"), el("i"), el("i"), el("span", undefined, titleText));
-    const body = el("div", "vc-opsec-term-body");
-    const prompt = el("div", "vc-opsec-term-prompt");
-    const ps1 = el("span", "vc-opsec-term-ps", "root@node-7:~# ");
+    const body = el("div", "vc-privacyscreen-term-body");
+    const prompt = el("div", "vc-privacyscreen-term-prompt");
+    const ps1 = el("span", "vc-privacyscreen-term-ps", "root@node-7:~# ");
     const typed = el("span");
-    prompt.append(ps1, typed, el("span", "vc-opsec-term-cursor"));
+    prompt.append(ps1, typed, el("span", "vc-privacyscreen-term-cursor"));
     win.append(bar, body, prompt);
     root.appendChild(win);
 
@@ -317,7 +317,7 @@ function buildTerminal(root: HTMLElement, o: CurtainOptions, cleanups: (() => vo
     const sleep = (ms: number) => new Promise<void>(resolve => { timer = setTimeout(resolve, ms); });
     cleanups.push(() => { dead = true; clearTimeout(timer); });
 
-    const add = (text: string, cls = "vc-opsec-term-line") => {
+    const add = (text: string, cls = "vc-privacyscreen-term-line") => {
         const node = el("div", cls, text);
         body.appendChild(node);
         while (body.childElementCount > 200) body.firstElementChild?.remove();
@@ -326,7 +326,7 @@ function buildTerminal(root: HTMLElement, o: CurtainOptions, cleanups: (() => vo
     };
 
     const progress = async (label: string) => {
-        const node = add("", "vc-opsec-term-line vc-opsec-term-progress");
+        const node = add("", "vc-privacyscreen-term-line vc-privacyscreen-term-progress");
         let pct = 0;
         while (pct < 100 && !dead) {
             pct = Math.min(100, pct + 1 + Math.floor(Math.random() * 6));
@@ -344,7 +344,7 @@ function buildTerminal(root: HTMLElement, o: CurtainOptions, cleanups: (() => vo
             await sleep(45 + Math.random() * 95);
         }
         await sleep(350 + Math.random() * 500);
-        add(`root@node-7:~# ${cmd}`, "vc-opsec-term-line vc-opsec-term-cmd");
+        add(`root@node-7:~# ${cmd}`, "vc-privacyscreen-term-line vc-privacyscreen-term-cmd");
         typed.textContent = "";
     };
 
@@ -362,14 +362,14 @@ function buildTerminal(root: HTMLElement, o: CurtainOptions, cleanups: (() => vo
                         await progress(step.bar);
                     } else if ("hex" in step) {
                         for (let i = 0; i < step.hex; i++) {
-                            add(hexLine(), "vc-opsec-term-line vc-opsec-term-hex");
+                            add(hexLine(), "vc-privacyscreen-term-line vc-privacyscreen-term-hex");
                             await sleep(70 + Math.random() * 110);
                         }
                     } else {
                         await sleep(step.wait);
                     }
                 }
-                add("", "vc-opsec-term-line");
+                add("", "vc-privacyscreen-term-line");
                 await sleep(900 + Math.random() * 1200);
             }
             // brief idle blink before the whole run repeats
@@ -382,16 +382,16 @@ function buildTerminal(root: HTMLElement, o: CurtainOptions, cleanups: (() => vo
 
 /** Fake blue screen in the Windows 10/11 style */
 function buildBsod(root: HTMLElement, cleanups: (() => void)[]) {
-    const box = el("div", "vc-opsec-bsod");
-    const pct = el("div", "vc-opsec-bsod-text");
+    const box = el("div", "vc-privacyscreen-bsod");
+    const pct = el("div", "vc-privacyscreen-bsod-text");
     let value = Math.floor(Math.random() * 20);
     const render = () => pct.textContent = `${value}% complete`;
     render();
     box.append(
-        el("div", "vc-opsec-bsod-face", ":("),
-        el("div", "vc-opsec-bsod-text", "Your PC ran into a problem and needs to restart. We're just collecting some error info, and then we'll restart for you."),
+        el("div", "vc-privacyscreen-bsod-face", ":("),
+        el("div", "vc-privacyscreen-bsod-text", "Your PC ran into a problem and needs to restart. We're just collecting some error info, and then we'll restart for you."),
         pct,
-        el("div", "vc-opsec-bsod-small", "Stop code: CRITICAL_PROCESS_DIED")
+        el("div", "vc-privacyscreen-bsod-small", "Stop code: CRITICAL_PROCESS_DIED")
     );
     root.appendChild(box);
 
@@ -407,16 +407,16 @@ function buildBsod(root: HTMLElement, cleanups: (() => void)[]) {
 }
 
 function buildCenter(root: HTMLElement, o: CurtainOptions) {
-    const center = el("div", "vc-opsec-curtain-center");
+    const center = el("div", "vc-privacyscreen-curtain-center");
 
     if (o.showIcon) {
-        const icon = el("div", "vc-opsec-curtain-icon");
-        icon.append(el("div", "vc-opsec-curtain-halo"), iconNode(o));
+        const icon = el("div", "vc-privacyscreen-curtain-icon");
+        icon.append(el("div", "vc-privacyscreen-curtain-halo"), iconNode(o));
         center.appendChild(icon);
     }
     if (o.showText) {
-        center.appendChild(el("div", "vc-opsec-curtain-title", o.text.trim() || DEFAULT_CURTAIN_TEXT));
-        center.appendChild(el("div", "vc-opsec-curtain-hint",
+        center.appendChild(el("div", "vc-privacyscreen-curtain-title", o.text.trim() || DEFAULT_CURTAIN_TEXT));
+        center.appendChild(el("div", "vc-privacyscreen-curtain-hint",
             o.clickToUnlock ? `Click or press ${o.hotkeyLabel} to unlock` : `Unlock only with ${o.hotkeyLabel}`));
     }
     root.appendChild(center);
@@ -431,16 +431,16 @@ export interface CurtainInstance {
 
 export function buildCurtain(o: CurtainOptions, preview = false): CurtainInstance {
     const root = el("div", [
-        "vc-opsec-curtain",
+        "vc-privacyscreen-curtain",
         "vc-keep-motion",
-        `vc-opsec-curtain-${o.style}`,
-        `vc-opsec-anim-${o.animation}`,
-        preview && "vc-opsec-curtain-preview"
+        `vc-privacyscreen-curtain-${o.style}`,
+        `vc-privacyscreen-anim-${o.animation}`,
+        preview && "vc-privacyscreen-curtain-preview"
     ].filter(Boolean).join(" "));
 
-    root.style.setProperty("--opsec-c-accent", o.accent);
-    root.style.setProperty("--opsec-c-opacity", String(Math.max(0, Math.min(100, o.opacity)) / 100));
-    root.style.setProperty("--opsec-c-blur", `${Math.max(0, o.blur)}px`);
+    root.style.setProperty("--privacyscreen-c-accent", o.accent);
+    root.style.setProperty("--privacyscreen-c-opacity", String(Math.max(0, Math.min(100, o.opacity)) / 100));
+    root.style.setProperty("--privacyscreen-c-blur", `${Math.max(0, o.blur)}px`);
 
     const cleanups: (() => void)[] = [];
     switch (o.style) {
@@ -510,7 +510,7 @@ export function hideCurtain(onlyAuto = false) {
     if (!current || (onlyAuto && current.mode !== "auto")) return;
     const { el: node, destroy } = current;
     current = null;
-    node.classList.add("vc-opsec-curtain-leave");
+    node.classList.add("vc-privacyscreen-curtain-leave");
     setTimeout(() => {
         destroy();
         node.remove();

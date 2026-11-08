@@ -1,5 +1,5 @@
 /*
- * OpSec – Keybind: stored as "ctrl+shift+KeyL", displayed as "Ctrl + Shift + L"
+ * PrivacyScreen – Keybind: stored as "ctrl+shift+KeyL", displayed as "Ctrl + Shift + L"
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 

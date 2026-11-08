@@ -50,12 +50,6 @@ export const settings = definePluginSettings({
     deletes: feature("Overwrite your messages with gibberish before deleting them"),
     invisible: { ...feature("Appear invisible"), onChange: () => applyPresence() },
     activity: { ...feature("Hide your game and app activity"), onChange: () => applyPresence() },
-    showTitleBarButton: {
-        type: OptionType.BOOLEAN,
-        description: "Show icon in the title bar",
-        default: true,
-        hidden: true
-    },
     /** Status before Silent Mode set "invisible" – restored when it ends */
     savedStatus: {
         type: OptionType.STRING,

@@ -413,14 +413,13 @@ function FavoriteManager() {
 }
 
 const OPTIONS = [
-    ["showTitleBarButton", "Show icon in the title bar", FRIENDS_PATH, "teal"],
     ["sortByStatus", "Sort by status (in voice first) instead of your own order", SORT_PATH, "blue"],
     ["hideOffline", "Hide offline friends", HIDE_PATH, "gray"],
     ["leaveWithFriend", "While following: leave voice when the friend leaves", FOLLOW_PATH, "orange"]
 ] as const;
 
 function Options() {
-    const s = settings.use(["showTitleBarButton", "sortByStatus", "hideOffline", "leaveWithFriend"]);
+    const s = settings.use(["sortByStatus", "hideOffline", "leaveWithFriend"]);
     return (
         <Section title="Options" footer="Following goes on until you press Stop: if you get moved away (e.g. by a “join to create” bot) you're brought back to your friend, if you leave voice yourself you join again when they switch channels.">
             {OPTIONS.map(([key, label, icon, color]) => (
@@ -459,12 +458,10 @@ function PopoutPanel({ onClose }: { onClose(): void; }) {
 }
 
 function TitleBarButton() {
-    const { showTitleBarButton, following } = settings.use(["showTitleBarButton", "following"]);
+    const { following } = settings.use(["following"]);
     const followedUser = useStateFromStores([UserStore], () => following ? UserStore.getUser(following) : undefined, [following]);
     const buttonRef = useRef(null);
     const [show, setShow] = useState(false);
-
-    if (!showTitleBarButton) return null;
 
     const tooltip = following ? `Friend Dock - following ${getDisplayName(followedUser, following)}` : "Friend Dock";
 

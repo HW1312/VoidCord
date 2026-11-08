@@ -437,21 +437,13 @@ function BookmarksTab() {
 // ---------------------------------------------------------------- Options
 
 function OptionsTab() {
-    const s = settings.use(["showTitleBarButton", "cooldown", "reminderSound", "reminderVolume", "reminderFlash", "bookmarkSaveMedia"]);
+    const s = settings.use(["cooldown", "reminderSound", "reminderVolume", "reminderFlash", "bookmarkSaveMedia"]);
     const [mediaBytes, setMediaBytes] = useState<number | null>(null);
     useEffect(() => { bookmarkMediaSize().then(setMediaBytes, () => setMediaBytes(null)); }, []);
 
     return (
         <>
             <Section title="General">
-                <ToggleRow
-                    icon={RI.inbox}
-                    color="green"
-                    title="Radar icon in the title bar"
-                    subtitle="When hidden, you can reach Radar via the plugin settings and the Vencord Toolbox menu."
-                    checked={s.showTitleBarButton}
-                    onChange={v => settings.store.showTitleBarButton = v}
-                />
                 <Row
                     leading={<Glyph path={RI.flash} color="orange" />}
                     title="Cooldown per rule"
@@ -801,12 +793,9 @@ export const HighlightChip = ErrorBoundary.wrap(({ message }: { message: any; })
 // ---------------------------------------------------------------- Title bar
 
 function TitleBarButton() {
-    const { showTitleBarButton } = settings.use(["showTitleBarButton"]);
     const unread = useUnreadCount();
     const buttonRef = useRef(null);
     const [show, setShow] = useState(false);
-
-    if (!showTitleBarButton) return null;
 
     return (
         <Popout

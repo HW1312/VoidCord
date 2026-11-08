@@ -1,5 +1,5 @@
 /*
- * OpSec – Streaming protection (ScreenshareGuard)
+ * PrivacyScreen – Streaming protection (ScreenshareGuard)
  * While you are streaming / sharing your screen:
  *  - blur the DM list (and DM bubbles in the server bar)
  *  - hide selected servers & channels
@@ -15,9 +15,9 @@
 import { Logger } from "@utils/Logger";
 import { ApplicationStreamingStore, FluxDispatcher, SortedGuildStore, StreamerModeStore } from "@webpack/common";
 
-import { opsecNotify } from "./ui";
+import { privacyNotify } from "./ui";
 
-const logger = new Logger("OpSec");
+const logger = new Logger("PrivacyScreen");
 
 export interface GuardOptions {
     enabled: boolean;
@@ -60,7 +60,7 @@ const emit = () => listeners.forEach(l => l());
 
 const DM_LINK = 'a[href^="/channels/@me/"]';
 const snowflake = (id: string) => /^\d{15,21}$/.test(id);
-const TIP_CLASS = "vc-opsec-hide-tips";
+const TIP_CLASS = "vc-privacyscreen-hide-tips";
 
 interface FolderInfo { id: string; guildIds: string[]; }
 
@@ -178,7 +178,7 @@ function applyCss(on: boolean) {
     }
     if (!style) {
         style = document.createElement("style");
-        style.id = "vc-opsec-stream-guard";
+        style.id = "vc-privacyscreen-stream-guard";
         document.head.appendChild(style);
     }
     style.textContent = css;
@@ -188,7 +188,7 @@ function applyCss(on: boolean) {
 
 type StreamerKey = "enabled" | "disableNotifications" | "disableSounds";
 
-/** Values OpSec changed for the stream (to restore them) */
+/** Values PrivacyScreen changed for the stream (to restore them) */
 const changedStreamerMode = new Map<StreamerKey, boolean>();
 
 function setStreamerMode(key: StreamerKey, value: boolean) {
@@ -218,7 +218,7 @@ function applyStreamerMode(on: boolean) {
         }
     } catch (e) {
         logger.error("Failed to toggle Streamer Mode", e);
-        opsecNotify("OpSec: Failed to toggle Streamer Mode", "error");
+        privacyNotify("Failed to toggle Streamer Mode", "error");
     }
 }
 

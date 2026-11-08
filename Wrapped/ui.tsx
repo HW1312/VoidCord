@@ -338,12 +338,11 @@ const TOGGLES = [
     { key: "trackMessages", label: "Messages", hint: "Messages you send (per server, channel, hour) and DMs you receive.", icon: ICONS.message, color: "blue" },
     { key: "trackVoice", label: "Voice time", hint: "Time in voice channels and calls, and who was there with you.", icon: ICONS.voice, color: "green" },
     { key: "trackActive", label: "Active time", hint: "Time Discord is focused and you are not idle.", icon: ICONS.clock, color: "orange" },
-    { key: "trackGames", label: "Games", hint: "Time per game from your own activity status.", icon: ICONS.game, color: "pink" },
-    { key: "showTitleBarButton", label: "Show icon in the title bar", hint: "Opens the dashboard. Also available in the Vencord toolbox.", icon: ICONS.chart, color: "purple" }
+    { key: "trackGames", label: "Games", hint: "Time per game from your own activity status.", icon: ICONS.game, color: "pink" }
 ] as const;
 
 function Panel() {
-    const s = settings.use(["trackMessages", "trackVoice", "trackActive", "trackGames", "showTitleBarButton", "idleMinutes"]);
+    const s = settings.use(["trackMessages", "trackVoice", "trackActive", "trackGames", "idleMinutes"]);
     const stats = useStats();
     const days = Object.keys(stats.days).length;
 
@@ -390,9 +389,6 @@ export const SettingsPanel = ErrorBoundary.wrap(Panel, { noop: true });
 // ---------------------------------------------------------------- Title bar
 
 function TitleBarButton() {
-    const { showTitleBarButton } = settings.use(["showTitleBarButton"]);
-    if (!showTitleBarButton) return null;
-
     return (
         <HeaderBarIcon
             className={cl("btn-titlebar")}

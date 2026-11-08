@@ -20,12 +20,6 @@ export const settings = definePluginSettings({
         type: OptionType.COMPONENT,
         component: () => <SettingsPanel />
     },
-    showTitleBarButton: {
-        type: OptionType.BOOLEAN,
-        description: "Show icon in the title bar",
-        default: true,
-        hidden: true
-    },
     trackMessages: {
         type: OptionType.BOOLEAN,
         description: "Track messages",

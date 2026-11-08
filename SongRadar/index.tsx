@@ -27,12 +27,6 @@ export const settings = definePluginSettings({
         default: 0.4,
         hidden: true
     },
-    showTitleBarButton: {
-        type: OptionType.BOOLEAN,
-        description: "Show icon in the title bar",
-        default: true,
-        hidden: true
-    },
     /** Recognized songs, newest first */
     history: {
         type: OptionType.CUSTOM,

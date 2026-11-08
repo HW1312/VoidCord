@@ -335,12 +335,9 @@ function PlatformMenu({ onClose }: { onClose(): void; }) {
 }
 
 function TitleBarButton() {
-    const { showTitleBarButton } = settings.use(["showTitleBarButton"]);
     const { open } = useDoomState();
     const buttonRef = useRef(null);
     const [show, setShow] = useState(false);
-
-    if (!showTitleBarButton) return null;
 
     return (
         <Popout
@@ -380,7 +377,7 @@ export function renderTitleBarButton() {
 
 // ---------------------------------------------------------------- Settings
 
-type BoolKey = "muted" | "pauseWhenHidden" | "keepLoaded" | "showTitleBarButton";
+type BoolKey = "muted" | "pauseWhenHidden" | "keepLoaded";
 
 function Option({ label, setting, onChange }: { label: string; setting: BoolKey; onChange?(v: boolean): void; }) {
     const value = settings.use([setting])[setting];
@@ -453,7 +450,6 @@ export const SettingsPanel = ErrorBoundary.wrap(() => {
                 />
                 {layout === "side" && <NumberOption label="Panel width (px) - or drag the feed's left edge" setting="sideWidth" min={MIN_SIDE_WIDTH} max={1600} step={20} unit=" px" onChange={refresh} />}
                 <NumberOption label="Feed zoom (%)" setting="zoom" min={50} max={150} step={5} unit="%" onChange={v => Native?.setZoom(v / 100)} />
-                <Option label="Show the button in the title bar" setting="showTitleBarButton" />
             </Section>
 
             <Section title="Playback">

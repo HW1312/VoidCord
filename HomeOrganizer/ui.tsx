@@ -63,7 +63,7 @@ export function openOrganizer(tab: Tab = "dms") {
 // ---------------------------------------------------------------- Settings
 
 function Panel() {
-    const s = settings.use(["activeDays", "quietDays", "spamAccountDays", "protectPinned", "protectedIds", "dividerFix", "showTitleBarButton"]);
+    const s = settings.use(["activeDays", "quietDays", "spamAccountDays", "protectPinned", "protectedIds", "dividerFix"]);
 
     return (
         <Sheet
@@ -120,13 +120,6 @@ function Panel() {
                     title="PinDMs dividers"
                     subtitle="Show categories whose name consists only of dashes/underscores (e.g. “------------”) as a clean line."
                 />
-                <ToggleRow
-                    icon={ICONS.home}
-                    color={APP_COLOR}
-                    checked={s.showTitleBarButton}
-                    onChange={v => settings.store.showTitleBarButton = v}
-                    title="Icon in the title bar"
-                />
             </Section>
 
             <div className={"vc-homeorganizer-actions"}>
@@ -142,9 +135,7 @@ export const SettingsPanel = ErrorBoundary.wrap(Panel, { noop: true });
 // ---------------------------------------------------------------- Title bar
 
 function TitleBarButton() {
-    const { showTitleBarButton } = settings.use(["showTitleBarButton"]);
     const pending = useStateFromStores([RelationshipStore], () => RelationshipStore.getPendingCount());
-    if (!showTitleBarButton) return null;
 
     return (
         <HeaderBarIcon

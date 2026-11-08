@@ -7,11 +7,16 @@
  * Also keeps the title bar from getting squeezed: when the icons would run into Discord's centered title
  * ("Direct Messages", the channel name …), that title is hidden.
  *
+ * Showing / hiding icons is also here, for all plugins at once: right-click → "Show icons" → tick them. A hidden
+ * icon's slot stays mounted (display: none), so it can be listed and shown again. This replaced each plugin's own
+ * "Show icon in the title bar" setting – an icon that was turned off there starts hidden here (one-time migration).
+ *
  * Usage in a plugin: `renderTitleBarButton: titleBarSlot("FriendDock", renderTitleBarButton)`
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
 import * as DataStore from "@api/DataStore";
+import { Settings } from "@api/Settings";
 import { ContextMenuApi, createRoot, Menu, useEffect, useReducer } from "@webpack/common";
 import type { ReactNode } from "react";
 
@@ -23,9 +28,26 @@ const STORE_KEY = "VoidCord_titleBar";
 const ORDER_BASE = 1000;
 
 let order: string[] = [];
+/** Slots the user hid */
+let hidden: string[] = [];
 /** While arranging: the order shown, saved only with Save */
 let draft: string[] | null = null;
 let initialized = false;
+
+/** Slot id → plugin name, where they differ (label in the menu and the old setting's plugin) */
+const PLUGIN_NAMES: Record<string, string> = { SecretChat: "Unter das OS", opsec: "OpSec" };
+const pluginName = (id: string) => PLUGIN_NAMES[id] ?? id;
+/** Every slot a plugin registered (also of disabled plugins – only mounted ones are listed) */
+const registered = new Set<string>();
+
+const save = () => DataStore.set(STORE_KEY, { order, hidden, migrated: true }).catch(() => { });
+
+/** One time: icons turned off with the old per-plugin setting start hidden */
+function migrateOldSetting() {
+    for (const id of registered) {
+        if ((Settings.plugins as any)[pluginName(id)]?.showTitleBarButton === false && !hidden.includes(id)) hidden.push(id);
+    }
+}
 
 const listeners = new Set<() => void>();
 const emit = () => listeners.forEach(l => l());
@@ -43,7 +65,8 @@ function applyOrder() {
     const list = draft ?? order;
     styleEl.textContent = [
         `[${ATTR}] { order: ${ORDER_BASE + 500} !important; }`,
-        ...list.map((id, i) => `[${ATTR}="${CSS.escape(id)}"] { order: ${ORDER_BASE + i} !important; }`)
+        ...list.map((id, i) => `[${ATTR}="${CSS.escape(id)}"] { order: ${ORDER_BASE + i} !important; }`),
+        ...hidden.map(id => `[${ATTR}="${CSS.escape(id)}"] { display: none !important; }`)
     ].join("\n");
     queueMicrotask(checkSqueeze);
 }
@@ -54,14 +77,28 @@ async function init() {
     window.addEventListener("contextmenu", onContextMenu);
     window.addEventListener("resize", checkSqueeze);
     try {
-        order = (await DataStore.get<{ order?: string[]; }>(STORE_KEY))?.order ?? [];
+        const saved = await DataStore.get<{ order?: string[]; hidden?: string[]; migrated?: boolean; }>(STORE_KEY);
+        order = saved?.order ?? [];
+        hidden = saved?.hidden ?? [];
+        if (!saved?.migrated) {
+            migrateOldSetting();
+            save();
+        }
     } catch { }
+    applyOrder();
+}
+
+function toggleHidden(id: string) {
+    hidden = hidden.includes(id) ? hidden.filter(h => h !== id) : [...hidden, id];
+    save();
     applyOrder();
 }
 
 // ---------------------------------------------------------------- Finding the title bar
 
 const slots = () => Array.from(document.querySelectorAll<HTMLElement>(`[${ATTR}]`));
+/** Slots on screen (not hidden) – the ones that can be arranged */
+const visibleSlots = () => slots().filter(s => !hidden.includes(s.getAttribute(ATTR)!));
 
 /** The container all slots sit in (the left part of the title bar) */
 const leadingContainer = () => slots()[0]?.parentElement ?? null;
@@ -140,6 +177,7 @@ function TitleBarSlot({ id, render }: { id: string; render(): ReactNode; }) {
 
 /** Wraps a plugin's title bar button so it can be arranged; `id` must stay the same (it's saved) */
 export function titleBarSlot(id: string, render: () => ReactNode) {
+    registered.add(id);
     init();
     return () => <TitleBarSlot key={`vc-ui-tb-${id}`} id={id} render={render} />;
 }
@@ -152,16 +190,37 @@ function onContextMenu(e: MouseEvent) {
     const leading = leadingContainer();
     if (!leading || !leading.contains(e.target)) return;
     e.preventDefault();
-    ContextMenuApi.openContextMenu(e as any, () => (
+    // Plugins that are on right now (their slot is mounted), by name
+    const ids = [...new Set(slots().map(s => s.getAttribute(ATTR)!))].sort((a, b) => pluginName(a).localeCompare(pluginName(b)));
+    ContextMenuApi.openContextMenu(e as any, () => <TitleBarMenu ids={ids} />);
+}
+
+function TitleBarMenu({ ids }: { ids: string[]; }) {
+    // Re-render the ticks right away when one is clicked (the menu stays open)
+    const [, rerender] = useReducer((x: number) => x + 1, 0);
+    return (
         <Menu.Menu navId="vc-ui-titlebar" onClose={ContextMenuApi.closeContextMenu} aria-label="Title bar">
             <Menu.MenuItem id="vc-ui-tb-arrange" label="Arrange icons" action={startArranging} />
             {order.length > 0 && <Menu.MenuItem id="vc-ui-tb-reset" label="Reset icon order" action={resetOrder} />}
+            {ids.length > 0 && (
+                <Menu.MenuItem id="vc-ui-tb-show" label="Show icons">
+                    {ids.map(id => (
+                        <Menu.MenuCheckboxItem
+                            key={id}
+                            id={`vc-ui-tb-show-${id}`}
+                            label={pluginName(id)}
+                            checked={!hidden.includes(id)}
+                            action={() => { toggleHidden(id); rerender(); }}
+                        />
+                    ))}
+                </Menu.MenuItem>
+            )}
         </Menu.Menu>
-    ));
+    );
 }
 
 /** The order as it is on screen right now */
-const visualOrder = () => slots()
+const visualOrder = () => visibleSlots()
     .sort((a, b) => a.getBoundingClientRect().left - b.getBoundingClientRect().left)
     .map(el => el.getAttribute(ATTR)!);
 
@@ -185,11 +244,14 @@ export function startArranging() {
     emit();
 }
 
-function stopArranging(save: boolean) {
+function stopArranging(keep: boolean) {
     if (!draft) return;
-    if (save) {
-        order = draft;
-        DataStore.set(STORE_KEY, { order }).catch(() => { });
+    if (keep) {
+        // Hidden icons weren't arranged – they keep their old place among the others
+        const merged = [...draft];
+        order.forEach((id, i) => { if (hidden.includes(id) && !merged.includes(id)) merged.splice(Math.min(i, merged.length), 0, id); });
+        order = merged;
+        save();
     }
     draft = null;
     document.documentElement.classList.remove("vc-ui-tb-arranging");
@@ -205,7 +267,7 @@ function stopArranging(save: boolean) {
 
 function resetOrder() {
     order = [];
-    DataStore.set(STORE_KEY, { order }).catch(() => { });
+    save();
     applyOrder();
 }
 
@@ -243,7 +305,7 @@ function onPointerDown(e: PointerEvent) {
 
         // Swap with a neighbour once the dragged icon's middle passes the neighbour's middle
         const middle = ev.clientX - grab + rect.width / 2;
-        const others = slots().filter(s => s !== slot);
+        const others = visibleSlots().filter(s => s !== slot);
         let index = 0;
         for (const o of others) {
             const r = o.getBoundingClientRect();

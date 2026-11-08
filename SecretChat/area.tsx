@@ -172,9 +172,8 @@ export function ServerListIcon() {
 const HeaderBarIcon = findComponentByCodeLazy(".HEADER_BAR_BADGE_BOTTOM,", 'position:"bottom"');
 
 function TitleBarButton() {
-    const { showTitleBarButton, emergency } = settings.use(["showTitleBarButton", "emergency"]);
+    const { emergency } = settings.use(["emergency"]);
     const count = useRoomsBadge();
-    if (!showTitleBarButton) return null;
 
     return (
         <div className={cl("tb-wrap")}>

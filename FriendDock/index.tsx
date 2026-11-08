@@ -44,12 +44,6 @@ export const settings = definePluginSettings({
         type: OptionType.COMPONENT,
         component: () => <SettingsPanel />
     },
-    showTitleBarButton: {
-        type: OptionType.BOOLEAN,
-        description: "Show icon in the title bar",
-        default: true,
-        hidden: true
-    },
     sortByStatus: {
         type: OptionType.BOOLEAN,
         description: "Sort the dock by status (in voice, online, idle, ... offline) instead of your own order",

@@ -82,7 +82,8 @@ export default definePlugin({
             replacement: [
                 {
                     // Frame rate check throws for anything but 5 / 15 / 30 / 60
-                    match: /(function \i\((\i)\)\{)(switch\(\2\)\{case 5:return 5;)/,
+                    // (the function has no name since 2026-11: AC:function(e){switch(e){case 5…)
+                    match: /(function(?: \i)?\((\i)\)\{)(switch\(\2\)\{case 5:return 5;)/,
                     replace: "$1return $2;$3"
                 },
                 {

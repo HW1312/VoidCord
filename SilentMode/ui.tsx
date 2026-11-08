@@ -104,20 +104,9 @@ function Controls() {
 // ---------------------------------------------------------------- Settings
 
 export const SettingsPanel = ErrorBoundary.wrap(() => {
-    const { showTitleBarButton } = settings.use(["showTitleBarButton"]);
-
     return (
         <Sheet embedded header={HEADER}>
             <Controls />
-            <Section>
-                <ToggleRow
-                    icon={BELL_OFF_PATH}
-                    color={ICON_COLOR}
-                    title="Show icon in the title bar"
-                    checked={showTitleBarButton}
-                    onChange={v => settings.store.showTitleBarButton = v}
-                />
-            </Section>
         </Sheet>
     );
 }, { noop: true });
@@ -135,11 +124,9 @@ function PopoutPanel() {
 }
 
 function TitleBarButton() {
-    const { showTitleBarButton, active: enabled } = settings.use(["showTitleBarButton", "active"]);
+    const { active: enabled } = settings.use(["active"]);
     const buttonRef = useRef(null);
     const [show, setShow] = useState(false);
-
-    if (!showTitleBarButton) return null;
 
     return (
         <Popout

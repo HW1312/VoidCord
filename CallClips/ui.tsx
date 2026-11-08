@@ -781,11 +781,9 @@ export function openClipsWindow() {
 // ---------------------------------------------------------------- Title bar
 
 function TitleBarButton() {
-    const { showTitleBarButton } = settings.use(["showTitleBarButton"]);
     useListener(listeners);
     const buttonRef = useRef(null);
     const [show, setShow] = useState(false);
-    if (!showTitleBarButton) return null;
 
     return (
         <Popout
@@ -944,7 +942,7 @@ function HotkeyRow() {
 }
 
 export const SettingsPanel = ErrorBoundary.wrap(() => {
-    const s = settings.use(["seconds", "micMode", "showTitleBarButton", "showPanelButton", "deafenWhileEditing"]);
+    const s = settings.use(["seconds", "micMode", "showPanelButton", "deafenWhileEditing"]);
     return (
         <Sheet embedded header={{ app: "CallClips", title: "CallClips", subtitle: "Clip the last seconds of a voice call", icon: REPLAY_PATH, iconColor: "gray" }}>
             <Section title="Clip length" footer="Kept in memory only while you're in a call – nothing is saved until you clip.">
@@ -969,7 +967,6 @@ export const SettingsPanel = ErrorBoundary.wrap(() => {
                 <HotkeyRow />
                 <ToggleRow icon={REPLAY_PATH} title="Clip button in the voice panel" subtitle="Bottom left while you're in a call – right-click it for all clips" checked={s.showPanelButton} onChange={v => settings.store.showPanelButton = v} />
                 <ToggleRow icon={TRIM_PATH} title="Deafen while trimming" subtitle="In a call, the trim and soundboard windows deafen you so you hear only the clip – undeafened when you close them" checked={s.deafenWhileEditing} onChange={v => settings.store.deafenWhileEditing = v} />
-                <ToggleRow icon={REPLAY_PATH} title="Show icon in the title bar" checked={s.showTitleBarButton} onChange={v => settings.store.showTitleBarButton = v} />
                 <LinkRow icon={ICONS.folder} onClick={() => void openFolder()}>Open clips folder</LinkRow>
                 <LinkRow icon={REPLAY_PATH} onClick={openClipsWindow}>Show clips</LinkRow>
             </Section>

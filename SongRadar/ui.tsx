@@ -16,7 +16,7 @@ import { findComponentByCodeLazy } from "@webpack";
 import { Popout, showToast, Tooltip, useEffect, useRef, useState } from "@webpack/common";
 import type { CSSProperties } from "react";
 
-import { Button, Empty, Icon, IconButton, ICONS, openWindow, PluginArtwork, Popover, RoundButton, Section, Sheet, strokeIcon, ToggleRow, useListener } from "../_ui";
+import { Button, Empty, Icon, IconButton, ICONS, openWindow, PluginArtwork, Popover, RoundButton, Section, Sheet, strokeIcon, useListener } from "../_ui";
 import { grab, needsRestart as mediaGrabNeedsRestart } from "../MediaGrab/grab";
 import { settings } from "./index";
 import { PlatformIcon, PLATFORMS } from "./platforms";
@@ -369,11 +369,9 @@ export function openRadarWindow() {
 // ---------------------------------------------------------------- Title bar
 
 function TitleBarButton() {
-    const { showTitleBarButton } = settings.use(["showTitleBarButton"]);
     useListener(listeners);
     const buttonRef = useRef(null);
     const [show, setShow] = useState(false);
-    if (!showTitleBarButton) return null;
 
     const active = busy();
     return (
@@ -417,13 +415,10 @@ export function renderTitleBarButton() {
 // ---------------------------------------------------------------- Settings
 
 export const SettingsPanel = ErrorBoundary.wrap(() => {
-    const s = settings.use(["showTitleBarButton", "history"]);
+    const s = settings.use(["history"]);
     return (
         <Sheet embedded header={{ title: "SongRadar", subtitle: "Recognize music like Shazam – no account needed", iconNode: <PluginArtwork app="SongRadar" fallback={<RadarLogo />} /> }}>
-            <Section title="Options" footer="Only a fingerprint of the sound is sent to Shazam, never the audio itself.">
-                <ToggleRow icon={WAVE_PATH} color="blue" title="Show icon in the title bar" checked={s.showTitleBarButton} onChange={v => settings.store.showTitleBarButton = v} />
-            </Section>
-            <Section title="History">
+            <Section title="History" footer="Only a fingerprint of the sound is sent to Shazam, never the audio itself.">
                 {s.history.length
                     ? (
                         <div className={cl("setting-row")}>

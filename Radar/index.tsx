@@ -28,12 +28,6 @@ export const settings = definePluginSettings({
         type: OptionType.COMPONENT,
         component: () => <SettingsPanel />
     },
-    showTitleBarButton: {
-        type: OptionType.BOOLEAN,
-        description: "Show the Radar icon in the title bar",
-        default: true,
-        hidden: true
-    },
     cooldown: {
         type: OptionType.NUMBER,
         description: "Minimum interval in seconds between notifications from the same rule",

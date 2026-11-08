@@ -1,0 +1,1206 @@
+/* ===================================================================== PrivacyScreen
+ * Windows, rows, switches, buttons etc. come from the shared _ui kit.
+ * This file only styles what is special to PrivacyScreen: keybind box, server picker, curtain preview and
+ * style picker, and the curtain overlay itself (its looks are deliberate disguises, so they keep their own colors).
+ * Moved from OpSec (same rules, new prefix).
+ */
+
+@keyframes vc-privacyscreen-spin {
+    to { transform: rotate(360deg); }
+}
+
+@keyframes vc-privacyscreen-fade {
+    from { opacity: 0; transform: translateY(3px); }
+}
+
+@keyframes vc-privacyscreen-shine {
+    to { background-position: -200% 0; }
+}
+
+/* ---------- Window ---------- */
+
+.vc-privacyscreen-pane {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    animation: vc-privacyscreen-fade 0.2s var(--vc-ui-ease) both;
+}
+
+.vc-privacyscreen-hint {
+    color: var(--vc-ui-dim);
+    font-size: 12px;
+    line-height: 1.4;
+}
+
+.vc-privacyscreen-dim {
+    color: var(--vc-ui-dim);
+    font-weight: 500;
+}
+
+.vc-privacyscreen-text-warn {
+    color: var(--vc-ui-orange);
+}
+
+.vc-privacyscreen-off {
+    opacity: 0.45;
+    pointer-events: none;
+}
+
+/* Option belonging to the module above (indented like an iOS sub setting) */
+.vc-privacyscreen-sub {
+    padding-left: 38px;
+}
+
+.vc-privacyscreen-pad {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 10px 14px 12px 52px;
+    border-top: 1px solid var(--vc-ui-sep);
+}
+
+.vc-privacyscreen-meter {
+    margin-top: 8px;
+}
+
+
+/* ---------- Keys ---------- */
+
+.vc-privacyscreen-kbd-group {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    gap: 4px;
+}
+
+.vc-privacyscreen-kbd {
+    min-width: 12px;
+    padding: 2px 6px;
+    border: 1px solid var(--vc-ui-edge);
+    border-radius: 6px;
+    background: var(--vc-ui-field);
+    color: var(--vc-ui-title);
+    font-family: var(--vc-ui-mono);
+    font-size: 11px;
+    font-weight: 500;
+    text-align: center;
+}
+
+.vc-privacyscreen-kbd-live {
+    animation: vc-privacyscreen-fade 0.15s ease-out both;
+}
+
+.vc-privacyscreen-keybind {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.vc-privacyscreen-keybind-box {
+    display: flex;
+    flex: 1;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    min-height: 36px;
+    padding: 6px 10px;
+    border: 1px solid var(--vc-ui-edge);
+    border-radius: 8px;
+    background: var(--vc-ui-field);
+    color: var(--vc-ui-text);
+    font: inherit;
+    cursor: pointer;
+    transition: border-color 0.15s var(--vc-ui-ease);
+}
+
+.vc-privacyscreen-keybind-box:hover {
+    border-color: var(--vc-ui-faint);
+}
+
+.vc-privacyscreen-keybind-rec {
+    border-color: var(--vc-ui-accent);
+    animation: vc-privacyscreen-rec 1.4s ease-in-out infinite;
+}
+
+@keyframes vc-privacyscreen-rec {
+    50% { border-color: var(--vc-ui-edge); }
+}
+
+.vc-privacyscreen-keybind-prompt {
+    color: var(--vc-ui-title);
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.vc-privacyscreen-keybind-action {
+    color: var(--vc-ui-dim);
+    font-size: 12px;
+}
+
+.vc-privacyscreen-flash .vc-privacyscreen-kbd {
+    animation: vc-privacyscreen-flash 0.8s ease-out;
+}
+
+@keyframes vc-privacyscreen-flash {
+    0% { color: var(--vc-ui-green); border-color: var(--vc-ui-green); }
+}
+
+/* ---------- Streaming protection: server picker ---------- */
+
+.vc-privacyscreen-picker {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 10px 14px 12px 52px;
+    border-top: 1px solid var(--vc-ui-sep);
+}
+
+.vc-privacyscreen-picker-head {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.vc-privacyscreen-label {
+    color: var(--vc-ui-title);
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.vc-privacyscreen-value {
+    color: var(--vc-ui-dim);
+    font-family: var(--vc-ui-mono);
+    font-size: 12px;
+    font-variant-numeric: tabular-nums;
+}
+
+.vc-privacyscreen-picker-bulk {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.vc-privacyscreen-guild-list {
+    max-height: 300px;
+    overflow-y: auto;
+    background: var(--vc-ui-group);
+    scrollbar-width: thin;
+    scrollbar-color: var(--vc-ui-track) transparent;
+}
+
+.vc-privacyscreen-guild-icon {
+    display: grid;
+    place-items: center;
+    width: 28px;
+    height: 28px;
+    overflow: hidden;
+    border-radius: 8px;
+    background: var(--vc-ui-track);
+    color: var(--vc-ui-title);
+    font-size: 10px;
+    font-weight: 600;
+    object-fit: cover;
+}
+
+.vc-privacyscreen-guild-trail {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.vc-privacyscreen-guild-expand svg {
+    transition: transform 0.2s var(--vc-ui-ease);
+}
+
+.vc-privacyscreen-guild-expand-open svg {
+    transform: rotate(90deg);
+}
+
+.vc-privacyscreen-guild-channels {
+    padding: 4px 14px 12px 52px;
+}
+
+/* ---------- Curtain tab ---------- */
+
+.vc-privacyscreen-preview-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.vc-privacyscreen-preview-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+.vc-privacyscreen-preview {
+    position: relative;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    border: 1px solid var(--vc-ui-edge);
+    border-radius: 12px;
+    background: var(--vc-ui-group);
+}
+
+.vc-privacyscreen-mock {
+    position: absolute;
+    inset: 0;
+    display: flex;
+}
+
+.vc-privacyscreen-mock i {
+    display: block;
+    border-radius: 99px;
+}
+
+.vc-privacyscreen-mock-servers {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6%;
+    width: 9%;
+    padding-top: 3%;
+    background: var(--vc-ui-field);
+}
+
+.vc-privacyscreen-mock-servers i {
+    width: 62%;
+    aspect-ratio: 1;
+    background: var(--vc-ui-track);
+}
+
+.vc-privacyscreen-mock-servers i:first-child {
+    border-radius: 30%;
+    background: var(--vc-ui-dim);
+}
+
+.vc-privacyscreen-mock-channels {
+    display: flex;
+    flex-direction: column;
+    gap: 7%;
+    width: 24%;
+    padding: 5% 3%;
+    box-sizing: border-box;
+    border-right: 1px solid var(--vc-ui-sep);
+}
+
+.vc-privacyscreen-mock-channels i,
+.vc-privacyscreen-mock-lines i {
+    height: 5px;
+    background: var(--vc-ui-track);
+}
+
+.vc-privacyscreen-mock-chat {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 7%;
+    padding: 5% 4%;
+}
+
+.vc-privacyscreen-mock-msg {
+    display: flex;
+    align-items: flex-start;
+    gap: 6%;
+}
+
+.vc-privacyscreen-mock-avatar {
+    flex-shrink: 0;
+    width: 7%;
+    aspect-ratio: 1;
+    border-radius: 50%;
+}
+
+.vc-privacyscreen-mock-lines {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.vc-privacyscreen-mock-lines i:first-child {
+    height: 6px;
+    background: var(--vc-ui-dim);
+}
+
+.vc-privacyscreen-mock-input {
+    height: 12%;
+    margin-top: auto;
+    border-radius: 6px;
+    background: var(--vc-ui-field);
+}
+
+.vc-privacyscreen-styles {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 6px;
+}
+
+.vc-privacyscreen-style {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 4px 8px;
+    border: 1px solid var(--vc-ui-sep);
+    border-radius: 12px;
+    background: var(--vc-ui-group);
+    color: var(--vc-ui-dim);
+    font: inherit;
+    font-size: 11px;
+    font-weight: 500;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background 0.15s var(--vc-ui-ease), color 0.15s var(--vc-ui-ease), border-color 0.15s var(--vc-ui-ease);
+}
+
+.vc-privacyscreen-style:hover {
+    background: var(--vc-ui-group-hover);
+    color: var(--vc-ui-text);
+}
+
+.vc-privacyscreen-style-active,
+.vc-privacyscreen-style-active:hover {
+    border-color: var(--vc-ui-accent);
+    color: var(--vc-ui-title);
+}
+
+.vc-privacyscreen-slider {
+    margin-top: 6px;
+}
+
+.vc-privacyscreen-swatches {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.vc-privacyscreen-swatch {
+    position: relative;
+    width: 24px;
+    height: 24px;
+    padding: 0;
+    border: none;
+    border-radius: 50%;
+    box-shadow: inset 0 0 0 1px var(--vc-ui-edge);
+    cursor: pointer;
+    transition: box-shadow 0.15s var(--vc-ui-ease);
+}
+
+.vc-privacyscreen-swatch:hover {
+    box-shadow: inset 0 0 0 1px var(--vc-ui-edge), 0 0 0 2px var(--vc-ui-glass), 0 0 0 3px var(--vc-ui-faint);
+}
+
+.vc-privacyscreen-swatch-active,
+.vc-privacyscreen-swatch-active:hover {
+    box-shadow: 0 0 0 2px var(--vc-ui-glass), 0 0 0 3px var(--vc-ui-accent);
+}
+
+.vc-privacyscreen-swatch-custom {
+    display: block;
+    overflow: hidden;
+    background: conic-gradient(var(--vc-ui-red), var(--vc-ui-orange), var(--vc-ui-yellow), var(--vc-ui-green), var(--vc-ui-blue), var(--vc-ui-purple), var(--vc-ui-red));
+}
+
+.vc-privacyscreen-swatch-custom input {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.vc-privacyscreen-swatch-small {
+    width: 22px;
+    height: 22px;
+}
+
+.vc-privacyscreen-icon-picks {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 6px;
+}
+
+.vc-privacyscreen-icon-pick {
+    display: grid;
+    place-items: center;
+    aspect-ratio: 1;
+    padding: 0;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    background: none;
+    color: var(--vc-ui-dim);
+    cursor: pointer;
+    transition: color 0.15s var(--vc-ui-ease), border-color 0.15s var(--vc-ui-ease);
+}
+
+.vc-privacyscreen-icon-pick:hover {
+    color: var(--vc-ui-title);
+}
+
+.vc-privacyscreen-icon-pick-active,
+.vc-privacyscreen-icon-pick-active:hover {
+    border-color: var(--vc-ui-edge);
+    color: var(--vc-ui-title);
+}
+
+.vc-privacyscreen-icon-pick-custom {
+    font-size: 12px;
+    font-weight: 600;
+}
+
+/* ===================================================================== Style thumbnails (miniatures of the curtain looks) */
+
+.vc-privacyscreen-style-thumb {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 100%;
+    aspect-ratio: 16 / 10;
+    border-radius: 7px;
+    overflow: hidden;
+    color: #fff;
+}
+
+.vc-privacyscreen-thumb-mask {
+    background: radial-gradient(circle at 50% 45%, color-mix(in srgb, var(--privacyscreen-c-accent) 45%, transparent), #0c0c0e 70%);
+}
+
+.vc-privacyscreen-thumb-glass {
+    background:
+        linear-gradient(135deg, rgb(255 255 255 / 18%), rgb(255 255 255 / 4%)),
+        repeating-linear-gradient(0deg, #4e5058 0 3px, #313338 3px 8px);
+    backdrop-filter: blur(2px);
+}
+
+.vc-privacyscreen-thumb-glass::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    backdrop-filter: blur(3px);
+    background: color-mix(in srgb, var(--privacyscreen-c-accent) 15%, rgb(20 20 24 / 50%));
+}
+
+.vc-privacyscreen-thumb-glass svg {
+    position: relative;
+}
+
+.vc-privacyscreen-thumb-black {
+    background: #000;
+    color: #333;
+}
+
+.vc-privacyscreen-thumb-update {
+    background: #000;
+}
+
+.vc-privacyscreen-thumb-dots {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    border: 2px dotted #fff;
+    animation: vc-privacyscreen-spin 2s linear infinite;
+}
+
+.vc-privacyscreen-thumb-matrix {
+    background:
+        repeating-linear-gradient(90deg, transparent 0 5px, color-mix(in srgb, var(--privacyscreen-c-accent) 70%, transparent) 5px 6px, transparent 6px 11px),
+        #000;
+    background-size: 100% 200%;
+    animation: vc-privacyscreen-rain 1.6s linear infinite;
+}
+
+.vc-privacyscreen-thumb-matrix::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(transparent 30%, #000 90%);
+}
+
+@keyframes vc-privacyscreen-rain {
+    to {
+        background-position: 0 100%;
+    }
+}
+
+
+.vc-privacyscreen-thumb-radar {
+    background:
+        conic-gradient(from 0deg, color-mix(in srgb, var(--privacyscreen-c-accent) 55%, transparent), transparent 25%),
+        repeating-radial-gradient(circle, transparent 0 7px, color-mix(in srgb, var(--privacyscreen-c-accent) 35%, transparent) 7px 8px),
+        #05100b;
+}
+
+.vc-privacyscreen-thumb-aurora {
+    background:
+        radial-gradient(60% 80% at 20% 30%, color-mix(in srgb, var(--privacyscreen-c-accent) 70%, transparent), transparent 70%),
+        radial-gradient(60% 80% at 80% 70%, #4c9bff99, transparent 70%),
+        #0b0d14;
+}
+
+.vc-privacyscreen-thumb-lock {
+    background: linear-gradient(160deg, #1d2b3a, #0c1118);
+}
+
+.vc-privacyscreen-thumb-clock {
+    font-size: 11px;
+    font-weight: 300;
+    color: #fff;
+}
+
+.vc-privacyscreen-thumb-terminal {
+    background: #0a0c0a;
+    justify-items: start;
+    padding-left: 8px;
+}
+
+.vc-privacyscreen-thumb-term {
+    font-family: var(--font-code, monospace);
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--privacyscreen-c-accent);
+}
+
+.vc-privacyscreen-thumb-bsod {
+    background: #0078d7;
+    justify-items: start;
+    padding-left: 8px;
+}
+
+.vc-privacyscreen-thumb-sad {
+    font-size: 16px;
+    color: #fff;
+}
+
+
+/* ===================================================================== Curtain */
+
+.vc-privacyscreen-curtain {
+    --privacyscreen-c-accent: #8b7bff;
+    --privacyscreen-c-opacity: 0.94;
+    --privacyscreen-c-blur: 24px;
+
+    position: fixed;
+    inset: 0;
+    z-index: 2147483647;
+    container-type: size;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+    cursor: pointer;
+    user-select: none;
+    color: #e6e6ea;
+    font-family: var(--font-primary, "gg sans", "Noto Sans", sans-serif);
+    background: rgb(10 10 13 / var(--privacyscreen-c-opacity));
+    backdrop-filter: blur(var(--privacyscreen-c-blur)) saturate(1.2) !important;
+    transition: background 0.3s, backdrop-filter 0.3s;
+}
+
+.vc-privacyscreen-curtain-preview {
+    position: absolute;
+    z-index: 1;
+    cursor: default;
+}
+
+.vc-privacyscreen-curtain-mask {
+    background:
+        radial-gradient(45cqmax 45cqmax at 50% 42%, color-mix(in srgb, var(--privacyscreen-c-accent) 22%, transparent), transparent 70%),
+        rgb(10 10 13 / var(--privacyscreen-c-opacity));
+}
+
+.vc-privacyscreen-curtain-glass {
+    background:
+        linear-gradient(135deg, rgb(255 255 255 / 10%), rgb(255 255 255 / 2%)),
+        color-mix(in srgb, var(--privacyscreen-c-accent) 10%, rgb(18 18 24 / calc(var(--privacyscreen-c-opacity) * 0.55)));
+    backdrop-filter: blur(calc(var(--privacyscreen-c-blur) + 8px)) saturate(1.5) !important;
+}
+
+.vc-privacyscreen-curtain-black {
+    background: #000;
+    backdrop-filter: none !important;
+    color: #3a3a40;
+}
+
+.vc-privacyscreen-curtain-update {
+    background: #000;
+    backdrop-filter: none !important;
+    color: #fff;
+    cursor: default;
+}
+
+.vc-privacyscreen-curtain-matrix {
+    background: rgb(0 0 0 / var(--privacyscreen-c-opacity));
+}
+
+.vc-privacyscreen-curtain-center {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: clamp(4px, 1.4cqmin, 12px);
+    text-align: center;
+    padding: 0 6cqw;
+}
+
+.vc-privacyscreen-curtain-icon {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: clamp(34px, 20cqmin, 150px);
+    aspect-ratio: 1;
+    margin-bottom: clamp(4px, 2cqmin, 18px);
+    color: #f2f2f5;
+    animation: vc-privacyscreen-float 5s ease-in-out infinite;
+}
+
+.vc-privacyscreen-curtain-icon svg {
+    position: relative;
+    width: 72%;
+    height: 72%;
+    filter: drop-shadow(0 0 clamp(4px, 2cqmin, 18px) color-mix(in srgb, var(--privacyscreen-c-accent) 65%, transparent));
+}
+
+.vc-privacyscreen-curtain-halo {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: conic-gradient(from 0deg, transparent, var(--privacyscreen-c-accent), transparent 40%, color-mix(in srgb, var(--privacyscreen-c-accent) 50%, #00d4ff), transparent 80%);
+    mask: radial-gradient(circle, transparent 60%, #000 62%, #000 66%, transparent 68%);
+    animation: vc-privacyscreen-spin 6s linear infinite;
+    opacity: 0.9;
+}
+
+.vc-privacyscreen-curtain-black .vc-privacyscreen-curtain-icon {
+    color: #26262b;
+    animation: none;
+}
+
+.vc-privacyscreen-curtain-black .vc-privacyscreen-curtain-icon svg {
+    filter: none;
+}
+
+.vc-privacyscreen-curtain-black .vc-privacyscreen-curtain-halo {
+    display: none;
+}
+
+@keyframes vc-privacyscreen-float {
+    50% {
+        transform: translateY(-4%);
+    }
+}
+
+.vc-privacyscreen-curtain-title {
+    font-size: clamp(9px, 4.2cqmin, 34px);
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    background: linear-gradient(90deg, #fff, color-mix(in srgb, var(--privacyscreen-c-accent) 70%, #fff), #fff);
+    background-size: 200% 100%;
+    background-clip: text;
+    color: transparent;
+    animation: vc-privacyscreen-shine 5s linear infinite;
+}
+
+.vc-privacyscreen-curtain-hint {
+    font-size: clamp(6px, 2cqmin, 15px);
+    color: rgb(230 230 234 / 55%);
+}
+
+.vc-privacyscreen-curtain-black .vc-privacyscreen-curtain-title {
+    background: none;
+    color: #3a3a40;
+    animation: none;
+}
+
+.vc-privacyscreen-curtain-black .vc-privacyscreen-curtain-hint {
+    color: #2a2a30;
+}
+
+.vc-privacyscreen-matrix {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0.85;
+}
+
+.vc-privacyscreen-curtain-matrix .vc-privacyscreen-curtain-center {
+    padding: 2.5cqmin 5cqmin;
+    border-radius: 2cqmin;
+    background: rgb(0 0 0 / 70%);
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--privacyscreen-c-accent) 40%, transparent), 0 0 8cqmin rgb(0 0 0 / 80%);
+}
+
+.vc-privacyscreen-curtain-matrix .vc-privacyscreen-curtain-title {
+    font-family: var(--font-code, monospace);
+    background: none;
+    color: var(--privacyscreen-c-accent);
+    text-shadow: 0 0 1.5cqmin var(--privacyscreen-c-accent);
+}
+
+/* Fake Windows update */
+
+.vc-privacyscreen-update {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: clamp(2px, 1cqmin, 8px);
+    text-align: center;
+    font-family: "Segoe UI Variable", "Segoe UI", sans-serif;
+}
+
+.vc-privacyscreen-update-spinner {
+    position: relative;
+    width: clamp(18px, 7cqmin, 56px);
+    aspect-ratio: 1;
+    margin-bottom: clamp(8px, 5cqmin, 44px);
+}
+
+.vc-privacyscreen-update-spinner i {
+    position: absolute;
+    inset: 0;
+    animation: vc-privacyscreen-orbit 5.5s infinite;
+}
+
+.vc-privacyscreen-update-spinner i::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: 12%;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background: #fff;
+    transform: translateX(-50%);
+}
+
+.vc-privacyscreen-update-spinner i:nth-child(2) { animation-delay: 0.24s; }
+.vc-privacyscreen-update-spinner i:nth-child(3) { animation-delay: 0.48s; }
+.vc-privacyscreen-update-spinner i:nth-child(4) { animation-delay: 0.72s; }
+.vc-privacyscreen-update-spinner i:nth-child(5) { animation-delay: 0.96s; }
+
+@keyframes vc-privacyscreen-orbit {
+    0% { transform: rotate(225deg); opacity: 1; animation-timing-function: ease-out; }
+    7% { transform: rotate(345deg); animation-timing-function: linear; }
+    30% { transform: rotate(455deg); animation-timing-function: ease-in-out; }
+    39% { transform: rotate(690deg); animation-timing-function: linear; }
+    70% { transform: rotate(815deg); opacity: 1; animation-timing-function: ease-out; }
+    75% { transform: rotate(945deg); animation-timing-function: ease-out; }
+    76% { transform: rotate(945deg); opacity: 0; }
+    100% { transform: rotate(945deg); opacity: 0; }
+}
+
+.vc-privacyscreen-update-title {
+    font-size: clamp(8px, 3.6cqmin, 28px);
+    font-weight: 400;
+}
+
+.vc-privacyscreen-update-sub {
+    margin-top: clamp(4px, 2cqmin, 16px);
+    font-size: clamp(6px, 2.2cqmin, 17px);
+    color: rgb(255 255 255 / 85%);
+}
+
+/* ---------- Fade in & out ---------- */
+
+.vc-privacyscreen-anim-fade {
+    animation: vc-privacyscreen-c-fade 0.35s ease-out;
+}
+
+.vc-privacyscreen-anim-zoom {
+    animation: vc-privacyscreen-c-fade 0.35s ease-out;
+}
+
+.vc-privacyscreen-anim-zoom > * {
+    animation: vc-privacyscreen-c-zoom 0.55s cubic-bezier(0.34, 1.4, 0.5, 1);
+}
+
+.vc-privacyscreen-anim-shutter {
+    animation: vc-privacyscreen-c-shutter 0.5s cubic-bezier(0.22, 1.2, 0.36, 1);
+}
+
+.vc-privacyscreen-anim-glitch {
+    animation: vc-privacyscreen-c-glitch 0.45s steps(1) both;
+}
+
+@keyframes vc-privacyscreen-c-fade {
+    from {
+        opacity: 0;
+        backdrop-filter: blur(0) !important;
+    }
+}
+
+@keyframes vc-privacyscreen-c-zoom {
+    from {
+        opacity: 0;
+        transform: scale(0.6);
+        filter: blur(8px);
+    }
+}
+
+@keyframes vc-privacyscreen-c-shutter {
+    from {
+        transform: translateY(-100%);
+    }
+}
+
+@keyframes vc-privacyscreen-c-glitch {
+    0% { clip-path: inset(0 0 85% 0); transform: translate(-3%, 0); opacity: 1; }
+    12% { clip-path: inset(40% 0 30% 0); transform: translate(3%, 0); }
+    25% { clip-path: inset(10% 0 60% 0); transform: translate(-2%, 1%); filter: hue-rotate(90deg); }
+    38% { clip-path: inset(70% 0 5% 0); transform: translate(2%, -1%); }
+    50% { clip-path: inset(0 0 40% 0); transform: translate(-1%, 0); filter: hue-rotate(-60deg); }
+    62% { clip-path: inset(30% 0 20% 0); transform: translate(1%, 0); }
+    75% { clip-path: inset(0 0 10% 0); transform: none; filter: none; }
+    100% { clip-path: inset(0); transform: none; }
+}
+
+.vc-privacyscreen-curtain-leave {
+    pointer-events: none;
+    animation: vc-privacyscreen-c-out 0.28s ease-in forwards !important;
+}
+
+.vc-privacyscreen-anim-shutter.vc-privacyscreen-curtain-leave {
+    animation: vc-privacyscreen-c-shutter-out 0.3s cubic-bezier(0.55, 0, 0.8, 0.2) forwards !important;
+}
+
+.vc-privacyscreen-anim-glitch.vc-privacyscreen-curtain-leave {
+    animation: vc-privacyscreen-c-glitch-out 0.28s steps(1) forwards !important;
+}
+
+@keyframes vc-privacyscreen-c-out {
+    to {
+        opacity: 0;
+        transform: scale(1.03);
+    }
+}
+
+@keyframes vc-privacyscreen-c-shutter-out {
+    to {
+        transform: translateY(-100%);
+    }
+}
+
+@keyframes vc-privacyscreen-c-glitch-out {
+    0% { clip-path: inset(0 0 30% 0); transform: translate(2%, 0); }
+    30% { clip-path: inset(50% 0 10% 0); transform: translate(-3%, 0); }
+    60% { clip-path: inset(20% 0 60% 0); transform: translate(1%, 0); }
+    100% { clip-path: inset(50% 0 50% 0); opacity: 0; }
+}
+
+.vc-privacyscreen-curtain-img {
+    position: relative;
+    width: 72%;
+    height: 72%;
+    border-radius: 18%;
+    object-fit: cover;
+}
+
+.vc-privacyscreen-curtain-emoji {
+    position: relative;
+    font-size: clamp(22px, 12cqmin, 96px);
+    line-height: 1;
+}
+
+/* ---------- Radar ---------- */
+
+.vc-privacyscreen-curtain-radar {
+    background:
+        radial-gradient(circle at 50% 50%, color-mix(in srgb, var(--privacyscreen-c-accent) 10%, transparent), transparent 60%),
+        rgb(4 10 8 / var(--privacyscreen-c-opacity));
+}
+
+.vc-privacyscreen-radar {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 90cqmin;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    overflow: hidden;
+    transform: translate(-50%, -50%);
+}
+
+.vc-privacyscreen-radar-rings {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background:
+        linear-gradient(color-mix(in srgb, var(--privacyscreen-c-accent) 25%, transparent), color-mix(in srgb, var(--privacyscreen-c-accent) 25%, transparent)) center / 1px 100% no-repeat,
+        linear-gradient(color-mix(in srgb, var(--privacyscreen-c-accent) 25%, transparent), color-mix(in srgb, var(--privacyscreen-c-accent) 25%, transparent)) center / 100% 1px no-repeat,
+        repeating-radial-gradient(circle, transparent 0 calc(12.5% - 1px), color-mix(in srgb, var(--privacyscreen-c-accent) 28%, transparent) calc(12.5% - 1px) 12.5%);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--privacyscreen-c-accent) 40%, transparent);
+}
+
+.vc-privacyscreen-radar-sweep {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: conic-gradient(from 0deg, color-mix(in srgb, var(--privacyscreen-c-accent) 45%, transparent), transparent 22%);
+    animation: vc-privacyscreen-spin 4s linear infinite;
+}
+
+.vc-privacyscreen-radar-blip {
+    position: absolute;
+    top: var(--y);
+    left: var(--x);
+    width: 1.4cqmin;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background: var(--privacyscreen-c-accent);
+    box-shadow: 0 0 2cqmin var(--privacyscreen-c-accent);
+    opacity: 0;
+    animation: vc-privacyscreen-blip 4s ease-out infinite;
+}
+
+@keyframes vc-privacyscreen-blip {
+    0% { opacity: 0; }
+    5% { opacity: 1; }
+    60% { opacity: 0; }
+}
+
+/* ---------- Aurora ---------- */
+
+.vc-privacyscreen-curtain-aurora {
+    background: rgb(8 9 16 / var(--privacyscreen-c-opacity));
+}
+
+.vc-privacyscreen-aurora {
+    position: absolute;
+    inset: -20%;
+    filter: blur(8cqmin);
+    opacity: 0.8;
+}
+
+.vc-privacyscreen-aurora i {
+    position: absolute;
+    width: 60%;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    animation: vc-privacyscreen-drift 18s ease-in-out infinite alternate;
+}
+
+.vc-privacyscreen-aurora i:nth-child(1) {
+    top: 5%;
+    left: 5%;
+    background: var(--privacyscreen-c-accent);
+}
+
+.vc-privacyscreen-aurora i:nth-child(2) {
+    right: 0;
+    bottom: 5%;
+    background: #4c9bff;
+    animation-duration: 22s;
+    animation-delay: -6s;
+}
+
+.vc-privacyscreen-aurora i:nth-child(3) {
+    top: 30%;
+    left: 35%;
+    width: 45%;
+    background: #8b7bff;
+    animation-duration: 26s;
+    animation-delay: -12s;
+}
+
+@keyframes vc-privacyscreen-drift {
+    50% { transform: translate(12%, -10%) scale(1.15); }
+    100% { transform: translate(-10%, 12%) scale(0.9); }
+}
+
+.vc-privacyscreen-curtain-aurora .vc-privacyscreen-curtain-halo {
+    display: none;
+}
+
+/* ---------- Lock screen ---------- */
+
+.vc-privacyscreen-curtain-lock {
+    background:
+        linear-gradient(160deg, rgb(29 43 58 / var(--privacyscreen-c-opacity)), rgb(10 14 20 / var(--privacyscreen-c-opacity)));
+    align-content: center;
+}
+
+.vc-privacyscreen-lock {
+    position: absolute;
+    top: 14%;
+    left: 0;
+    right: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: #fff;
+    text-shadow: 0 0.4cqmin 2cqmin rgb(0 0 0 / 40%);
+}
+
+.vc-privacyscreen-lock-time {
+    font-family: "Segoe UI Variable Display", "Segoe UI", sans-serif;
+    font-size: clamp(20px, 18cqmin, 150px);
+    font-weight: 600;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+}
+
+.vc-privacyscreen-lock-date {
+    margin-top: 1.5cqmin;
+    font-family: "Segoe UI Variable Text", "Segoe UI", sans-serif;
+    font-size: clamp(8px, 3.4cqmin, 28px);
+}
+
+.vc-privacyscreen-curtain-lock .vc-privacyscreen-curtain-center {
+    margin-top: 34cqmin;
+}
+
+.vc-privacyscreen-curtain-lock .vc-privacyscreen-curtain-icon {
+    width: clamp(20px, 9cqmin, 72px);
+    animation: none;
+}
+
+.vc-privacyscreen-curtain-lock .vc-privacyscreen-curtain-halo {
+    display: none;
+}
+
+.vc-privacyscreen-curtain-lock .vc-privacyscreen-curtain-title {
+    background: none;
+    color: #fff;
+    font-size: clamp(8px, 3cqmin, 24px);
+    font-weight: 600;
+    animation: none;
+}
+
+/* ---------- Terminal ---------- */
+
+.vc-privacyscreen-curtain-terminal {
+    background: rgb(0 0 0 / var(--privacyscreen-c-opacity));
+    backdrop-filter: blur(var(--privacyscreen-c-blur)) !important;
+}
+
+.vc-privacyscreen-term {
+    display: flex;
+    flex-direction: column;
+    width: min(92cqw, 150cqh);
+    height: 78cqh;
+    overflow: hidden;
+    border: 1px solid rgb(255 255 255 / 12%);
+    border-radius: 1.2cqmin;
+    background: #0b0d0c;
+    box-shadow: 0 3cqmin 8cqmin rgb(0 0 0 / 60%);
+    font-family: "Cascadia Mono", Consolas, var(--font-code, monospace);
+    font-size: clamp(5px, 2.1cqmin, 15px);
+    text-align: left;
+}
+
+.vc-privacyscreen-term-bar {
+    display: flex;
+    flex: none;
+    align-items: center;
+    gap: 1cqmin;
+    padding: 1.2cqmin 1.6cqmin;
+    background: #1b1e1c;
+    color: #9aa19c;
+}
+
+.vc-privacyscreen-term-bar i {
+    width: 1.4cqmin;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background: #ff5f57;
+}
+
+.vc-privacyscreen-term-bar i:nth-child(2) { background: #febc2e; }
+.vc-privacyscreen-term-bar i:nth-child(3) { background: #28c840; }
+
+.vc-privacyscreen-term-bar span {
+    margin-left: 1cqmin;
+}
+
+.vc-privacyscreen-term-body {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    justify-content: flex-end;
+    min-height: 0;
+    padding: 1.6cqmin;
+    overflow: hidden;
+    color: color-mix(in srgb, var(--privacyscreen-c-accent) 75%, #fff);
+}
+
+.vc-privacyscreen-term-line {
+    flex: none;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    opacity: 0.85;
+}
+
+.vc-privacyscreen-term-prompt {
+    flex: none;
+    padding: 0 1.6cqmin 1.6cqmin;
+    color: #fff;
+}
+
+.vc-privacyscreen-term-cursor {
+    display: inline-block;
+    width: 0.6em;
+    height: 1em;
+    margin-left: 0.3em;
+    vertical-align: text-bottom;
+    background: var(--privacyscreen-c-accent);
+    animation: vc-privacyscreen-caret 1s steps(1) infinite;
+}
+
+@keyframes vc-privacyscreen-caret {
+    50% { opacity: 0; }
+}
+
+/* ---------- Blue screen ---------- */
+
+.vc-privacyscreen-curtain-bsod {
+    justify-items: start;
+    background: #0078d7;
+    backdrop-filter: none !important;
+    color: #fff;
+    cursor: default;
+}
+
+.vc-privacyscreen-bsod {
+    display: flex;
+    flex-direction: column;
+    gap: 3cqmin;
+    max-width: 70cqw;
+    padding-left: 12cqw;
+    font-family: "Segoe UI", sans-serif;
+}
+
+.vc-privacyscreen-bsod-face {
+    font-size: clamp(30px, 22cqmin, 180px);
+    line-height: 1;
+}
+
+.vc-privacyscreen-bsod-text {
+    font-size: clamp(7px, 3.4cqmin, 26px);
+    line-height: 1.35;
+}
+
+.vc-privacyscreen-bsod-small {
+    font-size: clamp(5px, 1.9cqmin, 14px);
+    opacity: 0.9;
+}
+
+/* Terminal: movie hacker scene */
+.vc-privacyscreen-term-ps {
+    color: var(--privacyscreen-c-accent);
+}
+
+.vc-privacyscreen-term-cmd {
+    color: #fff;
+    opacity: 1;
+}
+
+.vc-privacyscreen-term-hex {
+    opacity: 0.5;
+}
+
+.vc-privacyscreen-term-progress {
+    white-space: pre;
+    opacity: 1;
+}

@@ -253,7 +253,7 @@ export default definePlugin({
             // Their blocks (/*vcSC*/, {let vcKeep=) may already sit there – this one always goes first.
             find: "Unexpected mismatch between files and file metadata",
             replacement: {
-                match: /(?<=async function \i\((\i),(\i),(\i)\)\{)(?=\/\*vcSC\*\/|\{let vcKeep=|let\{filesMetadata:)/,
+                match: /(?<=async function(?: \i)?\((\i),(\i),(\i)\)\{)(?=\/\*vcSC\*\/|\{let vcKeep=|let\{filesMetadata:)/,
                 replace: "/*vcFU*/{let vcFU=$self.takeFolders($1,$2,$3,arguments[3]);if(vcFU!=null){if(!vcFU.length)return;$1=vcFU}}/*vcFU*/"
             }
         },

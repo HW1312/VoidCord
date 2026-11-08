@@ -45,12 +45,6 @@ export const settings = definePluginSettings({
         default: "Alt+Shift+C",
         hidden: true
     },
-    showTitleBarButton: {
-        type: OptionType.BOOLEAN,
-        description: "Show icon in the title bar",
-        default: true,
-        hidden: true
-    },
     showPanelButton: {
         type: OptionType.BOOLEAN,
         description: "Show a clip button in the voice panel",

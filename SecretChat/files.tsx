@@ -13,13 +13,15 @@
 
 import { Settings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
+import { copyToClipboard } from "@utils/clipboard";
 import { Logger } from "@utils/Logger";
 import { openModal } from "@utils/modal";
 import { PluginNative } from "@utils/types";
 import { Channel, Message } from "@vencord/discord-types";
 import { Constants, MessageActions, PendingReplyStore, RestAPI, SnowflakeUtils, Tooltip, useEffect, UserStore, useState } from "@webpack/common";
+import type { ReactNode } from "react";
 
-import { Button, Icon, ICONS, notify } from "../_ui";
+import { Button, Icon, IconButton, ICONS, notify } from "../_ui";
 import { attachmentOf, formatBytes, sendFiles as sendPlainFiles, uploadLimit, uploadOne } from "../ChatPopout/upload";
 import { uploadForLink } from "../GofileUpload";
 import { decryptFile, encryptFile, encryptMessage, randomBytes, toHex } from "./crypto";
@@ -315,8 +317,43 @@ function pickFile(): Promise<File | null> {
     });
 }
 
-const kindOf = (m: Manifest) => m.vm === 1 ? "voice" : kindOfType(m.t);
+/** Text files up to this size are shown in the chat (long messages Discord turns into message.txt, code, logs …) */
+const TEXT_MAX = 1024 * 1024;
+const TEXT_EXT = /\.(txt|md|markdown|log|csv|tsv|json|jsonc|ya?ml|toml|ini|cfg|conf|env|xml|html?|css|scss|less|js|mjs|cjs|jsx|ts|tsx|py|rb|php|java|kt|kts|c|h|cc|cpp|hpp|cs|go|rs|swift|lua|sh|bash|zsh|ps1|bat|cmd|sql|gradle|properties|srt|vtt|diff|patch)$/i;
+const TEXT_TYPE = /^(text\/|application\/(json|xml|javascript|x-sh|x-yaml|toml|sql))/;
+const isText = (m: Manifest) => m.s <= TEXT_MAX && (TEXT_TYPE.test(m.t) || TEXT_EXT.test(m.n));
+
+const kindOf = (m: Manifest) => m.vm === 1 ? "voice" : isText(m) ? "text" : kindOfType(m.t);
 const kindOfType = (type: string) => type.startsWith("image/") ? "image" : type.startsWith("video/") ? "video" : type.startsWith("audio/") ? "audio" : "file";
+
+/** Decrypted text file in the chat: name, copy / save, the whole text (long ones scroll in the box) */
+function TextPreview({ url, name, size, badge, infoButton, onSave }: {
+    url: string; name: string; size: number; badge: ReactNode; infoButton: ReactNode; onSave(): void;
+}) {
+    const [text, setText] = useState<string | null>(null);
+    useEffect(() => {
+        let alive = true;
+        fetch(url).then(r => r.text()).then(t => { if (alive) setText(t); }, () => { if (alive) setText(""); });
+        return () => { alive = false; };
+    }, [url]);
+
+    return (
+        <div className={cl("text")}>
+            <div className={cl("text-head")}>
+                <Icon path={ICONS.file} size={16} className={cl("file-icon")} />
+                <span className={cl("text-name")} title={name}>{name}</span>
+                <span className={cl("file-size")}>{formatBytes(size)}</span>
+                {badge}
+                {infoButton}
+                {/* The kit's copy button confirms by turning into a check – no toast */}
+                <IconButton icon={ICONS.copy} label="Copy text" disabled={text == null} onClick={() => text != null && copyToClipboard(text)} />
+                <IconButton icon={ICONS.download} label="Save the decrypted file" onClick={onSave} />
+            </div>
+            {/* The whole text – long ones scroll inside the box */}
+            <pre className={cl("text-body")}>{text == null ? "Loading …" : text || " "}</pre>
+        </div>
+    );
+}
 
 /** Fits the media into 400 × 300 like Discord's attachments */
 function box(m: Manifest) {
@@ -340,7 +377,7 @@ export function EncryptedFile({ message }: { message: Message; }) {
 
     // Gofile has only a download page: the user downloads the .bin there and picks it here
     const gofile = !!info && isGofileLink(info.url);
-    // Pictures, videos and audio load right away (big ones on click), other files on click
+    // Pictures, videos, audio and text load right away (big ones on click), other files on click
     const auto = !!info && kind !== "file" && !gofile && info.manifest.s <= AUTO_LOAD_MAX;
 
     const start = (picked?: File, feedback = false) => {
@@ -451,7 +488,11 @@ export function EncryptedFile({ message }: { message: Message; }) {
         </div>
     );
 
-    if (kind !== "file" && !error && (auto || url)) {
+    if (kind === "text" && !error && url) {
+        return <TextPreview url={url} name={m.n} size={m.s} badge={badge} infoButton={infoButton} onSave={() => save(url)} />;
+    }
+
+    if (kind !== "file" && kind !== "text" && !error && (auto || url)) {
         const size = box(m);
         return (
             <div className={cl("file")}>

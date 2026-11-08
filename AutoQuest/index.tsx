@@ -67,11 +67,6 @@ const settings = definePluginSettings({
         default: true,
         onChange: (v: boolean) => v ? begin() : halt()
     },
-    showTitleBarButton: {
-        type: OptionType.BOOLEAN,
-        description: "Show the AutoQuest icon in the title bar",
-        default: true
-    },
     autoEnroll: {
         type: OptionType.BOOLEAN,
         description: "Accept new quests automatically",
@@ -738,8 +733,7 @@ const SETTING_GROUPS: { title: string; footer?: string; items: { key: keyof type
     {
         title: "Appearance",
         items: [
-            { key: "notify", label: "Notifications", sub: "Popups at the top right", icon: ICONS.bell, color: "red" },
-            { key: "showTitleBarButton", label: "Title bar icon", sub: "The trophy next to the other icons", icon: QUEST_PATH, color: "yellow" }
+            { key: "notify", label: "Notifications", sub: "Popups at the top right", icon: ICONS.bell, color: "red" }
         ]
     }
 ];
@@ -852,9 +846,7 @@ function SettingsButton() {
 // ---------------------------------------------------------------- Title bar
 
 function TitleBarButton() {
-    const { showTitleBarButton } = settings.use(["showTitleBarButton"]);
     useStatus();
-    if (!showTitleBarButton) return null;
 
     const list = [...status.values()];
     const needsYou = list.filter(s => s.state === "claimable" || s.state === "waiting").length;

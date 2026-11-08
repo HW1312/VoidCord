@@ -50,12 +50,6 @@ export const settings = definePluginSettings({
         default: 1000 as number,
         hidden: true
     },
-    showTitleBarButton: {
-        type: OptionType.BOOLEAN,
-        description: "Show the Roblox icon in the title bar",
-        default: true,
-        hidden: true
-    },
     history: {
         type: OptionType.CUSTOM,
         default: [] as HistoryEntry[],

@@ -36,11 +36,6 @@ export const APP_GLYPHS: Record<string, AppGlyph> = {
         base: ["M6 9H4.5a2.5 2.5 0 0 1 0-5H6", "M18 9h1.5a2.5 2.5 0 0 0 0-5H18", "M4 22h16", "M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22", "M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"],
         accent: ["M18 2H6v7a6 6 0 0 0 12 0V2Z"]
     },
-    BadgeUnlock: {
-        color: "blue",
-        base: ["M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z"],
-        accent: ["m9 12 2 2 4-4"]
-    },
     // instant replay: clock turning back
     CallClips: {
         color: "red",
@@ -68,6 +63,12 @@ export const APP_GLYPHS: Record<string, AppGlyph> = {
         color: "green",
         base: ["M18.09 10.37A6 6 0 1 1 10.34 18", "m16.71 13.88.7.71-2.82 2.82"],
         accent: [c(8, 8, 6), "M7 6h1v4"]
+    },
+    // folder with a zipper (sent as .zip)
+    FolderUpload: {
+        color: "yellow",
+        base: ["M20.9 19.8A2 2 0 0 0 22 18V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2h5.1"],
+        accent: [c(15, 19, 2), "M15 11v-1", "M15 17v-2"]
     },
     FormatHub: {
         color: "indigo",
@@ -143,16 +144,16 @@ export const APP_GLYPHS: Record<string, AppGlyph> = {
         base: ["M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"],
         accent: [c(12, 12, 3)]
     },
-    // dice
-    PeopleRoulette: {
-        color: "pink",
-        base: [rect(3, 3, 18, 18, 3)],
-        accent: [c(8, 8, 0.6), c(16, 8, 0.6), c(12, 12, 0.6), c(8, 16, 0.6), c(16, 16, 0.6)]
-    },
     PluginHub: {
         color: "purple",
         base: [rect(3, 3, 7, 7, 1.5), rect(3, 14, 7, 7, 1.5), rect(14, 14, 7, 7, 1.5)],
         accent: [rect(14, 3, 7, 7, 1.5)]
+    },
+    // crossed-out eye: covered from view
+    PrivacyScreen: {
+        color: "indigo",
+        base: ["M10.733 5.076a10.744 10.744 0 0 1 11.205 6.575 1 1 0 0 1 0 .696 10.747 10.747 0 0 1-1.444 2.49", "M14.084 14.158a3 3 0 0 1-4.242-4.242", "M17.479 17.499a10.75 10.75 0 0 1-15.417-5.151 1 1 0 0 1 0-.696 10.75 10.75 0 0 1 4.446-5.143"],
+        accent: ["m2 2 20 20"]
     },
     Radar: {
         color: "green",
@@ -217,12 +218,6 @@ export const APP_GLYPHS: Record<string, AppGlyph> = {
         color: "green",
         base: ["M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8", "M21 3v5h-5", "M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16", "M8 16H3v5"],
         accent: ["M12 8v7", "m9 12 3 3 3-3"]
-    },
-    // waveform with a stopwatch
-    VoiceLength: {
-        color: "orange",
-        base: ["M2 10v3", "M6 6v11", "M10 3v18", "M14 8v7"],
-        accent: [c(19, 16, 3.5), "M19 14.5v1.5l1 1"]
     },
     Wrapped: {
         color: "pink",
