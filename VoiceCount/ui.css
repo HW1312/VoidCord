@@ -1,0 +1,51 @@
+/* VoiceCount – one pill after the avatars in the server tooltip, right-aligned so the rows line up */
+
+.vc-voicecount-count {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    gap: 6px;
+    height: 20px;
+    margin-left: auto;
+    padding: 0 8px;
+    border-radius: 10px;
+    background: var(--background-mod-normal, rgb(255 255 255 / 8%));
+    color: var(--text-default, var(--text-normal));
+    font-size: 12px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+/* Discord's tooltip has a max width – only a tooltip with our counts in it may grow, so the pill always fits */
+[class*="tooltip"]:has(.vc-voicecount-count) {
+    max-width: none !important;
+}
+
+/* the avatars keep their spot on the left, the pill goes to the right edge */
+div:has(> .vc-voicecount-count) {
+    gap: 8px;
+    flex-wrap: nowrap;
+    min-width: max-content;
+}
+
+.vc-voicecount-part {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+}
+
+.vc-voicecount-part svg {
+    opacity: 0.75;
+}
+
+.vc-voicecount-sep {
+    width: 1px;
+    height: 10px;
+    background: currentColor;
+    opacity: 0.25;
+}
+
+.vc-voicecount-bots {
+    color: var(--text-muted);
+}
