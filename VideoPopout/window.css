@@ -1,0 +1,88 @@
+/* VideoPopout – styles inside the popout window. Rendered as a <style> in the window itself (Discord doesn't reliably carry plugin CSS into popouts) */
+html,
+body {
+    margin: 0;
+    background: #000;
+}
+
+.vc-videopopout-window {
+    position: fixed;
+    inset: 0;
+    overflow: hidden;
+    background: #000;
+}
+
+.vc-videopopout-window .vc-secretchat-player-root {
+    width: 100% !important;
+    height: 100% !important;
+    max-width: none;
+    border-radius: 0;
+    box-shadow: none;
+    animation: none;
+}
+
+.vc-videopopout-window video {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+/* Move the window from anywhere on the video … */
+.vc-videopopout-window .vc-secretchat-player-root,
+.vc-videopopout-window video {
+    -webkit-app-region: drag;
+}
+
+/* … except the controls, which have to take clicks */
+.vc-videopopout-window .vc-secretchat-player-bar,
+.vc-videopopout-window .vc-secretchat-player-bar *,
+.vc-videopopout-window .vc-secretchat-player-bigplay,
+.vc-videopopout-window button,
+.vc-videopopout-window input {
+    -webkit-app-region: no-drag;
+}
+
+/* Top: close – shown while the mouse is over the window */
+.vc-videopopout-top {
+    position: absolute;
+    top: 0;
+    right: 0;
+    left: 0;
+    z-index: 5;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 4px;
+    height: 38px;
+    padding: 0 6px 0 12px;
+    background: linear-gradient(rgb(0 0 0 / 65%), transparent);
+    opacity: 0;
+    transition: opacity 0.18s;
+    -webkit-app-region: drag;
+}
+
+.vc-videopopout-window:hover .vc-videopopout-top {
+    opacity: 1;
+}
+
+
+.vc-videopopout-top-btn {
+    display: grid;
+    flex: none;
+    width: 26px;
+    height: 26px;
+    padding: 0;
+    place-items: center;
+    border: 0;
+    border-radius: 13px;
+    background: rgb(0 0 0 / 45%);
+    color: #fff;
+    cursor: pointer;
+    backdrop-filter: blur(8px);
+    transition: background-color 0.15s;
+}
+
+.vc-videopopout-top-btn:hover {
+    background: rgb(255 255 255 / 20%);
+}
+

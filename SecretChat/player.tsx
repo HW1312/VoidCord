@@ -78,12 +78,14 @@ const time = (s: number) => {
 
 // ---------------------------------------------------------------- Player
 
-export function VideoPlayer({ src, name, style, big, autoPlay, startAt }: {
+export function VideoPlayer({ src, name, style, big, autoPlay, startAt, noPip }: {
     src: string; name: string; style?: CSSProperties;
     /** In the big view: no expand button, fills the space */
     big?: boolean;
     autoPlay?: boolean;
     startAt?: number;
+    /** Already in its own window (VideoPopout): no picture-in-picture button */
+    noPip?: boolean;
 }) {
     const root = useRef<HTMLDivElement>(null);
     const video = useRef<HTMLVideoElement>(null);
@@ -261,7 +263,7 @@ export function VideoPlayer({ src, name, style, big, autoPlay, startAt }: {
                     <Ctrl label={loop ? "Loop on (L)" : "Loop (L)"} active={loop} onClick={() => setLoop(x => !x)}>
                         <Icon path={I.loop} size={18} />
                     </Ctrl>
-                    {pipSupported && (
+                    {pipSupported && !noPip && (
                         <Ctrl label="Pop out (picture in picture)" onClick={pip}>
                             <Icon path={I.pip} size={18} />
                         </Ctrl>

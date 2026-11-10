@@ -225,6 +225,12 @@ export const APP_GLYPHS: Record<string, AppGlyph> = {
         base: ["M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8", "M21 3v5h-5", "M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16", "M8 16H3v5"],
         accent: ["M12 8v7", "m9 12 3 3 3-3"]
     },
+    // a small window popping out of a big one
+    VideoPopout: {
+        color: "red",
+        base: ["M21 10V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h5"],
+        accent: [rect(12, 13, 10, 7, 2), "m15.5 15.5 3 1.5-3 1.5z"]
+    },
     // speaker with a number badge
     VoiceCount: {
         color: "green",

@@ -1,0 +1,15 @@
+/* VideoPopout – the button on videos in the chat: white like Discord's own buttons next to it (edit, copy) */
+.vc-videopopout-button {
+    display: grid;
+    width: 32px;
+    height: 32px;
+    place-items: center;
+    color: #fff;
+    cursor: pointer;
+    opacity: 0.85;
+    transition: opacity 0.15s;
+}
+
+.vc-videopopout-button:hover {
+    opacity: 1;
+}
